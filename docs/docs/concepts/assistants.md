@@ -1,37 +1,36 @@
-# Assistants
+# 어시스턴트
 
-!!! info "Prerequisites"
+!!! 정보 "필수 조건"
 
-    - [LangGraph Server](./langgraph_server.md)
+    - [랭그래프 서버](./langgraph_server.md)
 
-When building agents, it is fairly common to make rapid changes that *do not* alter the graph logic. For example, simply changing prompts or the LLM selection can have significant impacts on the behavior of the agents. Assistants offer an easy way to make and save these types of changes to agent configuration. This can have at least two use-cases:
+에이전트를 구축할 때, 그래프 논리를 변경하지 않는 빠른 수정이 일반적입니다. 예를 들어, 프롬프트나 LLM 선택을 단순히 변경하는 것만으로도 에이전트의 행동에 상당한 영향을 줄 수 있습니다. 어시스턴트는 이러한 유형의 에이전트 구성 변경을 쉽게 만들고 저장할 수 있는 방법을 제공합니다. 이는 적어도 두 가지 사용 사례가 있습니다:
 
-* Assistants give developers a quick and easy way to modify and version agents for experimentation.
-* Assistants can be modified via LangGraph Studio, offering a no-code way to configure agents  (e.g., for business users). 
+- 어시스턴트는 개발자에게 실험을 위한 에이전트를 수정하고 버전 관리할 수 있는 빠르고 쉬운 방법을 제공합니다.
+- 어시스턴트는 랭그래프 스튜디오를 통해 수정될 수 있어, 코드 없이 에이전트를 구성할 수 있는 방법을 제공합니다 (예: 비즈니스 사용자용).
 
-Assistants build off the concept of ["configuration"](low_level.md#configuration). 
-While ["configuration"](low_level.md#configuration) is available in the open source LangGraph library as well,  assistants are only present in [LangGraph Platform](langgraph_platform.md).
-This is because Assistants are tightly coupled to your deployed graph, and so we can only make them available when we are also deploying the graphs.
+어시스턴트는 ["구성"](low_level.md#configuration) 개념을 기반으로 하고 있습니다.
+["구성"](low_level.md#configuration) 기능은 오픈 소스 랭그래프 라이브러리에서도 제공되지만, 어시스턴트는 [랭그래프 플랫폼](langgraph_platform.md)에서만 존재합니다.
+이는 어시스턴트가 배포된 그래프와 밀접하게 연관되어 있기 때문에, 그래프를 배포할 때만 사용할 수 있습니다.
 
-## Configuring Assistants
+## 어시스턴트 구성
 
-In practice, an assistant is just an *instance* of a graph with a specific configuration. Because of this, multiple assistants can reference the same graph but can contain different configurations, such as prompts, models, and other graph configuration options. The LangGraph Cloud API provides several endpoints for creating and managing assistants. See the [API reference](../cloud/reference/api/api_ref.html) and [this how-to](../cloud/how-tos/configuration_cloud.md) for more details on how to create assistants.
+실제로 어시스턴트는 특정 구성으로 설정된 그래프의 *인스턴스*에 불과합니다. 때문에 여러 어시스턴스가 동일한 그래프를 참조하면서도 프롬프트, 모델 및 기타 그래프 구성 옵션과 같은 서로 다른 구성을 포함할 수 있습니다. 랭그래프 클라우드 API는 어시스턴스를 생성하고 관리하기 위한 여러 엔드포인트를 제공합니다. 어시스턴스를 생성하는 방법에 대한 자세한 내용은 [API 참조](../cloud/reference/api/api_ref.html) 및 [이 사용 방법](../cloud/how-tos/configuration_cloud.md)을 참조하십시오.
 
-## Versioning Assistants
+## 어시스턴트 버전 관리
 
-Once you've created an assistant, you can save and version it to track changes to the configuration over time. You can think about this at three levels:
+어시스턴스를 생성한 후, 생성 후의 구성 변화를 추적하기 위해 저장하고 버전 관리할 수 있습니다. 이를 세 가지 수준에서 생각할 수 있습니다:
 
-1) The graph lays out the general agent application logic 
-2) The agent configuration options represent parameters that can be changed 
-3) Assistant versions save and track specific settings of the agent configuration options 
+1. 그래프는 일반적인 에이전트 애플리케이션 논리를 제시합니다.
+2. 에이전트 구성 옵션은 변경할 수 있는 매개변수를 나타냅니다.
+3. 어시스턴트 버전은 에이전트 구성 옵션의 특정 설정을 저장하고 추적합니다.
 
-For example, let's imagine you have a general writing agent. You have created a general graph architecture that works well for writing. However, there are different types of writing, e.g. blogs vs tweets. In order to get the best performance on each use case, you need to make some minor changes to the models and prompts used. In this setup, you could create an assistant for each use case - one for blog writing and one for tweeting. These would share the same graph structure, but they may use different models and different prompts. Read [this how-to](../cloud/how-tos/assistant_versioning.md) to learn how you can use assistant versioning through both the [Studio](../concepts/langgraph_studio.md) and the SDK.
+예를 들어, 일반적인 글쓰기 에이전트를 가지고 있다고 가정해 봅시다. 글쓰기에 잘 맞는 일반적인 그래프 아키텍처를 구성했습니다. 그러나 블로그와 트윗과 같은 다양한 유형의 글쓰기가 있습니다. 각 사용 사례에서 최상의 성능을 얻기 위해 사용되는 모델과 프롬프트에 약간의 수정을 해야 합니다. 이 설정에서는 각 사용 사례에 대한 어시스턴트를 생성할 수 있습니다 - 하나는 블로그 작성을 위한 것이고, 다른 하나는 트위터를 위한 것입니다. 이들은 동일한 그래프 구조를 공유하지만 서로 다른 모델과 프롬프트를 사용할 수 있습니다. [이 사용 방법](../cloud/how-tos/assistant_versioning.md)을 읽고 [스튜디오](../concepts/langgraph_studio.md)와 SDK를 통해 어시스턴트 버전 관리를 사용할 수 있는 방법을 알아보세요.
 
-![assistant versions](img/assistants.png)
+![어시스턴트 버전](img/assistants.png)
 
+## 리소스
 
-## Resources
+어시스턴트에 대한 더 많은 정보는 다음 리소스를 참조하십시오:
 
-For more information on assistants, see the following resources:
-
-- [Assistants how-to guides](../how-tos/index.md#assistants)
+- [어시스턴트 사용 방법 가이드](../how-tos/index.md#assistants)

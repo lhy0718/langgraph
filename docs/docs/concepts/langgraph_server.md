@@ -1,130 +1,127 @@
-# LangGraph Server
+# LangGraph 서버
 
-!!! info "Prerequisites"
-    - [LangGraph Platform](./langgraph_platform.md)
-    - [LangGraph Glossary](low_level.md)
+!!! 정보 "전제 조건"
+    - [LangGraph 플랫폼](./langgraph_platform.md)
+    - [LangGraph 용어집](low_level.md)
 
-## Overview
+## 개요
 
-LangGraph Server offers an API for creating and managing agent-based applications. It is built on the concept of [assistants](assistants.md), which are agents configured for specific tasks, and includes built-in [persistence](persistence.md#memory-store) and a **task queue**. This versatile API supports a wide range of agentic application use cases, from background processing to real-time interactions.
+LangGraph 서버는 에이전트 기반 애플리케이션을 생성하고 관리하기 위한 API를 제공합니다. 이는 특정 작업을 위해 구성된 에이전트인 [조수](assistants.md)의 개념에 기반하여 구축되었으며, 내장된 [영속성](persistence.md#memory-store) 및 **작업 대기열**을 포함합니다. 이 다재다능한 API는 백그라운드 처리부터 실시간 상호작용까지 다양한 에이전트 애플리케이션 사용 사례를 지원합니다.
 
-## Key Features
+## 주요 특징
 
-The LangGraph Platform incorporates best practices for agent deployment, so you can focus on building your agent logic.
+LangGraph 플랫폼은 에이전트 배포를 위한 모범 사례를 통합하고 있으므로 에이전트 로직 구축에 집중할 수 있습니다.
 
-* **Streaming endpoints**: Endpoints that expose [multiple different streaming modes](streaming.md). We've made these work even for long-running agents that may go minutes between consecutive stream events.
-* **Background runs**: The LangGraph Server supports launching assistants in the background with endpoints for polling the status of the assistant's run and webhooks to monitor run status effectively.
-- **Support for long runs**: Our blocking endpoints for running assistants send regular heartbeat signals, preventing unexpected connection closures when handling requests that take a long time to complete.
-* **Task queue**: We've added a task queue to make sure we don't drop any requests if they arrive in a bursty nature.
-* **Horizontally scalable infrastructure**: LangGraph Server is designed to be horizontally scalable, allowing you to scale up and down your usage as needed.
-* **Double texting support**: Many times users might interact with your graph in unintended ways. For instance, a user may send one message and before the graph has finished running send a second message. We call this ["double texting"](double_texting.md) and have added four different ways to handle this.
-* **Optimized checkpointer**: LangGraph Platform comes with a built-in [checkpointer](./persistence.md#checkpoints) optimized for LangGraph applications.
-* **Human-in-the-loop endpoints**: We've exposed all endpoints needed to support [human-in-the-loop](human_in_the_loop.md) features.
-* **Memory**: In addition to thread-level persistence (covered above by [checkpointers]l(./persistence.md#checkpoints)), LangGraph Platform also comes with a built-in [memory store](persistence.md#memory-store).
-* **Cron jobs**: Built-in support for scheduling tasks, enabling you to automate regular actions like data clean-up or batch processing within your applications.
-* **Webhooks**: Allows your application to send real-time notifications and data updates to external systems, making it easy to integrate with third-party services and trigger actions based on specific events.
-* **Monitoring**: LangGraph Server integrates seamlessly with the [LangSmith](https://docs.smith.langchain.com/) monitoring platform, providing real-time insights into your application's performance and health.
+* **스트리밍 엔드포인트**: [여러 다양한 스트리밍 모드](streaming.md)를 노출하는 엔드포인트입니다. 우리는 이러한 엔드포인트가 몇 분 간의 간격을 두고 발생하는 장기 실행 에이전트에서도 작동하도록 만들었습니다.
+* **백그라운드 실행**: LangGraph 서버는 조수를 백그라운드에서 실행할 수 있도록 지원하며, 조수 실행 상태를 폴링하는 엔드포인트와 실행 상태를 효과적으로 모니터링하는 웹후크를 제공합니다.
+- **장기 실행 지원**: 조수를 실행하는 우리의 차단형 엔드포인트는 정기적인 심장박동 신호를 전송하여 오랜 시간 동안 완료되는 요청을 처리할 때 예기치 않은 연결 종료를 방지합니다.
+* **작업 대기열**: 폭발적으로 도착하는 요청을 놓치지 않도록 작업 대기열을 추가했습니다.
+* **수평 확장 가능한 인프라**: LangGraph 서버는 수평적으로 확장 가능하도록 설계되어 필요에 따라 사용량을 늘리거나 줄일 수 있습니다.
+* **이중 텍스트 지원**: 사용자들이 의도치 않게 그래프와 상호작용하는 경우가 많습니다. 예를 들어, 사용자가 한 메시지를 보내고 그래프가 실행되는 동안 두 번째 메시지를 보낼 수 있습니다. 이를 우리는 ["이중 텍스트"](double_texting.md)라고 부르며 이를 처리하는 네 가지 방법을 추가했습니다.
+* **최적화된 체크포인터**: LangGraph 플랫폼은 LangGraph 애플리케이션에 최적화된 내장 [체크포인터](./persistence.md#checkpoints)를 제공합니다.
+* **인간-중재 엔드포인트**: [인간-중재](human_in_the_loop.md) 기능을 지원하기 위한 모든 엔드포인트를 노출했습니다.
+* **메모리**: 스레드 수준의 영속성(위 [체크포인터]에서 다룸) 외에도, LangGraph 플랫폼은 내장된 [메모리 저장소](persistence.md#memory-store)를 제공합니다.
+* **크론 작업**: 데이터를 정리하거나 배치 처리를 자동화하는 등 작업을 예약할 수 있는 내장 지원이 있습니다.
+* **웹후크**: 애플리케이션이 실시간 알림 및 데이터 업데이트를 외부 시스템에 보낼 수 있게 하여, 타사 서비스와 쉽게 통합하고 특정 이벤트에 따라 동작을 트리거할 수 있습니다.
+* **모니터링**: LangGraph 서버는 [LangSmith](https://docs.smith.langchain.com/) 모니터링 플랫폼과 원활하게 통합되어 애플리케이션의 성능과 상태에 대한 실시간 통찰력을 제공합니다.
 
-## What are you deploying?
+## 무엇을 배포하고 있습니까?
 
-When you deploy a LangGraph Server, you are deploying one or more [graphs](#graphs), a database for [persistence](persistence.md), and a task queue.
+LangGraph 서버를 배포할 때, 하나 이상의 [그래프](#graphs), [영속성을 위한 데이터베이스](persistence.md), 그리고 작업 대기열을 배포하는 것입니다.
 
-### Graphs
+### 그래프
 
-When you deploy a graph with LangGraph Server, you are deploying a "blueprint" for an [Assistant](assistants.md). 
+LangGraph 서버로 그래프를 배포하면 [조수](assistants.md)를 위한 "청사진"을 배포하는 것입니다.
 
-An [Assistant](assistants.md) is a graph paired with specific configuration settings. You can create multiple assistants per graph, each with unique settings to accommodate different use cases
-that can be served by the same graph.
+[조수](assistants.md)는 특정 구성 설정과 쌍을 이루는 그래프입니다. 동일한 그래프에 대해 여러 조수를 생성할 수 있으며, 각각은 다양한 사용 사례를 수용하기 위해 고유한 설정을 가질 수 있습니다.
 
-Upon deployment, LangGraph Server will automatically create a default assistant for each graph using the graph's default configuration settings.
+배포 시, LangGraph 서버는 그래프의 기본 구성 설정을 사용하여 각 그래프에 대한 기본 조수를 자동으로 생성합니다.
 
-You can interact with assistants through the [LangGraph Server API](#langgraph-server-api).
+조수와 상호작용하려면 [LangGraph 서버 API](#langgraph-server-api)를 사용할 수 있습니다.
 
-!!! note
+!!! 노트
 
-    We often think of a graph as implementing an [agent](agentic_concepts.md), but a graph does not necessarily need to implement an agent. For example, a graph could implement a simple
-    chatbot that only supports back-and-forth conversation, without the ability to influence any application control flow. In reality, as applications get more complex, a graph will often implement a more complex flow that may use [multiple agents](./multi_agent.md) working in tandem.
+    우리는 종종 그래프를 [에이전트](agentic_concepts.md)를 구현하는 것으로 생각하지만, 그래프가 반드시 에이전트를 구현할 필요는 없습니다. 예를 들어, 그래프는 단순한 대화만 지원하는 간단한 챗봇을 구현할 수 있으며, 어떤 응용 프로그램의 흐름에 영향 미칠 수 있는 능력은 없습니다. 실제로, 애플리케이션이 더 복잡해짐에 따라 그래프는 종종 여러 [에이전트](./multi_agent.md)가 함께 작업하는 더 복잡한 흐름을 구현하게 됩니다.
 
-### Persistence and Task Queue
+### 영속성 및 작업 대기열
 
-The LangGraph Server leverages a database for [persistence](persistence.md) and a task queue.
+LangGraph 서버는 [영속성](persistence.md) 및 작업 대기열에 데이터베이스를 활용합니다.
 
-Currently, only [Postgres](https://www.postgresql.org/) is supported as a database for LangGraph Server and [Redis](https://redis.io/) as the task queue.
+현재 LangGraph 서버에는 [Postgres](https://www.postgresql.org/)와 [Redis](https://redis.io/)가 작업 대기열로 지원됩니다.
 
-If you're deploying using [LangGraph Cloud](./langgraph_cloud.md), these components are managed for you. If you're deploying LangGraph Server on your own infrastructure, you'll need to set up and manage these components yourself.
+[LangGraph Cloud](./langgraph_cloud.md)를 사용하여 배포하는 경우, 이러한 구성 요소는 귀하를 위해 관리됩니다. 자체 인프라에서 LangGraph 서버를 배포하는 경우, 이러한 구성 요소를 직접 설정하고 관리해야 합니다.
 
-Please review the [deployment options](./deployment_options.md) guide for more information on how these components are set up and managed.
+이러한 구성 요소가 어떻게 설정되고 관리되는지에 대한 자세한 정보는 [배포 옵션](./deployment_options.md) 가이드를 참조하시기 바랍니다.
 
-## Application Structure
+## 애플리케이션 구조
 
-To deploy a LangGraph Server application, you need to specify the graph(s) you want to deploy, as well as any relevant configuration settings, such as dependencies and environment variables.
+LangGraph 서버 애플리케이션을 배포하려면 배포할 그래프와 관련 구성 설정(예: 의존성 및 환경 변수)을 지정해야 합니다.
 
-Read the [application structure](./application_structure.md) guide to learn how to structure your LangGraph application for deployment.
+배포를 위한 LangGraph 애플리케이션 구조를 배우기 위해 [애플리케이션 구조](./application_structure.md) 가이드를 읽으십시오.
 
-## LangGraph Server API
+## LangGraph 서버 API
 
-The LangGraph Server API allows you to create and manage [assistants](assistants.md), [threads](#threads), [runs](#runs), [cron jobs](#cron-jobs), and more.
+LangGraph 서버 API를 사용하면 [조수](assistants.md), [스레드](#threads), [실행](#runs), [크론 작업](#cron-jobs) 등을 생성하고 관리할 수 있습니다.
 
-The [LangGraph Cloud API Reference](../cloud/reference/api/api_ref.html) provides detailed information on the API endpoints and data models.
+[LangGraph Cloud API 참조](../cloud/reference/api/api_ref.html)에서는 API 엔드포인트 및 데이터 모델에 대한 자세한 정보를 제공합니다.
 
-### Assistants
+### 조수
 
-An [Assistant](assistants.md) refers to a [graph](#graphs) plus specific [configuration](low_level.md#configuration) settings for that graph.
+[조수](assistants.md)는 특정 [구성](low_level.md#configuration) 설정을 갖춘 [그래프](#graphs)를 의미합니다.
 
-You can think of an assistant as a saved configuration of an [agent](agentic_concepts.md).
+조수를 [에이전트](agentic_concepts.md)의 저장된 구성으로 생각할 수 있습니다.
 
-When building agents, it is fairly common to make rapid changes that *do not* alter the graph logic. For example, simply changing prompts or the LLM selection can have significant impacts on the behavior of the agents. Assistants offer an easy way to make and save these types of changes to agent configuration.
+에이전트를 구축할 때, 그래프 로직을 변경하지 않는 빠른 변경을 만드는 것이 상당히 일반적입니다. 예를 들어, 프롬프트를 변경하거나 LLM 선택을 변경하는 것만으로도 에이전트 동작에 상당한 영향을 미칠 수 있습니다. 조수는 이러한 유형의 에이전트 구성을 쉽게 변경하고 저장하는 방법을 제공합니다.
 
-### Threads
+### 스레드
 
-A thread contains the accumulated state of a sequence of [runs](#runs). If a run is executed on a thread, then the [state](low_level.md#state) of the underlying graph of the assistant will be persisted to the thread.
+스레드는 일련의 [실행](#runs)의 누적 상태를 포함합니다. 스레드에서 실행이 이루어지면 그러면 조수의 기본 그래프 상태가 스레드에 지속됩니다.
 
-A thread's current and historical state can be retrieved. To persist state, a thread must be created prior to executing a run.
+스레드의 현재 및 히스토리 상태를 검색할 수 있습니다. 상태를 지속하려면 실행하기 전에 스레드를 생성해야 합니다.
 
-The state of a thread at a particular point in time is called a [checkpoint](persistence.md#checkpoints). Checkpoints can be used to restore the state of a thread at a later time.
+특정 시점의 스레드 상태를 [체크포인트](persistence.md#checkpoints)라고 합니다. 체크포인트는 나중에 스레드 상태를 복원하는 데 사용될 수 있습니다.
 
-For more on threads and checkpoints, see this section of the [LangGraph conceptual guide](low_level.md#persistence).
+스레드 및 체크포인트에 대한 자세한 내용은 [LangGraph 개념 가이드](low_level.md#persistence)의 이 섹션을 참조하십시오.
 
-The LangGraph Cloud API provides several endpoints for creating and managing threads and thread state. See the [API reference](../cloud/reference/api/api_ref.html#tag/threads) for more details.
+LangGraph Cloud API는 스레드 및 스레드 상태를 생성하고 관리하는 여러 엔드포인트를 제공합니다. 자세한 내용은 [API 참조](../cloud/reference/api/api_ref.html#tag/threads)를 참조하십시오.
 
-### Runs
+### 실행
 
-A run is an invocation of an [assistant](#assistants). Each run may have its own input, configuration, and metadata, which may affect execution and output of the underlying graph. A run can optionally be executed on a [thread](#threads).
+실행은 [조수](#assistants)의 호출입니다. 각 실행은 고유한 입력, 구성 및 메타데이터를 가질 수 있으며 이는 기본 그래프의 실행 및 출력에 영향을 미칠 수 있습니다. 실행은 선택적으로 [스레드](#threads)에서 수행될 수 있습니다.
 
-The LangGraph Cloud API provides several endpoints for creating and managing runs. See the [API reference](../cloud/reference/api/api_ref.html#tag/thread-runs/) for more details.
+LangGraph Cloud API는 실행을 생성하고 관리하는 여러 엔드포인트를 제공합니다. 자세한 내용은 [API 참조](../cloud/reference/api/api_ref.html#tag/thread-runs/)를 참조하십시오.
 
-### Store
+### 저장소
 
-Store is an API for managing persistent [key-value store](./persistence.md#memory-store) that is available from any [thread](#threads).
+저장소는 모든 [스레드](#threads)에서 사용할 수 있는 지속적인 [키-값 저장소](./persistence.md#memory-store)를 관리하는 API입니다.
 
-Stores are useful for implementing [memory](./memory.md) in your LangGraph application.
+저장소는 LangGraph 애플리케이션에서 [메모리](./memory.md)를 구현하는 데 유용합니다.
 
-### Cron Jobs
+### 크론 잡
 
-There are many situations in which it is useful to run an assistant on a schedule. 
+일정을 정해 두고 어시스턴트를 실행해야 하는 상황이 많습니다. 
 
-For example, say that you're building an assistant that runs daily and sends an email summary
-of the day's news. You could use a cron job to run the assistant every day at 8:00 PM.
+예를 들어, 매일 실행되어 당일 뉴스 요약을 이메일로 보내는 어시스턴트를 구축한다고 가정해 보겠습니다. 이 경우 크론 잡을 사용하여 매일 오후 8시에 어시스턴트를 실행할 수 있습니다.
 
-LangGraph Cloud supports cron jobs, which run on a user-defined schedule. The user specifies a schedule, an assistant, and some input. After that, on the specified schedule, the server will:
+LangGraph Cloud는 사용자가 정의한 일정에 따라 실행되는 크론 잡을 지원합니다. 사용자는 일정을 지정하고, 어시스턴트를 선택하며, 일부 입력을 제공합니다. 이후 지정된 일정에 따라 서버는 다음을 수행합니다:
 
-- Create a new thread with the specified assistant
-- Send the specified input to that thread
+- 지정된 어시스턴트로 새로운 스레드를 생성합니다.
+- 해당 스레드에 지정된 입력을 보냅니다.
 
-Note that this sends the same input to the thread every time. See the [how-to guide](../cloud/how-tos/cron_jobs.md) for creating cron jobs.
+모든 경우에 동일한 입력이 스레드로 전송됩니다. 크론 잡을 생성하는 방법에 대한 [가이드](../cloud/how-tos/cron_jobs.md)를 참조하세요.
 
-The LangGraph Cloud API provides several endpoints for creating and managing cron jobs. See the [API reference](../cloud/reference/api/api_ref.html#tag/runscreate/POST/threads/{thread_id}/runs/crons) for more details.
+LangGraph Cloud API는 크론 잡을 생성하고 관리하기 위한 여러 엔드포인트를 제공합니다. 자세한 내용은 [API 참조](../cloud/reference/api/api_ref.html#tag/runscreate/POST/threads/{thread_id}/runs/crons)를 확인하세요.
 
-### Webhooks
+### 웹훅
 
-Webhooks enable event-driven communication from your LangGraph Cloud application to external services. For example, you may want to issue an update to a separate service once an API call to LangGraph Cloud has finished running.
+웹훅은 LangGraph Cloud 애플리케이션과 외부 서비스 간의 이벤트 기반 통신을 가능하게 합니다. 예를 들어, LangGraph Cloud에 대한 API 호출이 완료된 후 별도의 서비스에 업데이트를 발행하고 싶을 수 있습니다.
 
-Many LangGraph Cloud endpoints accept a `webhook` parameter. If this parameter is specified by a an endpoint that can accept POST requests, LangGraph Cloud will send a request at the completion of a run.
+많은 LangGraph Cloud 엔드포인트는 `webhook` 매개변수를 허용합니다. 이 매개변수가 POST 요청을 수용할 수 있는 엔드포인트에 의해 지정되면 LangGraph Cloud는 실행 완료 시 요청을 보냅니다.
 
-See the corresponding [how-to guide](../cloud/how-tos/webhooks.md) for more detail.
+자세한 내용은 관련 [가이드](../cloud/how-tos/webhooks.md)를 확인하세요.
 
-## Related
+## 관련 자료
 
-* LangGraph [Application Structure](./application_structure.md) guide explains how to structure your LangGraph application for deployment.
-* [How-to guides for the LangGraph Platform](../how-tos/index.md).
-* The [LangGraph Cloud API Reference](../cloud/reference/api/api_ref.html) provides detailed information on the API endpoints and data models.
+* LangGraph [애플리케이션 구조](./application_structure.md) 가이드는 배포를 위해 LangGraph 애플리케이션을 구성하는 방법을 설명합니다.
+* [LangGraph 플랫폼에 대한 방법 가이드](../how-tos/index.md).
+* [LangGraph Cloud API 참조](../cloud/reference/api/api_ref.html)는 API 엔드포인트 및 데이터 모델에 대한 자세한 정보를 제공합니다.

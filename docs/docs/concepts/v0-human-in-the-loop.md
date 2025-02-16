@@ -1,265 +1,265 @@
-# Human-in-the-loop
+# 인간-루프
 
-!!! note "Use the `interrupt` function instead."
+!!! 주의 "대신 `interrupt` 함수를 사용하세요."
 
-    As of LangGraph 0.2.57, the recommended way to set breakpoints is using the [`interrupt` function][langgraph.types.interrupt] as it simplifies **human-in-the-loop** patterns.
+    LangGraph 0.2.57부터, 중단점을 설정하는 추천 방법은 [`interrupt` 함수][langgraph.types.interrupt]를 사용하는 것입니다. 이는 **인간-루프** 패턴을 간소화합니다.
 
-    Please see the revised [human-in-the-loop guide](./human_in_the_loop.md) for the latest version that uses the `interrupt` function.
+    `interrupt` 함수를 사용하는 최신 버전에 대한 수정된 [인간-루프 가이드](./human_in_the_loop.md)를 참조하세요.
 
 
-Human-in-the-loop (or "on-the-loop") enhances agent capabilities through several common user interaction patterns.
+인간-루프(또는 "온-더-루프")는 여러 가지 일반적인 사용자 상호작용 패턴을 통해 에이전트의 능력을 향상시킵니다.
 
-Common interaction patterns include:
+일반적인 상호작용 패턴에는 다음이 포함됩니다:
 
-(1) `Approval` - We can interrupt our agent, surface the current state to a user, and allow the user to accept an action. 
+(1) `승인` - 에이전트를 중단하고, 현재 상태를 사용자에게 보여주어 사용자가 행동을 승인하도록 할 수 있습니다.
 
-(2) `Editing` - We can interrupt our agent, surface the current state to a user, and allow the user to edit the agent state. 
+(2) `편집` - 에이전트를 중단하고, 현재 상태를 사용자에게 보여주어 사용자가 에이전트 상태를 편집할 수 있도록 할 수 있습니다.
 
-(3) `Input` - We can explicitly create a graph node to collect human input and pass that input directly to the agent state.
+(3) `입력` - 그래프 노드를 명시적으로 생성하여 인간 입력을 수집하고 해당 입력을 에이전트 상태에 직접 전달할 수 있습니다.
 
-Use-cases for these interaction patterns include:
+이러한 상호작용 패턴의 사용 사례에는 다음이 포함됩니다:
 
-(1) `Reviewing tool calls` - We can interrupt an agent to review and edit the results of tool calls.
+(1) `도구 호출 검토` - 에이전트를 중단하여 도구 호출의 결과를 검토하고 수정할 수 있습니다.
 
-(2) `Time Travel` - We can manually re-play and / or fork past actions of an agent.
+(2) `시간 여행` - 에이전트의 과거 행동을 수동으로 재생하거나 분기할 수 있습니다.
 
-## Persistence
+## 지속성
 
-All of these interaction patterns are enabled by LangGraph's built-in [persistence](./persistence.md) layer, which will write a checkpoint of the graph state at each step. Persistence allows the graph to stop so that a human can review and / or edit the current state of the graph and then resume with the human's input.
+모든 이러한 상호작용 패턴은 LangGraph의 내장된 [지속성](./persistence.md) 레이어에 의해 가능해지며, 이는 각 단계에서 그래프 상태의 체크포인트를 작성합니다. 지속성은 그래프가 중단되고 사람이 현재 상태를 검토하거나 편집할 수 있도록 하며, 이후 사람의 입력으로 실행을 재개할 수 있게 합니다.
 
-### Breakpoints
+### 중단점
 
-Adding a [breakpoint](./breakpoints.md) a specific location in the graph flow is one way to enable human-in-the-loop. In this case, the developer knows *where* in the workflow human input is needed and simply places a breakpoint prior to or following that particular graph node.
+그래프 흐름의 특정 위치에 [중단점](./breakpoints.md)을 추가하는 것은 인간-루프를 활성화하는 한 가지 방법입니다. 이 경우, 개발자는 워크플로우의 *어디서* 인간 입력이 필요한지를 알고 해당 그래프 노드 이전 또는 이후에 중단점을 배치하면 됩니다.
 
-Here, we compile our graph with a checkpointer and a breakpoint at the node we want to interrupt before, `step_for_human_in_the_loop`. We then perform one of the above interaction patterns, which will create a new checkpoint if a human edits the graph state. The new checkpoint is saved to the `thread` and we can resume the graph execution from there by passing in `None` as the input.
+여기에서는 체크포인터와 우리가 중단하고자 하는 노드인 `step_for_human_in_the_loop` 앞에 중단점을 두고 그래프를 컴파일합니다. 이후 위의 상호작용 패턴 중 하나를 수행하여 사람이 그래프 상태를 편집하면 새로운 체크포인트가 생성됩니다. 새로운 체크포인트는 `thread`에 저장되며, 이곳에서 `None`을 입력으로 전달하여 그래프 실행을 재개할 수 있습니다.
 
 ```python
-# Compile our graph with a checkpointer and a breakpoint before "step_for_human_in_the_loop"
+# "step_for_human_in_the_loop" 앞에 체크포인터와 중단점을 두고 그래프 컴파일
 graph = builder.compile(checkpointer=checkpointer, interrupt_before=["step_for_human_in_the_loop"])
 
-# Run the graph up to the breakpoint
+# 중단점까지 그래프 실행
 thread_config = {"configurable": {"thread_id": "1"}}
 for event in graph.stream(inputs, thread_config, stream_mode="values"):
     print(event)
     
-# Perform some action that requires human in the loop
+# 인간 루프가 필요한 작업 수행
 
-# Continue the graph execution from the current checkpoint 
+# 현재 체크포인트에서 그래프 실행 계속 
 for event in graph.stream(None, thread_config, stream_mode="values"):
     print(event)
 ```
 
-### Dynamic Breakpoints
+### 동적 중단점
 
-Alternatively, the developer can define some *condition* that must be met for a breakpoint to be triggered. This concept of [dynamic breakpoints](./breakpoints.md) is useful when the developer wants to halt the graph under *a particular condition*. This uses a `NodeInterrupt`, which is a special type of exception that can be raised from within a node based upon some condition. As an example, we can define a dynamic breakpoint that triggers when the `input` is longer than 5 characters.
+대안으로, 개발자는 중단점이 촉발되기 위한 몇 가지 *조건*을 정의할 수 있습니다. 이러한 [동적 중단점](./breakpoints.md) 개념은 개발자가 *특정 조건*에서 그래프를 중단하고 싶을 때 유용합니다. 이는 일부 조건에 따라 노드 내에서 발생할 수 있는 특별한 예외인 `NodeInterrupt`를 사용합니다. 예를 들어, 입력이 5자보다 길 때 트리거되는 동적 중단점을 정의할 수 있습니다.
 
 ```python
 def my_node(state: State) -> State:
     if len(state['input']) > 5:
-        raise NodeInterrupt(f"Received input that is longer than 5 characters: {state['input']}")
+        raise NodeInterrupt(f"5자보다 긴 입력을 받았습니다: {state['input']}")
     return state
 ```
 
-Let's assume we run the graph with an input that triggers the dynamic breakpoint and then attempt to resume the graph execution simply by passing in `None` for the input. 
+우리가 동적 중단점을 촉발하는 입력으로 그래프를 실행하고, 이후 입력으로 `None`을 전달하여 그래프 실행을 재개하려고 한다고 가정해 보겠습니다.
 
 ```python
-# Attempt to continue the graph execution with no change to state after we hit the dynamic breakpoint 
+# 동적 중단점에 도달한 후 상태 변경 없이 그래프 실행 계속 시도 
 for event in graph.stream(None, thread_config, stream_mode="values"):
     print(event)
 ```
 
-The graph will *interrupt* again because this node will be *re-run* with the same graph state. We need to change the graph state such that the condition that triggers the dynamic breakpoint is no longer met. So, we can simply edit the graph state to an input that meets the condition of our dynamic breakpoint (< 5 characters) and re-run the node.
+이 노드는 동일한 그래프 상태로 다시 실행되기 때문에 그래프는 다시 *중단*될 것입니다. 따라서 동적 중단점을 촉발하는 조건이 더 이상 충족되지 않도록 그래프 상태를 변경해야 합니다. 그러므로 우리는 간단히 그래프 상태를 동적 중단점의 조건(< 5자)을 충족하는 입력으로 수정하고 노드를 다시 실행할 수 있습니다.
 
 ```python 
-# Update the state to pass the dynamic breakpoint
+# 동적 중단점을 통과하도록 상태 업데이트
 graph.update_state(config=thread_config, values={"input": "foo"})
 for event in graph.stream(None, thread_config, stream_mode="values"):
     print(event)
 ```
 
-Alternatively, what if we want to keep our current input and skip the node (`my_node`) that performs the check? To do this, we can simply perform the graph update with `as_node="my_node"` and pass in `None` for the values. This will make no update the graph state, but run the update as `my_node`, effectively skipping the node and bypassing the dynamic breakpoint.
+또는, 현재 입력을 유지하고 체크를 수행하는 노드(`my_node`)를 건너뛰고 싶다면 어떻게 해야 할까요? 이를 위해 우리는 `as_node="my_node"`와 함께 그래프 업데이트를 수행하고 값으로 `None`을 전달하면 됩니다. 이렇게 하면 그래프 상태 업데이트가 없지만, `my_node`로 실행되어 해당 노드를 건너뛰고 동적 중단점을 우회하게 됩니다.
 
 ```python
-# This update will skip the node `my_node` altogether
+# 이 업데이트는 `my_node` 노드를 전혀 건너뛰게 할 것입니다
 graph.update_state(config=thread_config, values=None, as_node="my_node")
 for event in graph.stream(None, thread_config, stream_mode="values"):
     print(event)
 ```
 
-See [our guide](../how-tos/human_in_the_loop/dynamic_breakpoints.ipynb) for a detailed how-to on doing this!
+자세한 방법은 [가이드](../how-tos/human_in_the_loop/dynamic_breakpoints.ipynb)를 참조하세요!
 
-## Interaction Patterns
+## 상호작용 패턴
 
-### Approval
+### 승인
 
 ![](./img/human_in_the_loop/approval.png)
 
-Sometimes we want to approve certain steps in our agent's execution. 
- 
-We can interrupt our agent at a [breakpoint](./breakpoints.md) prior to the step that we want to approve.
+때때로 우리는 에이전트 실행의 특정 단계를 승인하고 싶습니다. 
 
-This is generally recommend for sensitive actions (e.g., using external APIs or writing to a database).
- 
-With persistence, we can surface the current agent state as well as the next step to a user for review and approval. 
- 
-If approved, the graph resumes execution from the last saved checkpoint, which is saved to the `thread`:
+우리는 승인하고자 하는 단계 이전의 [중단점](./breakpoints.md)에서 에이전트를 중단할 수 있습니다.
+
+이는 일반적으로 민감한 작업(예: 외부 API 사용 또는 데이터베이스에 쓰기)에 권장됩니다.
+
+지속성을 통해 현재 에이전트 상태와 다음 단계를 사용자에게 검토 및 승인을 위해 노출할 수 있습니다.
+
+승인되면 그래프는 마지막으로 저장된 체크포인트에서 실행을 재개하며, 이는 `thread`에 저장됩니다:
 
 ```python
-# Compile our graph with a checkpointer and a breakpoint before the step to approve
+# 승인할 단계 이전에 체크포인터와 중단점을 포함하여 그래프를 컴파일합니다.
 graph = builder.compile(checkpointer=checkpointer, interrupt_before=["node_2"])
 
-# Run the graph up to the breakpoint
+# 중단점까지 그래프를 실행합니다.
 for event in graph.stream(inputs, thread, stream_mode="values"):
     print(event)
-    
-# ... Get human approval ...
 
-# If approved, continue the graph execution from the last saved checkpoint
+# ... 인간의 승인을 받습니다 ...
+
+# 승인되면 마지막으로 저장된 체크포인트에서 그래프 실행을 계속합니다.
 for event in graph.stream(None, thread, stream_mode="values"):
     print(event)
 ```
 
-See [our guide](../how-tos/human_in_the_loop/breakpoints.ipynb) for a detailed how-to on doing this!
+이것을 수행하는 자세한 방법은 [우리의 가이드](../how-tos/human_in_the_loop/breakpoints.ipynb)를 참조하세요!
 
-### Editing
+### 편집
 
 ![](./img/human_in_the_loop/edit_graph_state.png)
 
-Sometimes we want to review and edit the agent's state. 
- 
-As with approval, we can interrupt our agent at a [breakpoint](./breakpoints.md) prior to the step we want to check. 
- 
-We can surface the current state to a user and allow the user to edit the agent state.
- 
-This can, for example, be used to correct the agent if it made a mistake (e.g., see the section on tool calling below).
+때때로 우리는 에이전트의 상태를 검토하고 편집하고 싶습니다.
 
-We can edit the graph state by forking the current checkpoint, which is saved to the `thread`.
+승인과 마찬가지로 확인하고 싶은 단계 이전에 에이전트를 [중단점](./breakpoints.md)에서 중단할 수 있습니다.
 
-We can then proceed with the graph from our forked checkpoint as done before. 
+현재 상태를 사용자에게 보여주고 사용자가 에이전트 상태를 편집할 수 있도록 합니다.
+
+예를 들어, 에이전트가 실수를 했을 때 이를 수정하는 데 사용할 수 있습니다(예: 아래의 도구 호출 섹션 참조).
+
+현재 체크포인트를 포크하여 그래프 상태를 편집할 수 있으며, 이는 `thread`에 저장됩니다.
+
+그런 다음 이전과 같이 포크된 체크포인트에서 그래프를 계속 진행할 수 있습니다.
 
 ```python
-# Compile our graph with a checkpointer and a breakpoint before the step to review
+# 검토할 단계 이전에 체크포인트와 중단점을 포함하여 그래프를 컴파일합니다.
 graph = builder.compile(checkpointer=checkpointer, interrupt_before=["node_2"])
 
-# Run the graph up to the breakpoint
+# 중단점까지 그래프를 실행합니다.
 for event in graph.stream(inputs, thread, stream_mode="values"):
     print(event)
-    
-# Review the state, decide to edit it, and create a forked checkpoint with the new state
+
+# 상태를 검토하고, 편집하기로 결정하고, 새로운 상태로 포크된 체크포인트를 생성합니다.
 graph.update_state(thread, {"state": "new state"})
 
-# Continue the graph execution from the forked checkpoint
+# 포크된 체크포인트에서 그래프 실행을 계속합니다.
 for event in graph.stream(None, thread, stream_mode="values"):
     print(event)
 ```
 
-See [this guide](../how-tos/human_in_the_loop/edit-graph-state.ipynb) for a detailed how-to on doing this!
+이것을 수행하는 자세한 방법은 [이 가이드](../how-tos/human_in_the_loop/edit-graph-state.ipynb)를 참조하세요!
 
-### Input
+### 입력
 
 ![](./img/human_in_the_loop/wait_for_input.png)
 
-Sometimes we want to explicitly get human input at a particular step in the graph. 
- 
-We can create a graph node designated for this (e.g., `human_input` in our example diagram).
- 
-As with approval and editing, we can interrupt our agent at a [breakpoint](./breakpoints.md) prior to this node.
- 
-We can then perform a state update that includes the human input, just as we did with editing state.
+때때로 우리는 그래프의 특정 단계에서 명시적으로 인간 입력을 받고 싶습니다.
 
-But, we add one thing: 
+이를 위해 지정된 그래프 노드를 생성할 수 있습니다(예: 예제 다이어그램의 `human_input`).
 
-We can use `as_node=human_input` with the state update to specify that the state update *should be treated as a node*.
+승인 및 편집과 마찬가지로 이 노드 이전에 에이전트를 [중단점](./breakpoints.md)에서 중단할 수 있습니다.
 
-The is subtle, but important: 
+그런 다음 입력이 포함된 상태 업데이트를 수행할 수 있으며, 이는 상태 편집 시와 같습니다.
 
-With editing, the user makes a decision about whether or not to edit the graph state.
+하지만 한 가지를 추가합니다:
 
-With input, we explicitly define a node in our graph for collecting human input!
+상태 업데이트와 함께 `as_node=human_input`을 사용하여 상태 업데이트가 *노드로 처리되어야 한다*고 명시할 수 있습니다.
 
-The state update with the human input then runs *as this node*.
+これは微妙ですが重要です:
+
+편집의 경우 사용자는 그래프 상태를 편집할지 여부를 결정합니다.
+
+입력의 경우 수집을 위한 그래프의 노드를 명시적으로 정의합니다!
+
+그런 다음 인간 입력이 포함된 상태 업데이트는 *이 노드로서* 실행됩니다.
 
 ```python
-# Compile our graph with a checkpointer and a breakpoint before the step to to collect human input
+# 인간 입력을 수집하기 위해 체크포인트와 중단점 이전에 그래프를 컴파일합니다.
 graph = builder.compile(checkpointer=checkpointer, interrupt_before=["human_input"])
 
-# Run the graph up to the breakpoint
+# 중단점까지 그래프를 실행합니다.
 for event in graph.stream(inputs, thread, stream_mode="values"):
     print(event)
-    
-# Update the state with the user input as if it was the human_input node
+
+# 마치 human_input 노드인 것처럼 사용자 입력으로 상태를 업데이트합니다.
 graph.update_state(thread, {"user_input": user_input}, as_node="human_input")
 
-# Continue the graph execution from the checkpoint created by the human_input node
+# human_input 노드로 생성된 체크포인트에서 그래프 실행을 계속합니다.
 for event in graph.stream(None, thread, stream_mode="values"):
     print(event)
 ```
 
-See [this guide](../how-tos/human_in_the_loop/wait-user-input.ipynb) for a detailed how-to on doing this!
+이것을 수행하는 자세한 방법은 [이 가이드](../how-tos/human_in_the_loop/wait-user-input.ipynb)를 참조하세요!
 
-## Use-cases
+## 사용 사례
 
-### Reviewing Tool Calls
+### 도구 호출 검토
 
-Some user interaction patterns combine the above ideas.
+일부 사용자 상호작용 패턴은 위의 아이디어를 결합합니다.
 
-For example, many agents use [tool calling](https://python.langchain.com/docs/how_to/tool_calling/) to make decisions. 
+예를 들어, 많은 에이전트가 [도구 호출](https://python.langchain.com/docs/how_to/tool_calling/)을 사용하여 결정을 내립니다.
 
-Tool calling presents a challenge because the agent must get two things right: 
+도구 호출은 두 가지를 정확하게 수행해야 하기 때문에 도전 과제가 됩니다: 
 
-(1) The name of the tool to call 
+(1) 호출할 도구의 이름 
 
-(2) The arguments to pass to the tool
+(2) 도구에 전달할 인수
 
-Even if the tool call is correct, we may also want to apply discretion: 
+도구 호출이 정확하더라도 우리는 또한 신중함을 적용할 수 있습니다: 
 
-(3) The tool call may be a sensitive operation that we want to approve 
+(3) 도구 호출이 승인해야 할 민감한 작업일 수 있습니다. 
 
-With these points in mind, we can combine the above ideas to create a human-in-the-loop review of a tool call.
+이러한 점을 염두에 두고, 우리는 위의 아이디어를 결합하여 도구 호출에 대한 사람-검토(사람 개입)를 생성할 수 있습니다.
 
 ```python
-# Compile our graph with a checkpointer and a breakpoint before the step to to review the tool call from the LLM 
+# 검토 단계 이전에 체크포인터와 중단점을 사용하여 그래프를 컴파일합니다.
 graph = builder.compile(checkpointer=checkpointer, interrupt_before=["human_review"])
 
-# Run the graph up to the breakpoint
+# 그래프를 중단점까지 실행합니다.
 for event in graph.stream(inputs, thread, stream_mode="values"):
     print(event)
     
-# Review the tool call and update it, if needed, as the human_review node
+# 도구 호출을 검토하고 필요하면 업데이트합니다. 이를 human_review 노드로 설정합니다.
 graph.update_state(thread, {"tool_call": "updated tool call"}, as_node="human_review")
 
-# Otherwise, approve the tool call and proceed with the graph execution with no edits 
+# 그렇지 않으면 도구 호출을 승인하고 수정 없이 그래프 실행을 계속합니다.
 
-# Continue the graph execution from either: 
-# (1) the forked checkpoint created by human_review or 
-# (2) the checkpoint saved when the tool call was originally made (no edits in human_review)
+# 그래프 실행을 계속하는 방법:
+# (1) human_review에서 생성된 forked checkpoint 또는 
+# (2) 도구 호출이 원래 이루어졌을 때 저장된 체크포인트(인편에 수정 없음)
 for event in graph.stream(None, thread, stream_mode="values"):
     print(event)
 ```
 
-See [this guide](../how-tos/human_in_the_loop/review-tool-calls.ipynb) for a detailed how-to on doing this!
+자세한 방법에 대해서는 [이 가이드](../how-tos/human_in_the_loop/review-tool-calls.ipynb)를 참조하세요!
 
-### Time Travel
+### 시간 여행
 
-When working with agents, we often want closely examine their decision making process: 
+에이전트와 작업할 때, 우리는 종종 그들의 의사 결정 과정을 면밀히 살펴보기를 원합니다: 
 
-(1) Even when they arrive a desired final result, the reasoning that led to that result is often important to examine.
+(1) 원하는 최종 결과에 도달하더라도 그 결과에 이르게 한 추론을 검토하는 것은 종종 중요합니다.
 
-(2) When agents make mistakes, it is often valuable to understand why.
+(2) 에이전트가 실수를 할 때, 그 이유를 이해하는 것은 종종 가치가 있습니다.
 
-(3) In either of the above cases, it is useful to manually explore alternative decision making paths.
+(3) 위의 두 경우 모두에서, 대안적인 의사 결정 경로를 수동으로 탐색하는 것이 유용합니다.
 
-Collectively, we call these debugging concepts `time-travel` and they are composed of `replaying` and `forking`.
+이 모든 개념을 통칭하여 `시간 여행(time-travel)`이라고 하며, 이는 `재생(replaying)`과 `분기(forking)`으로 구성됩니다.
 
-#### Replaying
+#### 재생
 
 ![](./img/human_in_the_loop/replay.png)
 
-Sometimes we want to simply replay past actions of an agent. 
- 
-Above, we showed the case of executing an agent from the current state (or checkpoint) of the graph.
+때때로 우리는 에이전트의 과거 행동을 단순히 재생하고 싶습니다.
 
-We by simply passing in `None` for the input with a `thread`.
+위에서는 그래프의 현재 상태(또는 체크포인트)에서 에이전트를 실행하는 경우를 보여주었습니다.
+
+우리는 `thread`와 함께 입력으로 `None`을 간단히 전달함으로써 수행할 수 있습니다.
 
 ```
 thread = {"configurable": {"thread_id": "1"}}
@@ -267,9 +267,9 @@ for event in graph.stream(None, thread, stream_mode="values"):
     print(event)
 ```
 
-Now, we can modify this to replay past actions from a *specific* checkpoint by passing in the checkpoint ID.
+이제 우리는 체크포인트 ID를 전달하여 *특정* 체크포인트에서 과거 행동을 재생하도록 수정할 수 있습니다.
 
-To get a specific checkpoint ID, we can easily get all of the checkpoints in the thread and filter to the one we want.
+특정 체크포인트 ID를 얻으려면, 스레드에 있는 모든 체크포인트를 쉽게 가져와서 원하는 체크포인트로 필터할 수 있습니다.
 
 ```python
 all_checkpoints = []
@@ -277,11 +277,11 @@ for state in app.get_state_history(thread):
     all_checkpoints.append(state)
 ```
 
-Each checkpoint has a unique ID, which we can use to replay from a specific checkpoint.
+각 체크포인트는 고유한 ID를 가지며, 이를 사용하여 특정 체크포인트에서 재생할 수 있습니다.
 
-Assume from reviewing the checkpoints that we want to replay from one, `xxx`.
+체크포인트를 검토한 결과, `xxx`라는 체크포인트에서 재생하고 싶다고 가정합니다.
 
-We just pass in the checkpoint ID when we run the graph.
+그래프를 실행할 때 체크포인트 ID를 전달하면 됩니다.
 
 ```python
 config = {'configurable': {'thread_id': '1', 'checkpoint_id': 'xxx'}}
@@ -289,34 +289,34 @@ for event in graph.stream(None, config, stream_mode="values"):
     print(event)
 ```
  
-Importantly, the graph knows which checkpoints have been previously executed. 
+중요한 점은 그래프가 이전에 실행된 체크포인트를 알고 있다는 것입니다. 
 
-So, it will re-play any previously executed nodes rather than re-executing them.
+그래서 이전에 실행된 노드를 재실행하기보다는 재생할 것입니다.
 
-See [this additional conceptual guide](https://langchain-ai.github.io/langgraph/concepts/persistence/#replay) for related context on replaying.
+재생과 관련한 추가 컨셉 가이드는 [여기](https://langchain-ai.github.io/langgraph/concepts/persistence/#replay)를 참조하십시오.
 
-See see [this guide](../how-tos/human_in_the_loop/time-travel.ipynb) for a detailed how-to on doing time-travel!
+시간 여행에 대한 자세한 방법은 [이 가이드](../how-tos/human_in_the_loop/time-travel.ipynb)를 참조하세요!
 
-#### Forking
+#### 포킹
 
 ![](./img/human_in_the_loop/forking.png)
 
-Sometimes we want to fork past actions of an agent, and explore different paths through the graph.
+가끔 우리는 에이전트의 과거 행동을 포킹하고 그래프를 통해 다양한 경로를 탐색하고 싶습니다.
 
-`Editing`, as discussed above, is *exactly* how we do this for the *current* state of the graph! 
+위에서 논의한 `편집`은 그래프의 *현재* 상태에 대해 이를 수행하는 *정확한* 방법입니다!
 
-But, what if we want to fork *past* states of the graph?
+하지만 그래프의 *과거* 상태를 포킹하고 싶다면 어떻게 해야 할까요?
 
-For example, let's say we want to edit a particular checkpoint, `xxx`.
+예를 들어, 특정 체크포인트 `xxx`를 편집하고 싶다고 가정해 보겠습니다.
 
-We pass this `checkpoint_id` when we update the state of the graph.
+우리는 그래프의 상태를 업데이트할 때 이 `checkpoint_id`를 전달합니다.
 
 ```python
 config = {"configurable": {"thread_id": "1", "checkpoint_id": "xxx"}}
 graph.update_state(config, {"state": "updated state"}, )
 ```
 
-This creates a new forked checkpoint, `xxx-fork`, which we can then run the graph from.
+이렇게 하면 새로운 포크된 체크포인트 `xxx-fork`가 생성되며, 이로부터 그래프를 실행할 수 있습니다.
 
 ```python
 config = {'configurable': {'thread_id': '1', 'checkpoint_id': 'xxx-fork'}}
@@ -324,6 +324,6 @@ for event in graph.stream(None, config, stream_mode="values"):
     print(event)
 ```
 
-See [this additional conceptual guide](https://langchain-ai.github.io/langgraph/concepts/persistence/#update-state) for related context on forking.
+포킹과 관련된 맥락에 대한 [이 추가 개념 가이드](https://langchain-ai.github.io/langgraph/concepts/persistence/#update-state)를 참조하세요.
 
-See [this guide](../how-tos/human_in_the_loop/time-travel.ipynb) for a detailed how-to on doing time-travel!
+타임 트래블을 수행하는 방법에 대한 자세한 안내는 [이 가이드](../how-tos/human_in_the_loop/time-travel.ipynb)를 참고하세요!

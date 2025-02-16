@@ -1,28 +1,28 @@
-# Persistence
+## 지속성
 
-LangGraph has a built-in persistence layer, implemented through checkpointers. When you compile graph with a checkpointer, the checkpointer saves a `checkpoint` of the graph state at every super-step. Those checkpoints are saved to a `thread`, which can be accessed after graph execution. Because `threads` allow access to graph's state after execution, several powerful capabilities including human-in-the-loop, memory, time travel, and fault-tolerance are all possible. See [this how-to guide](../how-tos/persistence.ipynb) for an end-to-end example on how to add and use checkpointers with your graph. Below, we'll discuss each of these concepts in more detail. 
+LangGraph는 내장된 지속성 계층을 제공하며, 이는 체크포인터를 통해 구현됩니다. 그래프를 체크포인터와 함께 컴파일하면, 체크포인트는 각 슈퍼 단계에서 그래프 상태의 `checkpoint`를 저장합니다. 이 체크포인트는 `thread`에 저장되며, 그래프 실행 후에 접근할 수 있습니다. `threads`를 통해 그래프의 실행 후 상태에 접근할 수 있기 때문에, 인간 개입, 메모리, 시간 여행, 내결함성 등 여러 강력한 기능을 지원할 수 있습니다. 체크포인트를 그래프에 추가하고 사용하는 방법에 대한 전체 예시는 [이 가이드](../how-tos/persistence.ipynb)에서 확인할 수 있습니다. 아래에서는 각 개념을 더 자세히 설명합니다.
 
-![Checkpoints](img/persistence/checkpoints.jpg)
+![체크포인트](img/persistence/checkpoints.jpg)
 
-## Threads
+## 스레드
 
-A thread is a unique ID or [thread identifier](#threads) assigned to each checkpoint saved by a checkpointer. When invoking graph with a checkpointer, you **must** specify a `thread_id` as part of the `configurable` portion of the config:
+스레드는 체크포인트가 저장한 각 체크포인트에 할당된 고유한 ID 또는 [스레드 식별자](#threads)입니다. 체크포인트를 사용해 그래프를 호출할 때는 **반드시** `thread_id`를 구성 요소의 일부로 지정해야 합니다:
 
 ```python
 {"configurable": {"thread_id": "1"}}
 ```
 
-## Checkpoints
+## 체크포인트
 
-Checkpoint is a snapshot of the graph state saved at each super-step and is represented by `StateSnapshot` object with the following key properties:
+체크포인트는 각 슈퍼 단계에서 저장된 그래프 상태의 스냅샷으로, 다음과 같은 주요 속성들을 포함하는 `StateSnapshot` 객체로 표현됩니다:
 
-- `config`: Config associated with this checkpoint. 
-- `metadata`: Metadata associated with this checkpoint.
-- `values`: Values of the state channels at this point in time.
-- `next` A tuple of the node names to execute next in the graph.
-- `tasks`: A tuple of `PregelTask` objects that contain information about next tasks to be executed. If the step was previously attempted, it will include error information. If a graph was interrupted [dynamically](../how-tos/human_in_the_loop/dynamic_breakpoints.ipynb) from within a node, tasks will contain additional data associated with interrupts.
+- `config`: 이 체크포인트와 관련된 구성
+- `metadata`: 이 체크포인트와 관련된 메타데이터
+- `values`: 이 시점에서 상태 채널의 값
+- `next`: 그래프에서 다음에 실행할 노드들의 튜플
+- `tasks`: 실행할 다음 작업들에 대한 정보를 담고 있는 `PregelTask` 객체들의 튜플입니다. 이전에 시도된 경우 오류 정보도 포함됩니다. 그래프가 [동적으로](../how-tos/human_in_the_loop/dynamic_breakpoints.ipynb) 노드 내에서 중단된 경우, `tasks`에는 중단과 관련된 추가 데이터가 포함됩니다.
 
-Let's see what checkpoints are saved when a simple graph is invoked as follows:
+간단한 그래프가 호출될 때 저장되는 체크포인트를 살펴보겠습니다:
 
 ```python
 from langgraph.graph import StateGraph, START, END
@@ -56,30 +56,30 @@ config = {"configurable": {"thread_id": "1"}}
 graph.invoke({"foo": ""}, config)
 ```
 
-After we run the graph, we expect to see exactly 4 checkpoints:
+그래프를 실행한 후, 우리는 총 4개의 체크포인트를 보게 됩니다:
 
-* empty checkpoint with `START` as the next node to be executed
-* checkpoint with the user input `{'foo': '', 'bar': []}` and `node_a` as the next node to be executed
-* checkpoint with the outputs of `node_a` `{'foo': 'a', 'bar': ['a']}` and `node_b` as the next node to be executed
-* checkpoint with the outputs of `node_b` `{'foo': 'b', 'bar': ['a', 'b']}` and no next nodes to be executed
+- `START`가 다음 실행 노드로 지정된 빈 체크포인트
+- 사용자 입력 `{'foo': '', 'bar': []}`와 `node_a`가 다음 실행 노드로 지정된 체크포인트
+- `node_a`의 출력 `{'foo': 'a', 'bar': ['a']}`와 `node_b`가 다음 실행 노드로 지정된 체크포인트
+- `node_b`의 출력 `{'foo': 'b', 'bar': ['a', 'b']}`와 더 이상 실행할 노드가 없는 체크포인트
 
-Note that we `bar` channel values contain outputs from both nodes as we have a reducer for `bar` channel.
+`bar` 채널 값에는 `bar`에 대한 리듀서가 있기 때문에 두 노드에서 반환된 값이 포함됩니다.
 
-### Get state
+### 상태 가져오기
 
-When interacting with the saved graph state, you **must** specify a [thread identifier](#threads). You can view the *latest* state of the graph by calling `graph.get_state(config)`. This will return a `StateSnapshot` object that corresponds to the latest checkpoint associated with the thread ID provided in the config or a checkpoint associated with a checkpoint ID for the thread, if provided.
+저장된 그래프 상태와 상호작용할 때는 **반드시** [스레드 식별자](#threads)를 지정해야 합니다. `graph.get_state(config)`를 호출하여 그래프의 _최신_ 상태를 볼 수 있습니다. 이는 제공된 스레드 ID와 연결된 최신 체크포인트 또는 제공된 체크포인트 ID에 연결된 체크포인트와 일치하는 `StateSnapshot` 객체를 반환합니다.
 
 ```python
-# get the latest state snapshot
+# 최신 상태 스냅샷 가져오기
 config = {"configurable": {"thread_id": "1"}}
 graph.get_state(config)
 
-# get a state snapshot for a specific checkpoint_id
+# 특정 checkpoint_id에 대한 상태 스냅샷 가져오기
 config = {"configurable": {"thread_id": "1", "checkpoint_id": "1ef663ba-28fe-6528-8002-5a559208592c"}}
 graph.get_state(config)
 ```
 
-In our example, the output of `get_state` will look like this:
+위 예제에서 `get_state`의 출력은 다음과 같습니다:
 
 ```
 StateSnapshot(
@@ -92,16 +92,16 @@ StateSnapshot(
 )
 ```
 
-### Get state history
+### 상태 기록 가져오기
 
-You can get the full history of the graph execution for a given thread by calling `graph.get_state_history(config)`. This will return a list of `StateSnapshot` objects associated with the thread ID provided in the config. Importantly, the checkpoints will be ordered chronologically with the most recent checkpoint / `StateSnapshot` being the first in the list.
+`graph.get_state_history(config)`를 호출하면 주어진 스레드에 대한 전체 그래프 실행 기록을 가져올 수 있습니다. 이 메서드는 제공된 스레드 ID와 관련된 `StateSnapshot` 객체들의 목록을 반환합니다. 중요한 점은 체크포인트가 시간 순으로 정렬되어 있으며, 가장 최근의 체크포인트/`StateSnapshot`이 목록의 첫 번째에 있다는 것입니다.
 
 ```python
 config = {"configurable": {"thread_id": "1"}}
 list(graph.get_state_history(config))
 ```
 
-In our example, the output of `get_state_history` will look like this:
+예제에서 `get_state_history`의 출력은 다음과 같습니다:
 
 ```
 [
@@ -143,39 +143,41 @@ In our example, the output of `get_state_history` will look like this:
 ]
 ```
 
-![State](img/persistence/get_state.jpg)
+![상태](img/persistence/get_state.jpg)
 
-### Replay
+### 재생
 
-It's also possible to play-back a prior graph execution. If we `invoke` a graph with a `thread_id` and a `checkpoint_id`, then we will *re-play* the previously executed steps _before_ a checkpoint that corresponds to the `checkpoint_id`, and only execute the steps _after_ the checkpoint.
+이전 그래프 실행을 재생할 수도 있습니다. 만약 `thread_id`와 `checkpoint_id`를 사용하여 그래프를 `invoke`하면, `checkpoint_id`에 해당하는 체크포인트 이전에 실행된 단계를 *재생*하고, 체크포인트 이후의 단계만 실행합니다.
 
-* `thread_id` is the ID of a thread.
-* `checkpoint_id` is an identifier that refers to a specific checkpoint within a thread.
+- `thread_id`: 스레드의 ID입니다.
+- `checkpoint_id`: 스레드 내 특정 체크포인트를 나타내는 식별자입니다.
 
-You must pass these when invoking the graph as part of the `configurable` portion of the config:
+이들을 그래프 호출 시 `configurable` 부분에 포함하여 전달해야 합니다:
 
 ```python
 config = {"configurable": {"thread_id": "1", "checkpoint_id": "0c62ca34-ac19-445d-bbb0-5b4984975b2a"}}
 graph.invoke(None, config=config)
 ```
 
-Importantly, LangGraph knows whether a particular step has been executed previously. If it has, LangGraph simply *re-plays* that particular step in the graph and does not re-execute the step, but only for the steps _before_ the provided `checkpoint_id`. All of the steps _after_ `checkpoint_id` will be executed (i.e., a new fork), even if they have been executed previously. See this [how to guide on time-travel to learn more about replaying](../how-tos/human_in_the_loop/time-travel.ipynb).
+중요한 점은 LangGraph가 특정 단계가 이전에 실행되었는지 여부를 인식한다는 것입니다. 만약 실행되었다면, LangGraph는 해당 단계를 단순히 *재생*하며, 제공된 `checkpoint_id` 이전의 단계만 다시 실행하지 않습니다. `checkpoint_id` 이후의 모든 단계는 다시 실행됩니다 (즉, 새로운 분기).
 
-![Replay](img/persistence/re_play.png)
+[시간 여행을 배우는 방법](../how-tos/human_in_the_loop/time-travel.ipynb)에 대한 가이드를 참조하여 재생에 대해 더 알아보세요.
 
-### Update state
+![재생](img/persistence/re_play.png)
 
-In addition to re-playing the graph from specific `checkpoints`, we can also *edit* the graph state. We do this using `graph.update_state()`. This method accepts three different arguments:
+### 상태 업데이트
+
+특정 `checkpoints`에서 그래프를 재생하는 것 외에도, 그래프 상태를 *편집*할 수도 있습니다. 이를 위해 `graph.update_state()`를 사용합니다. 이 메서드는 세 가지 인자를 받습니다:
 
 #### `config`
 
-The config should contain `thread_id` specifying which thread to update. When only the `thread_id` is passed, we update (or fork) the current state. Optionally, if we include `checkpoint_id` field, then we fork that selected checkpoint.
+구성은 업데이트할 스레드의 `thread_id`를 포함해야 합니다. `thread_id`만 전달하면 현재 상태를 업데이트(또는 분기)합니다. 선택적으로 `checkpoint_id` 필드를 포함하면 선택한 체크포인트에서 분기할 수 있습니다.
 
 #### `values`
 
-These are the values that will be used to update the state. Note that this update is treated exactly as any update from a node is treated. This means that these values will be passed to the [reducer](./low_level.md#reducers) functions, if they are defined for some of the channels in the graph state. This means that `update_state` does NOT automatically overwrite the channel values for every channel, but only for the channels without reducers. Let's walk through an example.
+이 값들은 상태를 업데이트하는 데 사용됩니다. 이 업데이트는 노드에서 발생한 업데이트와 동일하게 처리됩니다. 즉, 이 값들은 그래프 상태의 일부 채널에 대해 정의된 [리듀서](./low_level.md#reducers) 함수에 전달됩니다. 이 말은 `update_state`가 모든 채널 값을 자동으로 덮어쓰지 않고, 리듀서가 없는 채널만 덮어쓴다는 뜻입니다. 예제를 살펴봅시다.
 
-Let's assume you have defined the state of your graph with the following schema (see full example above):
+그래프 상태를 다음과 같은 스키마로 정의했다고 가정해봅시다 (위의 전체 예제 참조):
 
 ```python
 from typing import Annotated
@@ -187,59 +189,59 @@ class State(TypedDict):
     bar: Annotated[list[str], add]
 ```
 
-Let's now assume the current state of the graph is
+현재 그래프 상태가 다음과 같다고 가정합시다:
 
 ```
 {"foo": 1, "bar": ["a"]}
 ```
 
-If you update the state as below:
+다음과 같이 상태를 업데이트한다고 가정합시다:
 
 ```
 graph.update_state(config, {"foo": 2, "bar": ["b"]})
 ```
 
-Then the new state of the graph will be:
+그렇다면 그래프의 새 상태는 다음과 같습니다:
 
 ```
 {"foo": 2, "bar": ["a", "b"]}
 ```
 
-The `foo` key (channel) is completely changed (because there is no reducer specified for that channel, so `update_state` overwrites it). However, there is a reducer specified for the `bar` key, and so it appends `"b"` to the state of `bar`.
+`foo` 키(채널)는 완전히 변경됩니다 (이 채널에 대해 리듀서가 정의되지 않았으므로 `update_state`가 이를 덮어씁니다). 그러나 `bar` 키에는 리듀서가 정의되어 있으므로 `"b"`가 `bar` 상태에 추가됩니다.
 
 #### `as_node`
 
-The final thing you can optionally specify when calling `update_state` is `as_node`. If you provided it, the update will be applied as if it came from node `as_node`. If `as_node` is not provided, it will be set to the last node that updated the state, if not ambiguous. The reason this matters is that the next steps to execute depend on the last node to have given an update, so this can be used to control which node executes next. See this [how to guide on time-travel to learn more about forking state](../how-tos/human_in_the_loop/time-travel.ipynb).
+`update_state`를 호출할 때 선택적으로 지정할 수 있는 마지막 항목은 `as_node`입니다. 이를 제공하면, 업데이트는 마치 `as_node`에서 온 것처럼 적용됩니다. `as_node`가 제공되지 않으면, 상태를 마지막으로 업데이트한 노드가 설정됩니다(모호하지 않은 경우). 이는 그래프에서 다음에 실행할 단계가 마지막으로 상태를 업데이트한 노드에 의존하므로, 어떤 노드가 다음에 실행될지 제어하는 데 사용할 수 있습니다. 이 기능에 대해 더 알고 싶다면 [시간 여행 가이드](../how-tos/human_in_the_loop/time-travel.ipynb)를 참고하세요.
 
-![Update](img/persistence/checkpoints_full_story.jpg)
+![업데이트](img/persistence/checkpoints_full_story.jpg)
 
-## Memory Store
+## 메모리 저장소
 
-![Model of shared state](img/persistence/shared_state.png)
+![공유 상태 모델](img/persistence/shared_state.png)
 
-A [state schema](low_level.md#schema) specifies a set of keys that are populated as a graph is executed. As discussed above, state can be written by a checkpointer to a thread at each graph step, enabling state persistence.
+[상태 스키마](low_level.md#schema)는 그래프가 실행될 때 채워지는 키 세트를 지정합니다. 앞서 언급했듯이, 상태는 체크포인터가 그래프 단계마다 스레드에 기록하여 상태 지속성을 가능하게 합니다.
 
-But, what if we want to retain some information *across threads*? Consider the case of a chatbot where we want to retain specific information about the user across *all* chat conversations (e.g., threads) with that user!
+하지만 _스레드 간_ 정보를 유지하려면 어떻게 해야 할까요? 예를 들어, 사용자와의 모든 채팅 대화(즉, 스레드)에서 특정 정보를 유지하고 싶은 챗봇을 고려해보세요!
 
-With checkpointers alone, we cannot share information across threads. This motivates the need for the [`Store`](../reference/store.md#langgraph.store.base.BaseStore) interface. As an illustration, we can define an `InMemoryStore` to store information about a user across threads. We simply compile our graph with a checkpointer, as before, and with our new `in_memory_store` variable.
+체크포인터만으로는 스레드 간에 정보를 공유할 수 없습니다. 이로 인해 [`Store`](../reference/store.md#langgraph.store.base.BaseStore) 인터페이스의 필요성이 생깁니다. 예를 들어, 사용자의 정보를 여러 스레드에 걸쳐 저장할 수 있는 `InMemoryStore`를 정의할 수 있습니다. 우리는 그래프를 체크포인터와 함께 컴파일하고 새로운 `in_memory_store` 변수를 사용하여 이를 할 수 있습니다.
 
-### Basic Usage
+### 기본 사용법
 
-First, let's showcase this in isolation without using LangGraph.
+먼저, LangGraph를 사용하지 않고 이를 독립적으로 보여줍니다.
 
 ```python
 from langgraph.store.memory import InMemoryStore
 in_memory_store = InMemoryStore()
 ```
 
-Memories are namespaced by a `tuple`, which in this specific example will be `(<user_id>, "memories")`. The namespace can be any length and represent anything, does not have be user specific.
+메모리는 `tuple`로 네임스페이스가 지정됩니다. 이 예시에서는 `(<user_id>, "memories")`가 사용됩니다. 네임스페이스는 길이가 다를 수 있으며, 사용자 특정일 필요는 없습니다.
 
-```python 
+```python
 user_id = "1"
 namespace_for_memory = (user_id, "memories")
 ```
 
-We use the `store.put` method to save memories to our namespace in the store. When we do this, we specify the namespace, as defined above, and a key-value pair for the memory: the key is simply a unique identifier for the memory (`memory_id`) and the value (a dictionary) is the memory itself.
+`store.put` 메서드를 사용하여 메모리를 네임스페이스에 저장합니다. 이때 네임스페이스와 메모리의 키-값 쌍을 지정합니다. 키는 메모리의 고유 식별자(`memory_id`)이고 값은 메모리 자체를 나타내는 딕셔너리입니다.
 
 ```python
 memory_id = str(uuid.uuid4())
@@ -247,7 +249,7 @@ memory = {"food_preference" : "I like pizza"}
 in_memory_store.put(namespace_for_memory, memory_id, memory)
 ```
 
-We can read out memories in our namespace using the `store.search` method, which will return all memories for a given user as a list. The most recent memory is the last in the list.
+`store.search` 메서드를 사용하여 네임스페이스에서 메모리를 읽을 수 있으며, 주어진 사용자의 모든 메모리를 목록으로 반환합니다. 가장 최근 메모리가 목록의 마지막에 있습니다.
 
 ```python
 memories = in_memory_store.search(namespace_for_memory)
@@ -259,160 +261,158 @@ memories[-1].dict()
  'updated_at': '2024-10-02T17:22:31.590605+00:00'}
 ```
 
-Each memory type is a Python class ([`Item`](https://langchain-ai.github.io/langgraph/reference/store/#langgraph.store.base.Item)) with certain attributes. We can access it as a dictionary by converting via `.dict` as above.
-The attributes it has are:
+각 메모리 유형은 특정 속성을 가진 파이썬 클래스([`Item`](https://langchain-ai.github.io/langgraph/reference/store/#langgraph.store.base.Item))입니다. `.dict`로 변환하여 딕셔너리 형태로 접근할 수 있습니다. 이 클래스가 가진 속성은 다음과 같습니다:
 
-- `value`: The value (itself a dictionary) of this memory
-- `key`: A unique key for this memory in this namespace
-- `namespace`: A list of strings, the namespace of this memory type
-- `created_at`: Timestamp for when this memory was created
-- `updated_at`: Timestamp for when this memory was updated
+- `value`: 이 메모리의 값(딕셔너리)
+- `key`: 이 네임스페이스에서 메모리의 고유 키
+- `namespace`: 이 메모리 유형의 네임스페이스 목록
+- `created_at`: 이 메모리가 생성된 타임스탬프
+- `updated_at`: 이 메모리가 업데이트된 타임스탬프
 
-### Semantic Search
+### 의미 기반 검색
 
-Beyond simple retrieval, the store also supports semantic search, allowing you to find memories based on meaning rather than exact matches. To enable this, configure the store with an embedding model:
+단순 검색을 넘어서, 저장소는 의미 기반 검색도 지원하여, 정확한 일치가 아닌 의미를 기준으로 메모리를 찾을 수 있습니다. 이를 활성화하려면, 저장소를 임베딩 모델로 구성해야 합니다:
 
 ```python
 from langchain.embeddings import init_embeddings
 
 store = InMemoryStore(
     index={
-        "embed": init_embeddings("openai:text-embedding-3-small"),  # Embedding provider
-        "dims": 1536,                              # Embedding dimensions
-        "fields": ["food_preference", "$"]              # Fields to embed
+        "embed": init_embeddings("openai:text-embedding-3-small"),  # 임베딩 제공자
+        "dims": 1536,                              # 임베딩 차원
+        "fields": ["food_preference", "$"]              # 임베딩할 필드
     }
 )
 ```
 
-Now when searching, you can use natural language queries to find relevant memories:
+이제 검색할 때 자연어 쿼리를 사용하여 관련 메모리를 찾을 수 있습니다:
 
 ```python
-# Find memories about food preferences
-# (This can be done after putting memories into the store)
+# 음식 선호에 대한 메모리 찾기
+# (메모리가 저장된 후 검색 가능합니다)
 memories = store.search(
     namespace_for_memory,
-    query="What does the user like to eat?",
-    limit=3  # Return top 3 matches
+    query="사용자는 무엇을 먹는 것을 좋아합니까?",
+    limit=3  # 상위 3개 일치 항목 반환
 )
 ```
 
-You can control which parts of your memories get embedded by configuring the `fields` parameter or by specifying the `index` parameter when storing memories:
+메모리에서 어떤 부분을 임베딩할지 제어하려면 `fields` 매개변수를 설정하거나 메모리를 저장할 때 `index` 매개변수를 지정할 수 있습니다:
 
 ```python
-# Store with specific fields to embed
+# 특정 필드를 임베딩하여 저장
 store.put(
     namespace_for_memory,
     str(uuid.uuid4()),
     {
-        "food_preference": "I love Italian cuisine",
-        "context": "Discussing dinner plans"
+        "food_preference": "나는 이탈리안 요리를 좋아합니다",
+        "context": "저녁 계획에 대해 논의 중"
     },
-    index=["food_preference"]  # Only embed "food_preferences" field
+    index=["food_preference"]  # "food_preference" 필드만 임베딩
 )
 
-# Store without embedding (still retrievable, but not searchable)
+# 임베딩 없이 저장 (여전히 검색 가능하지만 검색은 불가능)
 store.put(
     namespace_for_memory,
     str(uuid.uuid4()),
-    {"system_info": "Last updated: 2024-01-01"},
+    {"system_info": "마지막 업데이트: 2024-01-01"},
     index=False
 )
 ```
 
-### Using in LangGraph
+### LangGraph에서 사용하기
 
-With this all in place, we use the `in_memory_store` in LangGraph. The `in_memory_store` works hand-in-hand with the checkpointer: the checkpointer saves state to threads, as discussed above, and the `in_memory_store` allows us to store arbitrary information for access *across* threads. We compile the graph with both the checkpointer and the `in_memory_store` as follows. 
+모든 준비가 끝났으면, 이제 `in_memory_store`를 LangGraph에서 사용합니다. `in_memory_store`는 체크포인터와 함께 작동합니다: 체크포인터는 위에서 설명한 대로 상태를 스레드에 저장하고, `in_memory_store`는 스레드 간에 임의의 정보를 저장할 수 있게 해줍니다. 우리는 그래프를 체크포인터와 `in_memory_store`로 컴파일할 수 있습니다.
 
 ```python
 from langgraph.checkpoint.memory import MemorySaver
 
-# We need this because we want to enable threads (conversations)
+# 스레드(대화)를 활성화하려면 체크포인터가 필요합니다
 checkpointer = MemorySaver()
 
-# ... Define the graph ...
+# ... 그래프 정의 ...
 
-# Compile the graph with the checkpointer and store
+# 체크포인터와 저장소를 사용하여 그래프 컴파일
 graph = graph.compile(checkpointer=checkpointer, store=in_memory_store)
 ```
 
-We invoke the graph with a `thread_id`, as before, and also with a `user_id`, which we'll use to namespace our memories to this particular user as we showed above.
+그래프를 `thread_id`와 함께 호출하며, `user_id`도 전달하여 사용자별 메모리를 네임스페이싱할 수 있습니다.
 
 ```python
-# Invoke the graph
+# 그래프 호출
 user_id = "1"
 config = {"configurable": {"thread_id": "1", "user_id": user_id}}
 
-# First let's just say hi to the AI
+# 먼저 AI에게 인사하기
 for update in graph.stream(
-    {"messages": [{"role": "user", "content": "hi"}]}, config, stream_mode="updates"
+    {"messages": [{"role": "user", "content": "안녕"}]}, config, stream_mode="updates"
 ):
     print(update)
 ```
 
-We can access the `in_memory_store` and the `user_id` in *any node* by passing `store: BaseStore` and `config: RunnableConfig` as node arguments. Here's how we might use semantic search in a node to find relevant memories:
+`in_memory_store`와 `user_id`는 *모든 노드*에서 `store: BaseStore`와 `config: RunnableConfig`를 노드 인수로 전달하여 접근할 수 있습니다. 다음은 노드에서 의미 검색을 사용하여 관련 메모리를 찾는 방법입니다:
 
 ```python
 def update_memory(state: MessagesState, config: RunnableConfig, *, store: BaseStore):
-    
-    # Get the user id from the config
+
+    # config에서 사용자 ID 가져오기
     user_id = config["configurable"]["user_id"]
-    
-    # Namespace the memory
+
+    # 메모리 네임스페이스 설정
     namespace = (user_id, "memories")
-    
-    # ... Analyze conversation and create a new memory
-    
-    # Create a new memory ID
+
+    # ... 대화 분석 후 새 메모리 생성
+
+    # 새 메모리 ID 생성
     memory_id = str(uuid.uuid4())
 
-    # We create a new memory
+    # 새 메모리 생성
     store.put(namespace, memory_id, {"memory": memory})
-
 ```
 
-As we showed above, we can also access the store in any node and use the `store.search` method to get memories. Recall the the memories are returned as a list of objects that can be converted to a dictionary.
+위에서 보았듯이, `store`를 사용하여 메모리에 접근하고 `store.search` 메서드를 사용하여 메모리를 검색할 수 있습니다. 메모리는 객체 목록으로 반환되며, 딕셔너리로 변환할 수 있습니다.
 
 ```python
 memories[-1].dict()
-{'value': {'food_preference': 'I like pizza'},
+{'value': {'food_preference': '나는 피자를 좋아합니다'},
  'key': '07e0caf4-1631-47b7-b15f-65515d4c1843',
  'namespace': ['1', 'memories'],
  'created_at': '2024-10-02T17:22:31.590602+00:00',
  'updated_at': '2024-10-02T17:22:31.590605+00:00'}
 ```
 
-We can access the memories and use them in our model call.
+메모리를 사용하여 모델 호출에 활용할 수 있습니다.
 
 ```python
 def call_model(state: MessagesState, config: RunnableConfig, *, store: BaseStore):
-    # Get the user id from the config
+    # config에서 사용자 ID 가져오기
     user_id = config["configurable"]["user_id"]
-    
-    # Search based on the most recent message
+
+    # 가장 최근 메시지를 기반으로 검색
     memories = store.search(
         namespace,
         query=state["messages"][-1].content,
         limit=3
     )
     info = "\n".join([d.value["memory"] for d in memories])
-    
-    # ... Use memories in the model call
+
+    # ... 메모리를 모델 호출에 사용
 ```
 
-If we create a new thread, we can still access the same memories so long as the `user_id` is the same. 
+새로운 스레드를 생성해도 `user_id`가 동일하면 동일한 메모리를 계속 사용할 수 있습니다.
 
 ```python
-# Invoke the graph
+# 그래프 호출
 config = {"configurable": {"thread_id": "2", "user_id": "1"}}
 
-# Let's say hi again
+# 다시 인사하기
 for update in graph.stream(
     {"messages": [{"role": "user", "content": "hi, tell me about my memories"}]}, config, stream_mode="updates"
 ):
     print(update)
 ```
 
-When we use the LangGraph Platform, either locally (e.g., in LangGraph Studio) or with LangGraph Cloud, the base store is available to use by default and does not need to be specified during graph compilation. To enable semantic search, however, you **do** need to configure the indexing settings in your `langgraph.json` file. For example:
+LangGraph 플랫폼을 사용할 때, 로컬(예: LangGraph Studio) 또는 LangGraph Cloud에서 기본 저장소를 사용하여 그래프를 컴파일할 때 별도로 지정할 필요가 없습니다. 그러나 의미 검색을 활성화하려면 `langgraph.json` 파일에서 인덱싱 설정을 구성해야 합니다. 예를 들면:
 
 ```json
 {
@@ -427,53 +427,52 @@ When we use the LangGraph Platform, either locally (e.g., in LangGraph Studio) o
 }
 ```
 
-See the [deployment guide](../cloud/deployment/semantic_search.md) for more details and configuration options.
+자세한 내용과 구성 옵션은 [배포 가이드](../cloud/deployment/semantic_search.md)를 참조하세요.
 
-## Checkpointer libraries
+### 체크포인터 라이브러리
 
-Under the hood, checkpointing is powered by checkpointer objects that conform to [BaseCheckpointSaver][langgraph.checkpoint.base.BaseCheckpointSaver] interface. LangGraph provides several checkpointer implementations, all implemented via standalone, installable libraries:
+LangGraph는 체크포인터 객체를 통해 체크포인팅을 제공합니다. 이 객체는 [BaseCheckpointSaver](langgraph.checkpoint.base.BaseCheckpointSaver) 인터페이스를 따르며, LangGraph는 여러 가지 체크포인터 구현을 제공합니다. 모든 구현은 독립적인 설치 가능한 라이브러리로 제공됩니다:
 
-* `langgraph-checkpoint`: The base interface for checkpointer savers ([BaseCheckpointSaver][langgraph.checkpoint.base.BaseCheckpointSaver]) and serialization/deserialization interface ([SerializerProtocol][langgraph.checkpoint.serde.base.SerializerProtocol]). Includes in-memory checkpointer implementation ([InMemorySaver][langgraph.checkpoint.memory.InMemorySaver]) for experimentation. LangGraph comes with `langgraph-checkpoint` included.
-* `langgraph-checkpoint-sqlite`: An implementation of LangGraph checkpointer that uses SQLite database ([SqliteSaver][langgraph.checkpoint.sqlite.SqliteSaver] / [AsyncSqliteSaver][langgraph.checkpoint.sqlite.aio.AsyncSqliteSaver]). Ideal for experimentation and local workflows. Needs to be installed separately.
-* `langgraph-checkpoint-postgres`: An advanced checkpointer that uses Postgres database ([PostgresSaver][langgraph.checkpoint.postgres.PostgresSaver] / [AsyncPostgresSaver][langgraph.checkpoint.postgres.aio.AsyncPostgresSaver]), used in LangGraph Cloud. Ideal for using in production. Needs to be installed separately.
+- `langgraph-checkpoint`: 체크포인터 저장소 인터페이스 ([BaseCheckpointSaver](langgraph.checkpoint.base.BaseCheckpointSaver))와 직렬화/역직렬화 인터페이스 ([SerializerProtocol](langgraph.checkpoint.serde.base.SerializerProtocol))를 포함합니다. 실험용으로 인메모리 체크포인터 구현 ([MemorySaver](langgraph.checkpoint.memory.MemorySaver))도 포함되어 있습니다. LangGraph는 기본적으로 `langgraph-checkpoint`을 포함합니다.
+- `langgraph-checkpoint-sqlite`: SQLite 데이터베이스를 사용하는 LangGraph 체크포인터 구현 ([SqliteSaver](langgraph.checkpoint.sqlite.SqliteSaver) / [AsyncSqliteSaver](langgraph.checkpoint.sqlite.aio.AsyncSqliteSaver)). 실험용 및 로컬 워크플로에 적합합니다. 별도로 설치해야 합니다.
+- `langgraph-checkpoint-postgres`: Postgres 데이터베이스를 사용하는 고급 체크포인터 구현 ([PostgresSaver](langgraph.checkpoint.postgres.PostgresSaver) / [AsyncPostgresSaver](langgraph.checkpoint.postgres.aio.AsyncPostgresSaver)), LangGraph Cloud에서 사용됩니다. 생산 환경에 적합합니다. 별도로 설치해야 합니다.
 
-### Checkpointer interface
+### 체크포인터 인터페이스
 
-Each checkpointer conforms to [BaseCheckpointSaver][langgraph.checkpoint.base.BaseCheckpointSaver] interface and implements the following methods:
+각 체크포인터는 [BaseCheckpointSaver](langgraph.checkpoint.base.BaseCheckpointSaver) 인터페이스를 구현하며, 다음과 같은 메서드를 제공합니다:
 
-* `.put` - Store a checkpoint with its configuration and metadata.  
-* `.put_writes` - Store intermediate writes linked to a checkpoint (i.e. [pending writes](#pending-writes)).  
-* `.get_tuple` - Fetch a checkpoint tuple using for a given configuration (`thread_id` and `checkpoint_id`). This is used to populate `StateSnapshot` in `graph.get_state()`.  
-* `.list` - List checkpoints that match a given configuration and filter criteria. This is used to populate state history in `graph.get_state_history()`
+- `.put` - 체크포인트와 해당 구성 및 메타데이터를 저장합니다.
+- `.put_writes` - 체크포인트와 연결된 중간 쓰기(예: [보류 중인 쓰기](#pending-writes))를 저장합니다.
+- `.get_tuple` - 주어진 구성 (`thread_id` 및 `checkpoint_id`)에 대한 체크포인트 튜플을 가져옵니다. 이는 `graph.get_state()`에서 `StateSnapshot`을 채우는 데 사용됩니다.
+- `.list` - 주어진 구성과 필터 기준에 맞는 체크포인트 목록을 반환합니다. 이는 `graph.get_state_history()`에서 상태 히스토리를 채우는 데 사용됩니다.
 
-If the checkpointer is used with asynchronous graph execution (i.e. executing the graph via `.ainvoke`, `.astream`, `.abatch`), asynchronous versions of the above methods will be used (`.aput`, `.aput_writes`, `.aget_tuple`, `.alist`).
+비동기적으로 그래프를 실행하는 경우 (즉, `.ainvoke`, `.astream`, `.abatch`를 통해 그래프를 실행할 때) 위의 메서드들은 비동기 버전(`.aput`, `.aput_writes`, `.aget_tuple`, `.alist`)을 사용합니다.
 
-!!! note Note
-    For running your graph asynchronously, you can use `MemorySaver`, or async versions of Sqlite/Postgres checkpointers -- `AsyncSqliteSaver` / `AsyncPostgresSaver` checkpointers.
+!!! 참고
+그래프를 비동기적으로 실행하려면 `MemorySaver`나 비동기 버전의 Sqlite/Postgres 체크포인터인 `AsyncSqliteSaver` / `AsyncPostgresSaver` 체크포인터를 사용할 수 있습니다.
 
-### Serializer
+### 직렬화기
 
-When checkpointers save the graph state, they need to serialize the channel values in the state. This is done using serializer objects. 
-`langgraph_checkpoint` defines [protocol][langgraph.checkpoint.serde.base.SerializerProtocol] for implementing serializers provides a default implementation ([JsonPlusSerializer][langgraph.checkpoint.serde.jsonplus.JsonPlusSerializer]) that handles a wide variety of types, including LangChain and LangGraph primitives, datetimes, enums and more.
+체크포인터가 그래프 상태를 저장할 때, 상태의 채널 값을 직렬화해야 합니다. 이는 직렬화 객체를 사용하여 수행됩니다. `langgraph_checkpoint`는 [직렬화 프로토콜](langgraph.checkpoint.serde.base.SerializerProtocol)을 정의하여 직렬화기를 구현하며, 기본 구현인 [JsonPlusSerializer](langgraph.checkpoint.serde.jsonplus.JsonPlusSerializer)가 제공됩니다. 이 구현은 LangChain 및 LangGraph 기본 데이터형, 날짜/시간, 열거형 등을 포함한 다양한 유형을 처리할 수 있습니다.
 
-## Capabilities
+## 기능
 
-### Human-in-the-loop
+### 인간-in-the-loop
 
-First, checkpointers facilitate [human-in-the-loop workflows](agentic_concepts.md#human-in-the-loop) workflows by allowing humans to inspect, interrupt, and approve graph steps. Checkpointers are needed for these workflows as the human has to be able to view the state of a graph at any point in time, and the graph has to be to resume execution after the human has made any updates to the state. See [these how-to guides](../how-tos/human_in_the_loop/breakpoints.ipynb) for concrete examples.
+첫째, 체크포인터는 [인간-in-the-loop](agentic_concepts.md#human-in-the-loop) 워크플로를 지원합니다. 이를 통해 인간은 그래프 단계를 검사, 중단 및 승인할 수 있습니다. 체크포인터는 이러한 워크플로에 필수적입니다. 인간은 그래프 상태를 언제든지 확인할 수 있어야 하고, 그래프는 인간이 상태를 업데이트한 후 실행을 재개할 수 있어야 합니다. [이들 하우투 가이드](../how-tos/human_in_the_loop/breakpoints.ipynb)를 통해 구체적인 예제를 확인할 수 있습니다.
 
-### Memory
+### 메모리
 
-Second, checkpointers allow for ["memory"](agentic_concepts.md#memory) between interactions.  In the case of repeated human interactions (like conversations) any follow up messages can be sent to that thread, which will retain its memory of previous ones. See [this how-to guide](../how-tos/memory/manage-conversation-history.ipynb) for an end-to-end example on how to add and manage conversation memory using checkpointers.
+둘째, 체크포인터는 [메모리](agentic_concepts.md#memory) 기능을 지원합니다. 반복적인 인간 상호작용(예: 대화)에서 후속 메시지는 해당 스레드에 전송되며 이전 메시지에 대한 기억을 유지합니다. 체크포인터를 사용하여 대화형 메모리를 추가하고 관리하는 방법에 대한 예제를 보려면 [이 하우투 가이드](../how-tos/memory/manage-conversation-history.ipynb)를 참조하세요.
 
-### Time Travel
+### 시간 여행
 
-Third, checkpointers allow for ["time travel"](time-travel.md), allowing users to replay prior graph executions to review and / or debug specific graph steps. In addition, checkpointers make it possible to fork the graph state at arbitrary checkpoints to explore alternative trajectories.
+셋째, 체크포인트는 [시간 여행](time-travel.md)을 지원하여 사용자가 이전 그래프 실행을 재생하여 특정 그래프 단계를 검토하거나 디버깅할 수 있도록 합니다. 또한 체크포인터를 사용하면 그래프 상태를 임의의 체크포인트에서 분기시켜 대체 경로를 탐색할 수 있습니다.
 
-### Fault-tolerance
+### 내결함성
 
-Lastly, checkpointing also provides fault-tolerance and error recovery: if one or more nodes fail at a given superstep, you can restart your graph from the last successful step. Additionally, when a graph node fails mid-execution at a given superstep, LangGraph stores pending checkpoint writes from any other nodes that completed successfully at that superstep, so that whenever we resume graph execution from that superstep we don't re-run the successful nodes.
+마지막으로, 체크포인트는 내결함성 및 오류 복구 기능을 제공합니다. 하나 이상의 노드가 특정 슈퍼 단계에서 실패하면, 그래프는 마지막 성공적인 단계에서 재시작할 수 있습니다. 또한, 그래프 노드가 특정 슈퍼 단계에서 실행 도중 실패하면, LangGraph는 다른 노드에서 완료된 모든 성공적인 쓰기를 보류 중인 체크포인트로 저장하여, 그래프 실행이 재개될 때 성공적인 노드를 다시 실행하지 않도록 합니다.
 
-#### Pending writes
+#### 보류 중인 쓰기
 
-Additionally, when a graph node fails mid-execution at a given superstep, LangGraph stores pending checkpoint writes from any other nodes that completed successfully at that superstep, so that whenever we resume graph execution from that superstep we don't re-run the successful nodes.
+추가로, 그래프 노드가 실행 도중 실패하면 LangGraph는 해당 슈퍼 단계에서 완료된 다른 노드들의 보류 중인 체크포인트 쓰기를 저장합니다. 그래프 실행이 재개될 때 성공적인 노드는 다시 실행되지 않도록 합니다.

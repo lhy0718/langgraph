@@ -1,23 +1,23 @@
-# LangGraph Platform Architecture
+# LangGraph 플랫폼 아키텍처
 
 ![](img/langgraph_platform_deployment_architecture.png)
 
-## How we use Postgres
+## Postgres 사용 방법
 
-Postgres is the persistence layer for all user and run data in LGP. This stores both checkpoints (see more info [here](./persistence.md)) as well as the server resources (threads, runs, assistants and crons).
+Postgres는 LGP에서 모든 사용자 및 실행 데이터를 저장하는 영속성 계층입니다. 이는 체크포인트(자세한 내용은 [여기](./persistence.md)에서 확인)와 서버 리소스(스레드, 실행, 어시스턴트, 크론 작업)를 모두 저장합니다.
 
-## How we use Redis
+## Redis 사용 방법
 
-Redis is used in each LGP deployment as a way for server and queue workers to communicate, and to store ephemeral metadata, more details on both below. No user/run data is stored in Redis.
+Redis는 각 LGP 배포에서 서버와 큐 워커 간의 통신을 위한 방법으로 사용되며, 덧붙여서 임시 메타데이터를 저장합니다. 아래에서 자세한 내용을 확인할 수 있습니다. Redis에는 사용자/실행 데이터가 저장되지 않습니다.
 
-### Communication
+### 통신
 
-All runs in LGP are executed by the pool of background workers that are part of each deployment. In order to enable some features for those runs (such as cancellation and output streaming) we need a channel for two-way communication between the server and the worker handling a particular run. We use Redis to organize that communication.
+LGP에서 모든 실행은 각 배포에 포함된 백그라운드 워커 풀에 의해 실행됩니다. 이러한 실행에서 일부 기능(예: 취소 및 출력 스트리밍)을 활성화하려면 서버와 특정 실행을 처리하는 워커 간의 양방향 통신 채널이 필요합니다. 이를 위해 Redis를 사용하여 통신을 조직합니다.
 
-1. A Redis list is used as a mechanism to wake up a worker as soon as a new run is created. Only a sentinel value is stored in this list, no actual run info. The run information is then retrieved from Postgres by the worker.
-2. A combination of a Redis string and Redis PubSub channel is used for the server to communicate a run cancellation request to the appropriate worker.
-3. A Redis PubSub channel is used by the worker to broadcast streaming output from an agent while the run is being handled. Any open `/stream` request in the server will subscribe to that channel and forward any events to the response as they arrive. No events are stored in Redis at any time.
+1. Redis 목록은 새 실행이 생성될 때 워커를 깨우는 메커니즘으로 사용됩니다. 이 목록에 저장되는 것은 실제 실행 정보가 아니라 감시 값만입니다. 실행 정보는 워커가 Postgres에서 가져옵니다.
+2. Redis 문자열과 Redis PubSub 채널의 조합은 서버가 실행 취소 요청을 적절한 워커로 전달할 때 사용됩니다.
+3. Redis PubSub 채널은 워커가 실행을 처리하는 동안 에이전트의 스트리밍 출력을 방송하는 데 사용됩니다. 서버의 모든 열린 `/stream` 요청은 이 채널에 구독하고, 이벤트가 도착하면 이를 응답으로 전달합니다. Redis에서는 이벤트가 저장되지 않습니다.
 
-### Ephemeral metadata
+### 임시 메타데이터
 
-Runs in an LGP deployment may be retried for specific failures (currently only for transient Postgres errors encountered during the run). In order to limit the number of retries (currently limited to 3 attempts per run) we record the attempt number in a Redis string when is picked up. This contains no run-specific info other than its ID, and expires after a short delay.
+LGP 배포에서는 특정 실패에 대해 실행을 재시도할 수 있습니다(현재는 실행 중에 발생한 일시적인 Postgres 오류에 대해서만 재시도합니다). 재시도 횟수를 제한하기 위해(현재는 실행당 3회로 제한) Redis 문자열에 실행이 시작될 때 시도 횟수를 기록합니다. 이 문자열은 실행 ID 외에 실행 특정 정보는 포함하지 않으며 짧은 시간 후 만료됩니다.

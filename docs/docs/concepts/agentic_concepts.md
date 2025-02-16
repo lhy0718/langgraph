@@ -1,126 +1,126 @@
-# Agent architectures
+# 에이전트 아키텍처
 
-Many LLM applications implement a particular control flow of steps before and / or after LLM calls. As an example, [RAG](https://github.com/langchain-ai/rag-from-scratch) performs retrieval of documents relevant to a user question, and passes those documents to an LLM in order to ground the model's response in the provided document context. 
+많은 LLM 애플리케이션은 LLM 호출 전후에 특정 제어 흐름을 구현합니다. 예를 들어, [RAG](https://github.com/langchain-ai/rag-from-scratch)는 사용자 질문에 관련된 문서를 검색하고, 그 문서를 LLM에 전달하여 모델의 응답을 제공된 문서 맥락에 맞추는 방식으로 동작합니다.
 
-Instead of hard-coding a fixed control flow, we sometimes want LLM systems that can pick their own control flow to solve more complex problems! This is one definition of an [agent](https://blog.langchain.dev/what-is-an-agent/): *an agent is a system that uses an LLM to decide the control flow of an application.* There are many ways that an LLM can control application:
+고정된 제어 흐름을 하드코딩하는 대신, 때때로 더 복잡한 문제를 해결할 수 있도록 제어 흐름을 스스로 선택할 수 있는 LLM 시스템을 원할 수 있습니다! 이것이 바로 [에이전트](https://blog.langchain.dev/what-is-an-agent/)의 정의 중 하나입니다: *에이전트는 애플리케이션의 제어 흐름을 결정하기 위해 LLM을 사용하는 시스템입니다.* LLM은 애플리케이션을 제어할 수 있는 여러 가지 방법이 있습니다:
 
-- An LLM can route between two potential paths
-- An LLM can decide which of many tools to call
-- An LLM can decide whether the generated answer is sufficient or more work is needed
+- LLM은 두 개의 잠재적 경로 중 하나를 선택할 수 있습니다.
+- LLM은 여러 도구 중에서 어느 도구를 호출할지 결정할 수 있습니다.
+- LLM은 생성된 답변이 충분한지 아니면 추가 작업이 필요한지를 결정할 수 있습니다.
 
-As a result, there are many different types of [agent architectures](https://blog.langchain.dev/what-is-a-cognitive-architecture/), which give an LLM varying levels of control. 
+결과적으로, LLM이 제어할 수 있는 다양한 수준의 [에이전트 아키텍처](https://blog.langchain.dev/what-is-a-cognitive-architecture/)가 존재합니다.
 
-![Agent Types](img/agent_types.png)
+![에이전트 유형](img/agent_types.png)
 
-## Router
+## 라우터
 
-A router allows an LLM to select a single step from a specified set of options. This is an agent architecture that exhibits a relatively limited level of control because the LLM usually focuses on making a single decision and produces a specific output from limited set of pre-defined options. Routers typically employ a few different concepts to achieve this.
+라우터는 LLM이 지정된 옵션 집합에서 단일 단계를 선택할 수 있게 합니다. 이는 LLM이 하나의 결정을 내리고 미리 정의된 제한된 옵션 집합에서 특정 출력을 생성하는 비교적 제한된 수준의 제어를 나타내는 에이전트 아키텍처입니다. 라우터는 일반적으로 이를 달성하기 위해 몇 가지 개념을 사용합니다.
 
-### Structured Output
+### 구조화된 출력
 
-Structured outputs with LLMs work by providing a specific format or schema that the LLM should follow in its response. This is similar to tool calling, but more general. While tool calling typically involves selecting and using predefined functions, structured outputs can be used for any type of formatted response. Common methods to achieve structured outputs include:
+LLM과의 구조화된 출력은 LLM이 응답에서 따라야 할 특정 형식이나 스키마를 제공함으로써 작동합니다. 이는 도구 호출과 비슷하지만 더 일반적입니다. 도구 호출은 일반적으로 미리 정의된 함수를 선택하고 사용하는 것과 관련이 있지만, 구조화된 출력은 어떤 형식의 응답에도 사용할 수 있습니다. 구조화된 출력을 달성하는 일반적인 방법은 다음과 같습니다:
 
-1. Prompt engineering: Instructing the LLM to respond in a specific format via the system prompt.
-2. Output parsers: Using post-processing to extract structured data from LLM responses.
-3. Tool calling: Leveraging built-in tool calling capabilities of some LLMs to generate structured outputs.
+1. **프롬프트 엔지니어링**: 시스템 프롬프트를 통해 LLM에게 특정 형식으로 응답하라고 지시합니다.
+2. **출력 파서**: 후처리를 사용하여 LLM 응답에서 구조화된 데이터를 추출합니다.
+3. **도구 호출**: 일부 LLM의 내장 도구 호출 기능을 활용하여 구조화된 출력을 생성합니다.
 
-Structured outputs are crucial for routing as they ensure the LLM's decision can be reliably interpreted and acted upon by the system. Learn more about [structured outputs in this how-to guide](https://python.langchain.com/docs/how_to/structured_output/).
+구조화된 출력은 라우팅에서 중요한 역할을 합니다. 이는 LLM의 결정을 시스템에서 신뢰할 수 있게 해석하고 실행할 수 있도록 보장합니다. [이 가이드](https://python.langchain.com/docs/how_to/structured_output/)에서 구조화된 출력에 대해 더 알아보세요.
 
-## Tool calling agent
+## 도구 호출 에이전트
 
-While a router allows an LLM to make a single decision, more complex agent architectures expand the LLM's control in two key ways:
+라우터는 LLM이 하나의 결정을 내리게 하지만, 더 복잡한 에이전트 아키텍처는 LLM의 제어 범위를 두 가지 주요 방식으로 확장합니다:
 
-1. Multi-step decision making: The LLM can make a series of decisions, one after another, instead of just one.
-2. Tool access: The LLM can choose from and use a variety of tools to accomplish tasks.
+1. **다단계 의사결정**: LLM은 단 하나의 결정이 아니라, 연속된 여러 결정을 내릴 수 있습니다.
+2. **도구 접근**: LLM은 다양한 도구를 선택하고 이를 사용하여 작업을 수행할 수 있습니다.
 
-[ReAct](https://arxiv.org/abs/2210.03629) is a popular general purpose agent architecture that combines these expansions, integrating three core concepts. 
+[ReAct](https://arxiv.org/abs/2210.03629)는 이러한 확장을 결합한 인기 있는 일반 목적의 에이전트 아키텍처로, 세 가지 핵심 개념을 통합합니다:
 
-1. `Tool calling`: Allowing the LLM to select and use various tools as needed.
-2. `Memory`: Enabling the agent to retain and use information from previous steps.
-3. `Planning`: Empowering the LLM to create and follow multi-step plans to achieve goals.
+1. `도구 호출`: LLM이 필요한 도구를 선택하고 사용할 수 있게 합니다.
+2. `메모리`: 에이전트가 이전 단계의 정보를 기억하고 이를 사용할 수 있게 합니다.
+3. `계획`: LLM이 목표를 달성하기 위해 다단계 계획을 수립하고 실행할 수 있게 합니다.
 
-This architecture allows for more complex and flexible agent behaviors, going beyond simple routing to enable dynamic problem-solving with multiple steps. You can use it with [`create_react_agent`][langgraph.prebuilt.chat_agent_executor.create_react_agent].
+이 아키텍처는 단순한 라우팅을 넘어서는 복잡하고 유연한 에이전트 행동을 가능하게 하며, 여러 단계를 거쳐 동적 문제 해결을 구현합니다. 이를 [`create_react_agent`](../how-tos/create-react-agent.ipynb) 와 함께 사용할 수 있습니다.
 
-### Tool calling
+### 도구 호출
 
-Tools are useful whenever you want an agent to interact with external systems. External systems (e.g., APIs) often require a particular input schema or payload, rather than natural language. When we bind an API, for example, as a tool, we give the model awareness of the required input schema. The model will choose to call a tool based upon the natural language input from the user and it will return an output that adheres to the tool's required schema. 
+도구는 에이전트가 외부 시스템과 상호작용해야 할 때 유용합니다. 외부 시스템(예: API)은 종종 자연어가 아닌 특정 입력 스키마나 페이로드를 요구합니다. 예를 들어 API를 도구로 바인딩할 때, 우리는 모델에게 필요한 입력 스키마를 인식시키게 됩니다. 모델은 사용자로부터 자연어 입력을 받으면, 그에 맞는 도구를 호출하고 도구가 요구하는 형식에 맞는 출력을 반환합니다.
 
-[Many LLM providers support tool calling](https://python.langchain.com/docs/integrations/chat/) and [tool calling interface](https://blog.langchain.dev/improving-core-tool-interfaces-and-docs-in-langchain/) in LangChain is simple: you can simply pass any Python `function` into `ChatModel.bind_tools(function)`.
+[많은 LLM 제공업체는 도구 호출을 지원합니다](https://python.langchain.com/docs/integrations/chat/)와 [LangChain의 도구 호출 인터페이스](https://blog.langchain.dev/improving-core-tool-interfaces-and-docs-in-langchain/)는 간단합니다: Python `function`을 `ChatModel.bind_tools(function)`에 전달하기만 하면 됩니다.
 
-![Tools](img/tool_call.png)
+![도구 호출](img/tool_call.png)
 
-### Memory
+### 메모리
 
-Memory is crucial for agents, enabling them to retain and utilize information across multiple steps of problem-solving. It operates on different scales:
+메모리는 에이전트에게 매우 중요하며, 여러 단계에 걸친 문제 해결 과정에서 정보를 유지하고 활용할 수 있게 해줍니다. 메모리는 다양한 규모로 운영됩니다:
 
-1. Short-term memory: Allows the agent to access information acquired during earlier steps in a sequence.
-2. Long-term memory: Enables the agent to recall information from previous interactions, such as past messages in a conversation.
+1. **단기 메모리**: 에이전트가 순차적인 이전 단계에서 획득한 정보를 접근할 수 있게 합니다.
+2. **장기 메모리**: 에이전트가 이전 상호작용에서 정보를 기억하고, 예를 들어 대화 중의 과거 메시지를 기억할 수 있습니다.
 
-LangGraph provides full control over memory implementation:
+LangGraph는 메모리 구현에 대한 완전한 제어를 제공합니다:
 
-- [`State`](./low_level.md#state): User-defined schema specifying the exact structure of memory to retain.
-- [`Checkpointers`](./persistence.md): Mechanism to store state at every step across different interactions.
+- [`State`](./low_level.md#state): 메모리가 유지할 정확한 구조를 지정하는 사용자 정의 스키마입니다.
+- [`체크포인트`](./persistence.md): 다양한 상호작용을 통해 상태를 저장하는 메커니즘입니다.
 
-This flexible approach allows you to tailor the memory system to your specific agent architecture needs. For a practical guide on adding memory to your graph, see [this tutorial](../how-tos/persistence.ipynb).
+이 유연한 접근 방식은 특정 에이전트 아키텍처의 요구에 맞게 메모리 시스템을 조정할 수 있게 해줍니다. 그래프에 메모리를 추가하는 실용적인 가이드는 [이 튜토리얼](../how-tos/persistence.ipynb)에서 확인하세요.
 
-Effective memory management enhances an agent's ability to maintain context, learn from past experiences, and make more informed decisions over time.
+효과적인 메모리 관리는 에이전트가 맥락을 유지하고, 과거 경험에서 학습하며, 시간이 지남에 따라 더 정보에 기반한 결정을 내리게 합니다.
 
-### Planning
+### 계획
 
-In the ReAct architecture, an LLM is called repeatedly in a while-loop. At each step the agent decides which tools to call, and what the inputs to those tools should be. Those tools are then executed, and the outputs are fed back into the LLM as observations. The while-loop terminates when the agent decides it has enough information to solve the user request and it is not worth calling any more tools.
+ReAct 아키텍처에서는 LLM이 반복적으로 호출됩니다. 각 단계에서 에이전트는 어떤 도구를 호출할지, 그 도구의 입력이 무엇이어야 할지를 결정합니다. 그런 다음 해당 도구가 실행되고 출력은 LLM으로 피드백되어 관찰로 처리됩니다. while 루프는 에이전트가 사용자 요청을 해결하기 위해 충분한 정보를 얻었다고 판단하면 종료됩니다.
 
-### ReAct implementation 
+### ReAct 구현
 
-There are several differences between [this](https://arxiv.org/abs/2210.03629) paper and the pre-built [`create_react_agent`][langgraph.prebuilt.chat_agent_executor.create_react_agent] implementation:
+[이](https://arxiv.org/abs/2210.03629) 논문과 미리 구축된 [`create_react_agent`](langgraph.prebuilt.chat_agent_executor.create_react_agent) 구현 사이에는 몇 가지 차이점이 있습니다:
 
-- First, we use [tool-calling](#tool-calling) to have LLMs call tools, whereas the paper used prompting + parsing of raw output. This is because tool calling did not exist when the paper was written, but is generally better and more reliable.
-- Second, we use messages to prompt the LLM, whereas the paper used string formatting. This is because at the time of writing, LLMs didn't even expose a message-based interface, whereas now that's the only interface they expose.
-- Third, the paper required all inputs to the tools to be a single string. This was largely due to LLMs not being super capable at the time, and only really being able to generate a single input. Our implementation allows for using tools that require multiple inputs.
-- Fourth, the paper only looks at calling a single tool at the time, largely due to limitations in LLMs performance at the time. Our implementation allows for calling multiple tools at a time.
-- Finally, the paper asked the LLM to explicitly generate a "Thought" step before deciding which tools to call. This is the "Reasoning" part of "ReAct". Our implementation does not do this by default, largely because LLMs have gotten much better and that is not as necessary. Of course, if you wish to prompt it do so, you certainly can.
+- 첫째, 우리는 [도구 호출](#도구-호출)을 사용하여 LLM이 도구를 호출하게 했습니다. 논문에서는 프롬프트 + 원시 출력 파싱을 사용했으나, 도구 호출은 그 당시 존재하지 않았으며 일반적으로 더 낫고 신뢰할 수 있습니다.
+- 둘째, 우리는 LLM을 프롬프트하기 위해 메시지를 사용했습니다. 논문에서는 문자열 포매팅을 사용했으나, 그 당시에는 LLM이 메시지 기반 인터페이스를 제공하지 않았고, 지금은 그것이 유일한 인터페이스입니다.
+- 셋째, 논문에서는 도구의 모든 입력이 하나의 문자열이어야 한다고 요구했습니다. 이는 LLM의 성능이 제한적이었기 때문입니다. 우리의 구현은 여러 입력을 필요로 하는 도구도 사용할 수 있게 해줍니다.
+- 넷째, 논문은 한 번에 하나의 도구만 호출하는 방식을 사용했습니다. 우리의 구현은 여러 도구를 동시에 호출할 수 있습니다.
+- 마지막으로, 논문에서는 LLM이 도구를 호출하기 전에 "사고" 단계를 명시적으로 생성해야 한다고 했습니다. 이는 "ReAct"의 "Reasoning" 부분입니다. 우리의 구현에서는 기본적으로 이를 수행하지 않지만, 원하면 이를 하도록 프롬프트할 수 있습니다.
 
-## Custom agent architectures
+## 맞춤형 에이전트 아키텍처
 
-While routers and tool-calling agents (like ReAct) are common, [customizing agent architectures](https://blog.langchain.dev/why-you-should-outsource-your-agentic-infrastructure-but-own-your-cognitive-architecture/) often leads to better performance for specific tasks. LangGraph offers several powerful features for building tailored agent systems:
+라우터 및 도구 호출 에이전트(ReAct와 같은)는 일반적이지만, [맞춤형 에이전트 아키텍처](https://blog.langchain.dev/why-you-should-outsource-your-agentic-infrastructure-but-own-your-cognitive-architecture/)를 구성하는 것이 특정 작업에 대해 더 나은 성능을 제공할 수 있습니다. LangGraph는 맞춤형 에이전트 시스템 구축을 위한 몇 가지 강력한 기능을 제공합니다:
 
-### Human-in-the-loop
+### 인간-인-더-루프
 
-Human involvement can significantly enhance agent reliability, especially for sensitive tasks. This can involve:
+인간의 참여는 에이전트의 신뢰성을 크게 향상시킬 수 있습니다, 특히 민감한 작업에서 그렇습니다. 이는 다음을 포함할 수 있습니다:
 
-- Approving specific actions
-- Providing feedback to update the agent's state
-- Offering guidance in complex decision-making processes
+- 특정 작업 승인
+- 에이전트 상태 업데이트를 위한 피드백 제공
+- 복잡한 의사결정 과정에서의 안내 제공
 
-Human-in-the-loop patterns are crucial when full automation isn't feasible or desirable. Learn more in our [human-in-the-loop guide](./human_in_the_loop.md).
+전체 자동화가 불가능하거나 바람직하지 않은 경우, 인간-인-더-루프 패턴은 매우 중요합니다. [인간-인-더-루프 가이드](./human_in_the_loop.md)에서 더 알아보세요.
 
-### Parallelization 
+### 병렬 처리
 
-Parallel processing is vital for efficient multi-agent systems and complex tasks. LangGraph supports parallelization through its [Send](./low_level.md#send) API, enabling:
+병렬 처리는 효율적인 다중 에이전트 시스템과 복잡한 작업에 매우 중요합니다. LangGraph는 [Send](./low_level.md#send) API를 통해 병렬 처리를 지원하며:
 
-- Concurrent processing of multiple states
-- Implementation of map-reduce-like operations
-- Efficient handling of independent subtasks
+- 여러 상태를 동시에 처리
+- 맵-리듀스와 같은 작업 구현
+- 독립적인 하위 작업의 효율적인 처리
 
-For practical implementation, see our [map-reduce tutorial](../how-tos/map-reduce.ipynb).
+실용적인 구현 예시는 [맵-리듀스 튜토리얼](../how-tos/map-reduce.ipynb)에서 확인할 수 있습니다.
 
-### Subgraphs
+### 서브그래프
 
-[Subgraphs](./low_level.md#subgraphs) are essential for managing complex agent architectures, particularly in [multi-agent systems](./multi_agent.md). They allow:
+[서브그래프](./low_level.md#subgraphs)는 복잡한 에이전트 아키텍처를 관리하는 데 필수적입니다, 특히 [다중 에이전트 시스템](./multi_agent.md)에서 그렇습니다. 이를 통해:
 
-- Isolated state management for individual agents
-- Hierarchical organization of agent teams
-- Controlled communication between agents and the main system
+- 개별 에이전트의 상태 관리
+- 에이전트 팀의 계층적 조직
+- 에이전트와 주요 시스템 간의 통신 제어
 
-Subgraphs communicate with the parent graph through overlapping keys in the state schema. This enables flexible, modular agent design. For implementation details, refer to our [subgraph how-to guide](../how-tos/subgraph.ipynb).
+서브그래프는 상태 스키마에서 겹치는 키를 통해 부모 그래프와 통신합니다. 이를 통해 유연하고 모듈화된 에이전트 설계를 할 수 있습니다. 구현 세부 사항은 [서브그래프 가이드](../how-tos/subgraph.ipynb)에서 확인하세요.
 
-### Reflection
+### 반성
 
-Reflection mechanisms can significantly improve agent reliability by:
+반성 메커니즘은 에이전트의 신뢰성을 크게 향상시킬 수 있습니다:
 
-1. Evaluating task completion and correctness
-2. Providing feedback for iterative improvement
-3. Enabling self-correction and learning
+1. 작업 완료 및 정확성 평가
+2. 반복적인 개선을 위한 피드백 제공
+3. 자기 수정 및 학습 가능
 
-While often LLM-based, reflection can also use deterministic methods. For instance, in coding tasks, compilation errors can serve as feedback. This approach is demonstrated in [this video using LangGraph for self-corrective code generation](https://www.youtube.com/watch?v=MvNdgmM7uyc).
+반성은 종종 LLM 기반으로 이루어지지만, 결정론적인 방법을 사용할 수도 있습니다. 예를 들어, 코딩 작업에서 컴파일 오류가 피드백으로 작용할 수 있습니다. 이 접근법은 [이 비디오](https://www.youtube.com/watch?v=MvNdgmM7uyc)에서 LangGraph를 사용한 자기 수정 코드 생성 예시를 통해 보여줍니다.
 
-By leveraging these features, LangGraph enables the creation of sophisticated, task-specific agent architectures that can handle complex workflows, collaborate effectively, and continuously improve their performance.
+이러한 기능을 활용하면 LangGraph는 복잡한 워크플로우를 처리하고, 효과적으로 협업하며, 지속적으로 성능을 개선할 수 있는 정교한 맞춤형 에이전트 아키텍처를 생성할 수 있습니다.

@@ -1,37 +1,37 @@
-# LangGraph Platform
+# LangGraph 플랫폼
 
-## Overview
+## 개요
 
-LangGraph Platform is a commercial solution for deploying agentic applications to production, built on the open-source [LangGraph framework](./high_level.md).
+LangGraph 플랫폼은 오픈 소스 [LangGraph 프레임워크](./high_level.md)를 기반으로 한 에이전트 애플리케이션을 프로덕션에 배포하기 위한 상업적 솔루션입니다.
 
-The LangGraph Platform consists of several components that work together to support the development, deployment, debugging, and monitoring of LangGraph applications:
+LangGraph 플랫폼은 LangGraph 애플리케이션의 개발, 배포, 디버깅 및 모니터링을 지원하기 위해 함께 작동하는 여러 구성 요소로 구성됩니다:
 
-- [LangGraph Server](./langgraph_server.md): The server defines an opinionated API and architecture that incorporates best practices for deploying agentic applications, allowing you to focus on building your agent logic rather than developing server infrastructure.
-- [LangGraph Studio](./langgraph_studio.md): LangGraph Studio is a specialized IDE that can connect to a LangGraph Server to enable visualization, interaction, and debugging of the application locally.
-- [LangGraph CLI](./langgraph_cli.md): LangGraph CLI is a command-line interface that helps to interact with a local LangGraph
-- [Python/JS SDK](./sdk.md): The Python/JS SDK provides a programmatic way to interact with deployed LangGraph Applications.
-- [Remote Graph](../how-tos/use-remote-graph.md): A RemoteGraph allows you to interact with any deployed LangGraph application as though it were running locally.
+- [LangGraph 서버](./langgraph_server.md): 서버는 에이전트 애플리케이션 배포를 위한 모범 사례를 통합하는 의견이 있는 API 및 아키텍처를 정의하여 서버 인프라 개발보다 에이전트 로직 구축에 집중할 수 있도록 합니다.
+- [LangGraph 스튜디오](./langgraph_studio.md): LangGraph 스튜디오는 로컬에서 애플리케이션의 시각화, 상호작용 및 디버깅을 가능하게 하는 LangGraph 서버에 연결할 수 있는 전문 IDE입니다.
+- [LangGraph CLI](./langgraph_cli.md): LangGraph CLI는 로컬 LangGraph와 상호작용하는 데 도움이 되는 명령줄 인터페이스입니다.
+- [Python/JS SDK](./sdk.md): Python/JS SDK는 배포된 LangGraph 애플리케이션과 상호작용하는 프로그래밍 방식의 방법을 제공합니다.
+- [원격 그래프](../how-tos/use-remote-graph.md): 원격 그래프를 사용하면 배포된 LangGraph 애플리케이션과 로컬에서 실행되는 것처럼 상호작용할 수 있습니다.
 
 ![](img/lg_platform.png)
 
-The LangGraph Platform offers a few different deployment options described in the [deployment options guide](./deployment_options.md).
+LangGraph 플랫폼은 [배포 옵션 가이드](./deployment_options.md)에서 설명된 여러 가지 배포 옵션을 제공합니다.
 
-## Why Use LangGraph Platform?
+## LangGraph 플랫폼을 사용하는 이유는 무엇인가요?
 
-**LangGraph Platform** handles common issues that arise when deploying LLM applications to production, allowing you to focus on agent logic instead of managing server infrastructure.
+**LangGraph 플랫폼**은 LLM 애플리케이션을 프로덕션에 배포할 때 발생하는 일반적인 문제를 처리하여, 서버 인프라 관리보다는 에이전트 로직에 집중할 수 있습니다.
 
-- **[Streaming Support](streaming.md)**: As agents grow more sophisticated, they often benefit from streaming both token outputs and intermediate states back to the user. Without this, users are left waiting for potentially long operations with no feedback. LangGraph Server provides [multiple streaming modes](streaming.md) optimized for various application needs.
+- **[스트리밍 지원](streaming.md)**: 에이전트가 더 정교해짐에 따라, 종종 사용자에게 토큰 출력 및 중간 상태를 스트리밍하는 혜택을 받습니다. 이를 통해 사용자는 피드백 없이 장시간 기다리는 상황을 피할 수 있습니다. LangGraph 서버는 다양한 애플리케이션 요구에 맞게 최적화된 [다수의 스트리밍 모드](streaming.md)를 제공합니다.
 
-- **Background Runs**: For agents that take longer to process (e.g., hours), maintaining an open connection can be impractical. The LangGraph Server supports launching agent runs in the background and provides both polling endpoints and webhooks to monitor run status effectively.
- 
-- **Support for long runs**: Vanilla server setups often encounter timeouts or disruptions when handling requests that take a long time to complete. LangGraph Server’s API provides robust support for these tasks by sending regular heartbeat signals, preventing unexpected connection closures during prolonged processes.
+- **백그라운드 실행**: 처리 시간이 오래 걸리는 에이전트(예: 수 시간)는 열린 연결을 유지하는 것이 비실용적일 수 있습니다. LangGraph 서버는 에이전트 실행을 백그라운드에서 시작하는 것을 지원하며, 효과적으로 실행 상태를 모니터링하기 위한 폴링 엔드포인트와 웹훅을 제공합니다.
 
-- **Handling Burstiness**: Certain applications, especially those with real-time user interaction, may experience "bursty" request loads where numerous requests hit the server simultaneously. LangGraph Server includes a task queue, ensuring requests are handled consistently without loss, even under heavy loads.
+- **장기 실행 지원**: 일반적인 서버 설정은 완료하는 데 오랜 시간이 걸리는 요청을 처리할 때 타임아웃이나 중단을 겪는 경우가 많습니다. LangGraph 서버의 API는 정기적인 하트비트 신호를 전송하여 장기간 프로세스 중 예기치 않은 연결 종료를 방지함으로써 이러한 작업에 대한 강력한 지원을 제공합니다.
 
-- **[Double Texting](double_texting.md)**: In user-driven applications, it’s common for users to send multiple messages rapidly. This “double texting” can disrupt agent flows if not handled properly. LangGraph Server offers built-in strategies to address and manage such interactions.
+- **폭주 처리**: 실시간 사용자 상호작용이 있는 특정 애플리케이션은 수많은 요청이 동시에 서버에 몰리는 "폭주" 요청 부하를 경험할 수 있습니다. LangGraph 서버는 작업 큐를 포함하여, 요청이 하중이 많은 상황에서도 일관되게 처리되도록 하고 손실이 없도록 합니다.
 
-- **[Checkpointers and Memory Management](persistence.md#checkpoints)**: For agents needing persistence (e.g., conversation memory), deploying a robust storage solution can be complex. LangGraph Platform includes optimized [checkpointers](persistence.md#checkpoints) and a [memory store](persistence.md#memory-store), managing state across sessions without the need for custom solutions.
+- **[이중 텍스트 입력](double_texting.md)**: 사용자 중심 애플리케이션에서는 사용자가 메시지를 빠르게 여러 개 보내는 것이 일반적입니다. 이러한 “이중 텍스트 입력”은 적절히 처리되지 않으면 에이전트 흐름을 방해할 수 있습니다. LangGraph 서버는 이러한 상호작용을 처리하고 관리하기 위한 내장 전략을 제공합니다.
 
-- **[Human-in-the-loop Support](human_in_the_loop.md)**: In many applications, users require a way to intervene in agent processes. LangGraph Server provides specialized endpoints for human-in-the-loop scenarios, simplifying the integration of manual oversight into agent workflows.
+- **[체크포인터 및 메모리 관리](persistence.md#checkpoints)**: 지속성이 필요한 에이전트(예: 대화 메모리)의 경우, 강력한 저장 솔루션을 배포하는 것은 복잡할 수 있습니다. LangGraph 플랫폼은 최적화된 [체크포인터](persistence.md#checkpoints) 및 [메모리 저장소](persistence.md#memory-store)를 포함하여, 사용자 정의 솔루션 없이 세션 간 상태를 관리합니다.
 
-By using LangGraph Platform, you gain access to a robust, scalable deployment solution that mitigates these challenges, saving you the effort of implementing and maintaining them manually. This allows you to focus more on building effective agent behavior and less on solving deployment infrastructure issues.
+- **[인간 참여 지원](human_in_the_loop.md)**: 많은 애플리케이션에서 사용자가 에이전트 프로세스에 개입할 수 있는 방법이 필요합니다. LangGraph 서버는 수동적인 감시를 에이전트 워크플로우에 통합하는 것을 단순화하는 인간 참여 시나리오를 위한 전문 엔드포인트를 제공합니다.
+
+LangGraph 플랫폼을 사용하면 이러한 문제를 완화하는 강력하고 확장 가능한 배포 솔루션에 접근할 수 있어, 수동으로 이를 구현하고 유지 관리하는 노력을 절약할 수 있습니다. 이를 통해 효과적인 에이전트 행동 구축에 더 집중하고 배포 인프라 문제 해결에 대한 부담을 덜 수 있습니다.

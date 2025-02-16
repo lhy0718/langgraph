@@ -1,87 +1,88 @@
-# Multi-agent Systems
+# 멀티 에이전트 시스템
 
-An [agent](./agentic_concepts.md#agent-architectures) is _a system that uses an LLM to decide the control flow of an application_. As you develop these systems, they might grow more complex over time, making them harder to manage and scale. For example, you might run into the following problems:
+[에이전트](./agentic_concepts.md#agent-architectures)는 *애플리케이션의 제어 흐름을 결정하기 위해 LLM을 사용하는 시스템*입니다. 이러한 시스템을 개발하다 보면 시간이 지남에 따라 복잡해져 관리와 확장이 어려워질 수 있습니다. 예를 들어, 다음과 같은 문제에 직면할 수 있습니다:
 
-- agent has too many tools at its disposal and makes poor decisions about which tool to call next
-- context grows too complex for a single agent to keep track of
-- there is a need for multiple specialization areas in the system (e.g. planner, researcher, math expert, etc.)
+- 에이전트가 사용할 수 있는 도구가 너무 많아 어떤 도구를 호출할지 결정하는 데 문제가 발생
+- 하나의 에이전트가 모든 컨텍스트를 추적하기에 복잡도가 너무 높음
+- 시스템에 여러 가지 전문 분야(예: 계획자, 연구자, 수학 전문가 등)가 필요함
 
-To tackle these, you might consider breaking your application into multiple smaller, independent agents and composing them into a **multi-agent system**. These independent agents can be as simple as a prompt and an LLM call, or as complex as a [ReAct](./agentic_concepts.md#react-implementation) agent (and more!).
+이를 해결하기 위해 애플리케이션을 여러 개의 독립적인 에이전트로 나누고 이를 **멀티 에이전트 시스템**으로 구성하는 것을 고려할 수 있습니다. 이러한 독립적인 에이전트는 간단한 프롬프트와 LLM 호출일 수도 있고, 복잡한 [ReAct](./agentic_concepts.md#react-implementation) 에이전트일 수도 있습니다(그리고 더 많은 형태가 있습니다!).
 
-The primary benefits of using multi-agent systems are:
+멀티 에이전트 시스템을 사용하는 주요 이점은 다음과 같습니다:
 
-- **Modularity**: Separate agents make it easier to develop, test, and maintain agentic systems.
-- **Specialization**: You can create expert agents focused on specific domains, which helps with the overall system performance.
-- **Control**: You can explicitly control how agents communicate (as opposed to relying on function calling).
+- **모듈화**: 독립적인 에이전트는 에이전트 시스템을 개발, 테스트 및 유지 관리하는 데 더 용이합니다.
+- **전문화**: 특정 도메인에 집중하는 전문가 에이전트를 만들어 시스템의 전체 성능을 개선할 수 있습니다.
+- **제어**: 에이전트 간의 통신 방법을 명확히 제어할 수 있습니다(함수 호출에 의존하는 대신).
 
-## Multi-agent architectures
+## 멀티 에이전트 아키텍처
 
 ![](./img/multi_agent/architectures.png)
 
-There are several ways to connect agents in a multi-agent system:
+멀티 에이전트 시스템에서 에이전트를 연결하는 몇 가지 방법이 있습니다:
 
-- **Network**: each agent can communicate with [every other agent](https://langchain-ai.github.io/langgraph/tutorials/multi_agent/multi-agent-collaboration/). Any agent can decide which other agent to call next.
-- **Supervisor**: each agent communicates with a single [supervisor](https://langchain-ai.github.io/langgraph/tutorials/multi_agent/agent_supervisor/) agent. Supervisor agent makes decisions on which agent should be called next.
-- **Supervisor (tool-calling)**: this is a special case of supervisor architecture. Individual agents can be represented as tools. In this case, a supervisor agent uses a tool-calling LLM to decide which of the agent tools to call, as well as the arguments to pass to those agents.
-- **Hierarchical**: you can define a multi-agent system with [a supervisor of supervisors](https://langchain-ai.github.io/langgraph/tutorials/multi_agent/hierarchical_agent_teams/). This is a generalization of the supervisor architecture and allows for more complex control flows.
-- **Custom multi-agent workflow**: each agent communicates with only a subset of agents. Parts of the flow are deterministic, and only some agents can decide which other agents to call next.
+- **네트워크**: 각 에이전트는 [다른 모든 에이전트와](https://langchain-ai.github.io/langgraph/tutorials/multi_agent/multi-agent-collaboration/) 통신할 수 있습니다. 어떤 에이전트도 다른 에이전트를 호출할지 결정할 수 있습니다.
+- **감독자**: 각 에이전트는 하나의 [감독자](https://langchain-ai.github.io/langgraph/tutorials/multi_agent/agent_supervisor/) 에이전트와 통신합니다. 감독자 에이전트는 어떤 에이전트를 호출할지 결정합니다.
+- **감독자 (도구 호출)**: 이는 감독자 아키텍처의 특별한 경우입니다. 개별 에이전트는 도구로 나타낼 수 있습니다. 이 경우, 감독자 에이전트는 도구 호출 LLM을 사용하여 호출할 에이전트 도구를 결정하고 해당 에이전트에 전달할 인수를 결정합니다.
+- **계층형**: [감독자의 감독자](https://langchain-ai.github.io/langgraph/tutorials/multi_agent/hierarchical_agent_teams/)를 정의하여 멀티 에이전트 시스템을 구성할 수 있습니다. 이는 감독자 아키텍처의 일반화이며 더 복잡한 제어 흐름을 가능하게 합니다.
+- **사용자 정의 멀티 에이전트 워크플로**: 각 에이전트는 일부 에이전트 집합과만 통신합니다. 흐름의 일부는 결정적이며, 일부 에이전트만 다음에 호출할 다른 에이전트를 결정할 수 있습니다.
 
-### Handoffs
+### 핸드오프
 
-In multi-agent architectures, agents can be represented as graph nodes. Each agent node executes its step(s) and decides whether to finish execution or route to another agent, including potentially routing to itself (e.g., running in a loop). A common pattern in multi-agent interactions is handoffs, where one agent hands off control to another. Handoffs allow you to specify:
+멀티 에이전트 아키텍처에서 에이전트는 그래프 노드로 나타낼 수 있습니다. 각 에이전트 노드는 자신의 단계를 실행하고 실행을 마칠지 아니면 다른 에이전트로 제어를 넘길지 결정합니다. 에이전트가 제어를 다른 에이전트에게 넘기는 패턴을 **핸드오프**라고 합니다. 핸드오프를 사용하면 다음을 지정할 수 있습니다:
 
-- __destination__: target agent to navigate to (e.g., name of the node to go to)
-- __payload__: [information to pass to that agent](#communication-between-agents) (e.g., state update)
+- **목적지**: 이동할 대상 에이전트(예: 이동할 노드 이름)
+- **페이로드**: 해당 에이전트로 전달할 [정보](#communication-between-agents) (예: 상태 업데이트)
 
-To implement handoffs in LangGraph, agent nodes can return [`Command`](./low_level.md#command) object that allows you to combine both control flow and state updates:
+LangGraph에서 핸드오프를 구현하려면 에이전트 노드가 [`Command`](./low_level.md#command) 객체를 반환할 수 있습니다. 이 객체는 제어 흐름과 상태 업데이트를 결합할 수 있습니다:
 
 ```python
 def agent(state) -> Command[Literal["agent", "another_agent"]]:
-    # the condition for routing/halting can be anything, e.g. LLM tool call / structured output, etc.
+    # 라우팅/중지 조건은 무엇이든 될 수 있습니다. 예: LLM 도구 호출 / 구조화된 출력 등.
     goto = get_next_agent(...)  # 'agent' / 'another_agent'
     return Command(
-        # Specify which agent to call next
+        # 어떤 에이전트를 다음으로 호출할지 지정
         goto=goto,
-        # Update the graph state
+        # 그래프 상태 업데이트
         update={"my_state_key": "my_state_value"}
     )
 ```
 
-In a more complex scenario where each agent node is itself a graph (i.e., a [subgraph](./low_level.md#subgraphs)), a node in one of the agent subgraphs might want to navigate to a different agent. For example, if you have two agents, `alice` and `bob` (subgraph nodes in a parent graph), and `alice` needs to navigate to `bob`, you can set `graph=Command.PARENT` in the `Command` object:
+각 에이전트 노드가 자체 그래프(즉, [서브그래프](./low_level.md#subgraphs))일 때 더 복잡한 시나리오가 발생할 수 있습니다. 예를 들어, `alice`와 `bob`이라는 두 에이전트가 있고(`alice`와 `bob`이 부모 그래프의 서브그래프 노드일 경우), `alice`가 `bob`으로 이동해야 할 때 `Command` 객체에서 `graph=Command.PARENT`를 설정하여 이를 처리할 수 있습니다:
 
 ```python
 def some_node_inside_alice(state)
     return Command(
         goto="bob",
         update={"my_state_key": "my_state_value"},
-        # specify which graph to navigate to (defaults to the current graph)
+        # 이동할 그래프를 지정 (기본값은 현재 그래프)
         graph=Command.PARENT,
     )
 ```
 
-!!! note
-    If you need to support visualization for subgraphs communicating using `Command(graph=Command.PARENT)` you would need to wrap them in a node function with `Command` annotation, e.g. instead of this:
+!!! 주의
 
-    ```python
-    builder.add_node(alice)
-    ```
+    서브그래프가 `Command(graph=Command.PARENT)`를 사용하여 통신하는 시각화를 지원하려면 이를 `Command` 주석이 있는 노드 함수로 감싸야 합니다. 예를 들어, 다음과 같이 해야 합니다:
 
-    you would need to do this:
+```python
+builder.add_node(alice)
+```
 
-    ```python
-    def call_alice(state) -> Command[Literal["bob"]]:
-        return alice.invoke(state)
+    대신 다음과 같이 해야 합니다:
 
-    builder.add_node("alice", call_alice)
-    ```
+```python
+def call_alice(state) -> Command[Literal["bob"]]:
+    return alice.invoke(state)
 
-#### Handoffs as tools
+builder.add_node("alice", call_alice)
+```
 
-One of the most common agent types is a ReAct-style tool-calling agents. For those types of agents, a common pattern is wrapping a handoff in a tool call, e.g.:
+#### 핸드오프를 도구로 사용
+
+가장 일반적인 에이전트 유형 중 하나는 ReAct 스타일의 도구 호출 에이전트입니다. 이러한 유형의 에이전트에서 일반적인 패턴은 핸드오프를 도구 호출로 래핑하는 것입니다. 예를 들어:
 
 ```python
 def transfer_to_bob(state):
-    """Transfer to bob."""
+    """bob으로 전송."""
     return Command(
         goto="bob",
         update={"my_state_key": "my_state_value"},
@@ -89,25 +90,24 @@ def transfer_to_bob(state):
     )
 ```
 
-This is a special case of updating the graph state from tools where in addition the state update, the control flow is included as well.
+이는 도구에서 그래프 상태 업데이트와 제어 흐름을 포함하여 두 가지를 함께 처리하는 특별한 경우입니다.
 
-!!! important
+!!! 중요
 
-    If you want to use tools that return `Command`, you can either use prebuilt [`create_react_agent`][langgraph.prebuilt.chat_agent_executor.create_react_agent] / [`ToolNode`][langgraph.prebuilt.tool_node.ToolNode] components, or implement your own tool-executing node that collects `Command` objects returned by the tools and returns a list of them, e.g.:
-    
-    ```python
-    def call_tools(state):
-        ...
-        commands = [tools_by_name[tool_call["name"]].invoke(tool_call) for tool_call in tool_calls]
-        return commands
-    ```
+    `Command`를 반환하는 도구를 사용하려면 미리 구축된 [`create_react_agent`][langgraph.prebuilt.chat_agent_executor.create_react_agent] / [`ToolNode`][langgraph.prebuilt.tool_node.ToolNode] 컴포넌트를 사용하거나, 도구에서 반환된 `Command` 객체를 수집하여 이를 반환하는 자체 도구 실행 노드를 구현할 수 있습니다. 예를 들어:
 
-Let's now take a closer look at the different multi-agent architectures.
+```python
+def call_tools(state):
+    ...
+    commands = [tools_by_name[tool_call["name"]].invoke(tool_call) for tool_call in tool_calls]
+    return commands
+```
 
-### Network
+이제 다양한 멀티 에이전트 아키텍처를 살펴보겠습니다.
 
-In this architecture, agents are defined as graph nodes. Each agent can communicate with every other agent (many-to-many connections) and can decide which agent to call next. This architecture is good for problems that do not have a clear hierarchy of agents or a specific sequence in which agents should be called.
+### 네트워크
 
+이 아키텍처에서는 에이전트를 그래프 노드로 정의합니다. 각 에이전트는 다른 모든 에이전트와 통신할 수 있으며(다대다 연결), 어떤 에이전트를 호출할지 결정할 수 있습니다. 이 아키텍처는 에이전트 간에 명확한 계층 구조나 특정 호출 순서가 없는 문제에 적합합니다.
 
 ```python
 from typing import Literal
@@ -117,12 +117,10 @@ from langgraph.graph import StateGraph, MessagesState, START, END
 model = ChatOpenAI()
 
 def agent_1(state: MessagesState) -> Command[Literal["agent_2", "agent_3", END]]:
-    # you can pass relevant parts of the state to the LLM (e.g., state["messages"])
-    # to determine which agent to call next. a common pattern is to call the model
-    # with a structured output (e.g. force it to return an output with a "next_agent" field)
+    # LLM에 전달할 상태의 관련 부분을 전달하여 어떤 에이전트를 호출할지 결정
     response = model.invoke(...)
-    # route to one of the agents or exit based on the LLM's decision
-    # if the LLM returns "__end__", the graph will finish execution
+    # LLM의 결정에 따라 에이전트를 호출하거나 종료
+    # LLM이 "__end__"를 반환하면 그래프 실행이 종료됨
     return Command(
         goto=response["next_agent"],
         update={"messages": [response["content"]]},
@@ -151,9 +149,9 @@ builder.add_edge(START, "agent_1")
 network = builder.compile()
 ```
 
-### Supervisor
+### 감독자
 
-In this architecture, we define agents as nodes and add a supervisor node (LLM) that decides which agent nodes should be called next. We use [`Command`](./low_level.md#command) to route execution to the appropriate agent node based on supervisor's decision. This architecture also lends itself well to running multiple agents in parallel or using [map-reduce](../how-tos/map-reduce.ipynb) pattern.
+이 아키텍처에서는 에이전트를 노드로 정의하고, 어떤 에이전트 노드를 호출할지 결정하는 감독자 노드(LLM)를 추가합니다. 우리는 [`Command`](./low_level.md#command)를 사용하여 감독자의 결정에 따라 실행을 적절한 에이전트 노드로 라우팅합니다. 이 아키텍처는 여러 에이전트를 병렬로 실행하거나 [map-reduce](../how-tos/map-reduce.ipynb) 패턴을 사용할 때 적합합니다.
 
 ```python
 from typing import Literal
@@ -163,17 +161,13 @@ from langgraph.graph import StateGraph, MessagesState, START, END
 model = ChatOpenAI()
 
 def supervisor(state: MessagesState) -> Command[Literal["agent_1", "agent_2", END]]:
-    # you can pass relevant parts of the state to the LLM (e.g., state["messages"])
-    # to determine which agent to call next. a common pattern is to call the model
-    # with a structured output (e.g. force it to return an output with a "next_agent" field)
+    # LLM에 전달할 상태의 관련 부분을 전달하여 어떤 에이전트를 호출할지 결정
     response = model.invoke(...)
-    # route to one of the agents or exit based on the supervisor's decision
-    # if the supervisor returns "__end__", the graph will finish execution
+    # 감독자의 결정에 따라 에이전트를 호출하거나 종료
+    # 감독자가 "__end__"를 반환하면 그래프 실행이 종료됨
     return Command(goto=response["next_agent"])
 
 def agent_1(state: MessagesState) -> Command[Literal["supervisor"]]:
-    # you can pass relevant parts of the state to the LLM (e.g., state["messages"])
-    # and add any additional logic (different models, custom prompts, structured output, etc.)
     response = model.invoke(...)
     return Command(
         goto="supervisor",
@@ -197,11 +191,11 @@ builder.add_edge(START, "supervisor")
 supervisor = builder.compile()
 ```
 
-Check out this [tutorial](https://langchain-ai.github.io/langgraph/tutorials/multi_agent/agent_supervisor/) for an example of supervisor multi-agent architecture.
+[이 튜토리얼](https://langchain-ai.github.io/langgraph/tutorials/multi_agent/agent_supervisor/)에서 감독자 멀티 에이전트 아키텍처의 예제를 확인하세요.
 
-### Supervisor (tool-calling)
+### 감독자 (도구 호출)
 
-In this variant of the [supervisor](#supervisor) architecture, we define individual agents as **tools** and use a tool-calling LLM in the supervisor node. This can be implemented as a [ReAct](./agentic_concepts.md#react-implementation)-style agent with two nodes — an LLM node (supervisor) and a tool-calling node that executes tools (agents in this case).
+[감독자](#supervisor) 아키텍처의 변형에서는 각 에이전트를 **도구**로 정의하고, 감독자 노드에서 도구 호출 LLM을 사용합니다. 이는 두 개의 노드로 구성된 [ReAct](./agentic_concepts.md#react-implementation) 스타일의 에이전트로 구현될 수 있습니다. 하나는 LLM 노드(감독자)이고 다른 하나는 도구를 실행하는 도구 호출 노드입니다(이 경우 에이전트).
 
 ```python
 from typing import Annotated
@@ -210,15 +204,13 @@ from langgraph.prebuilt import InjectedState, create_react_agent
 
 model = ChatOpenAI()
 
-# this is the agent function that will be called as tool
-# notice that you can pass the state to the tool via InjectedState annotation
+# 이 노드는 도구로 호출될 에이전트 함수입니다.
+# 주목할 점은 InjectedState 주석을 통해 상태를 도구에 전달할 수 있다는 것입니다.
 def agent_1(state: Annotated[dict, InjectedState]):
-    # you can pass relevant parts of the state to the LLM (e.g., state["messages"])
-    # and add any additional logic (different models, custom prompts, structured output, etc.)
+    # 상태의 관련 부분을 LLM에 전달하여 다음 에이전트를 결정
     response = model.invoke(...)
-    # return the LLM response as a string (expected tool response format)
-    # this will be automatically turned to ToolMessage
-    # by the prebuilt create_react_agent (supervisor)
+    # LLM 응답을 문자열로 반환 (도구 응답 형식)
+    # 이는 자동으로 ToolMessage로 변환됩니다.
     return response.content
 
 def agent_2(state: Annotated[dict, InjectedState]):
@@ -226,16 +218,16 @@ def agent_2(state: Annotated[dict, InjectedState]):
     return response.content
 
 tools = [agent_1, agent_2]
-# the simplest way to build a supervisor w/ tool-calling is to use prebuilt ReAct agent graph
-# that consists of a tool-calling LLM node (i.e. supervisor) and a tool-executing node
+# 도구 호출을 사용하는 감독자를 만드는 가장 간단한 방법은 미리 구축된 ReAct 에이전트 그래프를 사용하는 것입니다.
+# 이 그래프는 도구 호출 LLM 노드(즉, 감독자)와 도구 실행 노드를 포함합니다.
 supervisor = create_react_agent(model, tools)
 ```
 
-### Hierarchical
+### 계층적
 
-As you add more agents to your system, it might become too hard for the supervisor to manage all of them. The supervisor might start making poor decisions about which agent to call next, the context might become too complex for a single supervisor to keep track of. In other words, you end up with the same problems that motivated the multi-agent architecture in the first place.
+시스템에 에이전트를 더 추가하면 감독자가 모든 에이전트를 관리하는 것이 어려워질 수 있습니다. 감독자는 다음에 호출할 에이전트를 결정하는 데 잘못된 결정을 내리기 시작할 수 있으며, 맥락이 너무 복잡해져서 하나의 감독자가 이를 추적하는 것이 불가능해질 수 있습니다. 즉, 멀티 에이전트 아키텍처에서 처음 문제를 해결하려 했던 것과 같은 문제가 발생할 수 있습니다.
 
-To address this, you can design your system _hierarchically_. For example, you can create separate, specialized teams of agents managed by individual supervisors, and a top-level supervisor to manage the teams.
+이를 해결하려면 시스템을 _계층적으로_ 설계할 수 있습니다. 예를 들어, 개별 감독자가 관리하는 별도의 전문화된 에이전트 팀을 만들고, 상위 수준의 감독자가 이 팀들을 관리할 수 있습니다.
 
 ```python
 from typing import Literal
@@ -244,7 +236,7 @@ from langgraph.graph import StateGraph, MessagesState, START, END
 from langgraph.types import Command
 model = ChatOpenAI()
 
-# define team 1 (same as the single supervisor example above)
+# 팀 1 정의 (위의 단일 감독자 예시와 동일)
 
 def team_1_supervisor(state: MessagesState) -> Command[Literal["team_1_agent_1", "team_1_agent_2", END]]:
     response = model.invoke(...)
@@ -265,7 +257,7 @@ team_1_builder.add_node(team_1_agent_2)
 team_1_builder.add_edge(START, "team_1_supervisor")
 team_1_graph = team_1_builder.compile()
 
-# define team 2 (same as the single supervisor example above)
+# 팀 2 정의 (위의 단일 감독자 예시와 동일)
 class Team2State(MessagesState):
     next: Literal["team_2_agent_1", "team_2_agent_2", "__end__"]
 
@@ -283,16 +275,11 @@ team_2_builder = StateGraph(Team2State)
 team_2_graph = team_2_builder.compile()
 
 
-# define top-level supervisor
+# 상위 수준의 감독자 정의
 
 builder = StateGraph(MessagesState)
 def top_level_supervisor(state: MessagesState) -> Command[Literal["team_1_graph", "team_2_graph", END]]:
-    # you can pass relevant parts of the state to the LLM (e.g., state["messages"])
-    # to determine which team to call next. a common pattern is to call the model
-    # with a structured output (e.g. force it to return an output with a "next_team" field)
     response = model.invoke(...)
-    # route to one of the teams or exit based on the supervisor's decision
-    # if the supervisor returns "__end__", the graph will finish execution
     return Command(goto=response["next_team"])
 
 builder = StateGraph(MessagesState)
@@ -305,75 +292,49 @@ builder.add_edge("team_2_graph", "top_level_supervisor")
 graph = builder.compile()
 ```
 
-### Custom multi-agent workflow
+### 커스텀 멀티 에이전트 워크플로
 
-In this architecture we add individual agents as graph nodes and define the order in which agents are called ahead of time, in a custom workflow. In LangGraph the workflow can be defined in two ways:
+이 아키텍처에서는 개별 에이전트를 그래프 노드로 추가하고, 에이전트가 호출되는 순서를 미리 정의하여 커스텀 워크플로를 만듭니다. LangGraph에서는 워크플로를 두 가지 방법으로 정의할 수 있습니다:
 
-- **Explicit control flow (normal edges)**: LangGraph allows you to explicitly define the control flow of your application (i.e. the sequence of how agents communicate) explicitly, via [normal graph edges](./low_level.md#normal-edges). This is the most deterministic variant of this architecture above — we always know which agent will be called next ahead of time.
+- **명시적 제어 흐름 (정상 엣지)**: LangGraph는 응용 프로그램의 제어 흐름을 명시적으로 정의할 수 있게 해줍니다(즉, 에이전트 간의 통신 순서). 이는 위의 아키텍처 중 가장 결정적인 방식으로, 미리 어떤 에이전트가 다음에 호출될지 알 수 있습니다.
 
-- **Dynamic control flow (Command)**: in LangGraph you can allow LLMs to decide parts of your application control flow. This can be achieved by using [`Command`](./low_level.md#command). A special case of this is a [supervisor tool-calling](#supervisor-tool-calling) architecture. In that case, the tool-calling LLM powering the supervisor agent will make decisions about the order in which the tools (agents) are being called.
+- **동적 제어 흐름 (커맨드)**: LangGraph에서는 LLM이 응용 프로그램 제어 흐름의 일부를 결정하도록 허용할 수 있습니다. 이는 [`커맨드`](./low_level.md#command)를 사용하여 달성할 수 있습니다. 이 경우, 감독자 도구 호출 아키텍처의 특수한 경우입니다. 이 경우, 감독자 에이전트를 구동하는 도구 호출 LLM이 에이전트가 호출되는 순서에 대한 결정을 내립니다.
 
-```python
-from langchain_openai import ChatOpenAI
-from langgraph.graph import StateGraph, MessagesState, START
+### 에이전트 간 통신
 
-model = ChatOpenAI()
+멀티 에이전트 시스템을 구축할 때 가장 중요한 점은 에이전트들이 어떻게 통신할지를 결정하는 것입니다. 이를 위해 몇 가지 중요한 고려 사항이 있습니다:
 
-def agent_1(state: MessagesState):
-    response = model.invoke(...)
-    return {"messages": [response]}
+- 에이전트들이 [**그래프 상태 또는 도구 호출을 통해**](#graph-state-vs-tool-calls) 통신하는가?
+- 두 에이전트가 [**다른 상태 스키마**](#different-state-schemas)를 가질 경우 어떻게 처리하는가?
+- [**공유된 메시지 목록**](#shared-message-list)을 통해 어떻게 통신할 것인가?
 
-def agent_2(state: MessagesState):
-    response = model.invoke(...)
-    return {"messages": [response]}
+### 그래프 상태 vs 도구 호출
 
-builder = StateGraph(MessagesState)
-builder.add_node(agent_1)
-builder.add_node(agent_2)
-# define the flow explicitly
-builder.add_edge(START, "agent_1")
-builder.add_edge("agent_1", "agent_2")
-```
+에이전트 간에 전달되는 "페이로드"는 무엇일까요? 위에서 논의한 대부분의 아키텍처에서는 에이전트들이 [그래프 상태](./low_level.md#state)를 통해 통신합니다. [도구 호출을 사용하는 감독자 아키텍처](#supervisor-tool-calling)의 경우, 페이로드는 도구 호출 인자입니다.
 
-## Communication between agents
+#### 그래프 상태
 
-The most important thing when building multi-agent systems is figuring out how the agents communicate. There are few different considerations:
+그래프 상태를 통해 통신하려면 개별 에이전트를 [그래프 노드](./low_level.md#nodes)로 정의해야 합니다. 이 노드는 함수로 정의하거나 전체 [서브그래프](./low_level.md#subgraphs)로 추가할 수 있습니다. 그래프 실행의 각 단계에서 에이전트 노드는 그래프의 현재 상태를 받아서 에이전트 코드를 실행하고, 그 후 업데이트된 상태를 다음 노드로 전달합니다.
 
-- Do agents communicate via [**via graph state or via tool calls**](#graph-state-vs-tool-calls)?
-- What if two agents have [**different state schemas**](#different-state-schemas)?
-- How to communicate over a [**shared message list**](#shared-message-list)?
+일반적으로 에이전트 노드들은 단일 [상태 스키마](./low_level.md#schema)를 공유합니다. 그러나 에이전트 노드에 [다른 상태 스키마](#different-state-schemas)를 사용해야 할 수도 있습니다.
 
-### Graph state vs tool calls
+### 다른 상태 스키마
 
-What is the "payload" that is being passed around between agents? In most of the architectures discussed above the agents communicate via the [graph state](./low_level.md#state). In the case of the [supervisor with tool-calling](#supervisor-tool-calling), the payloads are tool call arguments.
+에이전트는 다른 에이전트들과 다른 상태 스키마를 가질 필요가 있을 수 있습니다. 예를 들어, 검색 에이전트는 쿼리와 검색된 문서만 추적하면 될 수 있습니다. LangGraph에서 이를 구현하는 두 가지 방법은 다음과 같습니다:
 
-![](./img/multi_agent/request.png)
+- [서브그래프](./low_level.md#subgraphs) 에이전트를 별도의 상태 스키마로 정의합니다. 서브그래프와 부모 그래프 간에 상태 키(채널)가 공유되지 않는 경우, 부모 그래프가 서브그래프와 통신할 수 있도록 [입력/출력 변환](https://langchain-ai.github.io/langgraph/how-tos/subgraph-transform-state/)을 추가하는 것이 중요합니다.
+- 에이전트 노드 함수에 [개인 입력 상태 스키마](https://langchain-ai.github.io/langgraph/how-tos/pass_private_state/)를 정의하여 전체 그래프 상태 스키마와 다른 상태를 사용할 수 있습니다. 이를 통해 해당 에이전트를 실행하는 데 필요한 정보만 전달할 수 있습니다.
 
-#### Graph state
+### 공유된 메시지 목록
 
-To communicate via graph state, individual agents need to be defined as [graph nodes](./low_level.md#nodes). These can be added as functions or as entire [subgraphs](./low_level.md#subgraphs). At each step of the graph execution, agent node receives the current state of the graph, executes the agent code and then passes the updated state to the next nodes.
+에이전트들이 통신하는 가장 일반적인 방법은 공유된 상태 채널을 통해서이며, 일반적으로 메시지 목록을 공유합니다. 이는 에이전트들이 공유하는 최소한 하나의 상태 채널(키)이 있다는 것을 전제로 합니다. 공유된 메시지 목록을 통해 통신할 때 추가적인 고려 사항이 있습니다: 에이전트들이 [**전체 생각 과정**](#share-full-history)을 공유할지, 아니면 [**최종 결과**](#share-final-result)만 공유할지 결정해야 합니다.
 
-Typically agent nodes share a single [state schema](./low_level.md#schema). However, you might want to design agent nodes with [different state schemas](#different-state-schemas).
+#### 전체 생각 과정 공유
 
-### Different state schemas
+에이전트들이 **전체 생각 과정**(즉, "스래치패드")을 다른 모든 에이전트들과 공유할 수 있습니다. 이 "스래치패드"는 일반적으로 [메시지 목록](./low_level.md#why-use-messages)처럼 보입니다. 전체 생각 과정을 공유하는 장점은 다른 에이전트들이 더 나은 결정을 내리는 데 도움이 될 수 있고, 시스템 전체의 추론 능력을 향상시킬 수 있다는 점입니다. 단점은 에이전트 수와 복잡도가 커질수록 "스래치패드"도 빠르게 커지므로, [메모리 관리](./memory.md/#managing-long-conversation-history)에 대한 추가 전략이 필요할 수 있다는 점입니다.
 
-An agent might need to have a different state schema from the rest of the agents. For example, a search agent might only need to keep track of queries and retrieved documents. There are two ways to achieve this in LangGraph:
+#### 최종 결과만 공유
 
-- Define [subgraph](./low_level.md#subgraphs) agents with a separate state schema. If there are no shared state keys (channels) between the subgraph and the parent graph, it’s important to [add input / output transformations](https://langchain-ai.github.io/langgraph/how-tos/subgraph-transform-state/) so that the parent graph knows how to communicate with the subgraphs.
-- Define agent node functions with a [private input state schema](https://langchain-ai.github.io/langgraph/how-tos/pass_private_state/) that is distinct from the overall graph state schema. This allows passing information that is only needed for executing that particular agent.
+에이전트들이 각자의 개인적인 "스래치패드"를 가지고 **최종 결과만** 나머지 에이전트들과 공유할 수 있습니다. 이 접근 방식은 많은 에이전트나 복잡한 에이전트가 있는 시스템에서 더 효과적일 수 있습니다. 이 경우, 에이전트들은 [다른 상태 스키마](#different-state-schemas)를 사용해야 합니다.
 
-### Shared message list
-
-The most common way for the agents to communicate is via a shared state channel, typically a list of messages. This assumes that there is always at least a single channel (key) in the state that is shared by the agents. When communicating via a shared message list there is an additional consideration: should the agents [share the full history](#share-full-history) of their thought process or only [the final result](#share-final-result)?
-
-![](./img/multi_agent/response.png)
-
-#### Share full history
-
-Agents can **share the full history** of their thought process (i.e. "scratchpad") with all other agents. This "scratchpad" would typically look like a [list of messages](./low_level.md#why-use-messages). The benefit of sharing full thought process is that it might help other agents make better decisions and improve reasoning ability for the system as a whole. The downside is that as the number of agents and their complexity grows, the "scratchpad" will grow quickly and might require additional strategies for [memory management](./memory.md/#managing-long-conversation-history).
-
-#### Share final result
-
-Agents can have their own private "scratchpad" and only **share the final result** with the rest of the agents. This approach might work better for systems with many agents or agents that are more complex. In this case, you would need to define agents with [different state schemas](#different-state-schemas)
-
-For agents called as tools, the supervisor determines the inputs based on the tool schema. Additionally, LangGraph allows [passing state](https://langchain-ai.github.io/langgraph/how-tos/pass-run-time-values-to-tools/#pass-graph-state-to-tools) to individual tools at runtime, so subordinate agents can access parent state, if needed.
+도구로 호출된 에이전트의 경우, 감독자는 도구 스키마를 기반으로 입력을 결정합니다. 또한 LangGraph에서는 [런타임에 상태 전달](https://langchain-ai.github.io/langgraph/how-tos/pass-run-time-values-to-tools/#pass-graph-state-to-tools)을 통해 하위 에이전트가 상위 상태에 접근할 수 있도록 지원합니다.

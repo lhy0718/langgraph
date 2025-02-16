@@ -1,42 +1,42 @@
-# Double Texting
+# 이중 텍스트
 
-!!! info "Prerequisites"
-    - [LangGraph Server](./langgraph_server.md)
+!!! 정보 "전제 조건"
+    - [LangGraph 서버](./langgraph_server.md)
 
-Many times users might interact with your graph in unintended ways. 
-For instance, a user may send one message and before the graph has finished running send a second message. 
-More generally, users may invoke the graph a second time before the first run has finished.
-We call this "double texting".
+사용자들이 의도하지 않은 방식으로 그래프와 상호작용할 수 있는 경우가 많습니다. 
+예를 들어, 사용자가 한 메시지를 보낸 후 그래프가 실행 중일 때 두 번째 메시지를 보낼 수 있습니다. 
+보다 일반적으로, 사용자가 첫 번째 실행이 완료되기 전에 그래프를 두 번째로 호출할 수 있습니다. 
+이를 "이중 텍스트"라고 부릅니다.
 
-Currently, LangGraph only addresses this as part of [LangGraph Platform](langgraph_platform.md), not in the open source.
-The reason for this is that in order to handle this we need to know how the graph is deployed, and since LangGraph Platform deals with deployment the logic needs to live there.
-If you do not want to use LangGraph Platform, we describe the options we have implemented in detail below.
+현재 LangGraph는 이 문제를 [LangGraph 플랫폼](langgraph_platform.md)의 일환으로만 다루고 있으며, 오픈 소스에서는 다루고 있지 않습니다.
+그 이유는 이 문제를 처리하기 위해서는 그래프가 어떻게 배포되었는지를 알아야 하며, LangGraph 플랫폼이 배포를 다루기 때문에 이 로직은 그곳에 있어야 합니다.
+LangGraph 플랫폼을 사용하고 싶지 않은 경우, 아래에 구현된 옵션들을 자세히 설명합니다.
 
 ![](img/double_texting.png)
 
-## Reject
+## 거부
 
-This is the simplest option, this just rejects any follow-up runs and does not allow double texting. 
-See the [how-to guide](../cloud/how-tos/reject_concurrent.md) for configuring the reject double text option.
+가장 간단한 옵션으로, 후속 실행을 거부하고 이중 텍스트를 허용하지 않습니다. 
+이중 텍스트 거부 옵션을 구성하는 방법은 [사용 안내서](../cloud/how-tos/reject_concurrent.md)를 참조하세요.
 
-## Enqueue
+## 대기
 
-This is a relatively simple option which continues the first run until it completes the whole run, then sends the new input as a separate run. 
-See the [how-to guide](../cloud/how-tos/enqueue_concurrent.md) for configuring the enqueue double text option.
+상대적으로 간단한 옵션으로, 첫 번째 실행이 완료될 때까지 계속 진행한 후 새로운 입력을 별도의 실행으로 보냅니다. 
+이중 텍스트 대기 옵션을 구성하는 방법은 [사용 안내서](../cloud/how-tos/enqueue_concurrent.md)를 참조하세요.
 
-## Interrupt
+## 중단
 
-This option interrupts the current execution but saves all the work done up until that point. 
-It then inserts the user input and continues from there. 
+현재 실행을 중단하지만 그 시점까지 수행된 모든 작업을 저장하는 옵션입니다. 
+이후 사용자 입력을 삽입하고 거기에서 계속 진행합니다.
 
-If you enable this option, your graph should be able to handle weird edge cases that may arise. 
-For example, you could have called a tool but not yet gotten back a result from running that tool.
-You may need to remove that tool call in order to not have a dangling tool call.
+이 옵션을 활성화하면 그래프가 발생할 수 있는 이상한 엣지 케이스를 처리할 수 있어야 합니다. 
+예를 들어, 도구를 호출했지만 그 도구에서 결과를 아직 받지 못한 경우가 있을 수 있습니다.
+덜미가 잡힌 도구 호출을 피하기 위해 해당 도구 호출을 제거해야 할 수도 있습니다.
 
-See the [how-to guide](../cloud/how-tos/interrupt_concurrent.md) for configuring the interrupt double text option.
+이중 텍스트 중단 옵션을 구성하는 방법은 [사용 안내서](../cloud/how-tos/interrupt_concurrent.md)를 참조하세요.
 
-## Rollback
+## 롤백
 
-This option interrupts the current execution AND rolls back all work done up until that point, including the original run input. It then sends the new user input in, basically as if it was the original input.
+현재 실행을 중단하고 그 시점까지 수행된 모든 작업을 롤백하는 옵션입니다. 여기에는 원래 실행 입력도 포함됩니다. 이후 새로운 사용자 입력을 보냅니다. 이는 기본적으로 원래 입력인 것처럼 처리됩니다.
 
-See the [how-to guide](../cloud/how-tos/rollback_concurrent.md) for configuring the rollback double text option.
+이중 텍스트 롤백 옵션을 구성하는 방법은 [사용 안내서](../cloud/how-tos/rollback_concurrent.md)를 참조하세요.
