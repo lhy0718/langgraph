@@ -1,10 +1,10 @@
-# INVALID_CONCURRENT_GRAPH_UPDATE
+_한국어로 기계번역됨_
 
-A LangGraph [`StateGraph`](https://langchain-ai.github.io/langgraph/reference/graphs/#langgraph.graph.state.StateGraph) received concurrent updates to its state from multiple nodes to a state property that doesn't
-support it.
+# 유효하지 않은 동시 그래프 업데이트
 
-One way this can occur is if you are using a [fanout](https://langchain-ai.github.io/langgraph/how-tos/map-reduce/)
-or other parallel execution in your graph and you have defined a graph like this:
+LangGraph의 [`StateGraph`](https://langchain-ai.github.io/langgraph/reference/graphs/#langgraph.graph.state.StateGraph)가 여러 노드로부터 상태 속성에 대한 동시 상태 업데이트를 수신했지만 이를 지원하지 않습니다.
+
+이런 상황은 [fanout](https://langchain-ai.github.io/langgraph/how-tos/map-reduce/) 또는 그래프에서의 다른 병렬 실행을 사용할 때 발생할 수 있으며, 다음과 같은 그래프를 정의할 경우 발생할 수 있습니다:
 
 ```python hl_lines="2"
 class State(TypedDict):
@@ -25,25 +25,23 @@ builder.add_edge(START, "other_node")
 graph = builder.compile()
 ```
 
-If a node in the above graph returns `{ "some_key": "some_string_value" }`, this will overwrite the state value for `"some_key"` with `"some_string_value"`.
-However, if multiple nodes in e.g. a fanout within a single step return values for `"some_key"`, the graph will throw this error because
-there is uncertainty around how to update the internal state.
+위의 그래프에서 노드가 `{ "some_key": "some_string_value" }`를 반환하면, 이는 `"some_key"`에 대한 상태 값을 `"some_string_value"`로 덮어쓰게 됩니다. 그러나 만약 여러 노드가 e.g. 하나의 단계 내에서 `"some_key"`에 대한 값을 반환하면, 내부 상태를 어떻게 업데이트할지에 대한 불확실성 때문에 그래프는 이 오류를 발생시킵니다.
 
-To get around this, you can define a reducer that combines multiple values:
+이 문제를 해결하기 위해, 여러 값을 결합하는 리듀서를 정의할 수 있습니다:
 
 ```python hl_lines="5-6"
 import operator
 from typing import Annotated
 
 class State(TypedDict):
-    # The operator.add reducer fn makes this append-only
+    # operator.add 리듀서 함수는 이것을 추가 전용으로 만듭니다
     some_key: Annotated[list, operator.add]
 ```
 
-This will allow you to define logic that handles the same key returned from multiple nodes executed in parallel.
+이렇게 하면 병렬 실행된 여러 노드에서 반환된 동일한 키를 처리하는 로직을 정의할 수 있습니다.
 
-## Troubleshooting
+## 문제 해결
 
-The following may help resolve this error:
+다음 사항이 이 오류 해결에 도움이 될 수 있습니다:
 
-- If your graph executes nodes in parallel, make sure you have defined relevant state keys with a reducer.
+- 그래프가 노드를 병렬로 실행하는 경우, 관련 상태 키를 리듀서와 함께 정의했는지 확인하세요.

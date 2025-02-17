@@ -1,14 +1,15 @@
-# INVALID_GRAPH_NODE_RETURN_VALUE
+_한국어로 기계번역됨_
 
-A LangGraph [`StateGraph`](https://langchain-ai.github.io/langgraph/reference/graphs/#langgraph.graph.state.StateGraph)
-received a non-dict return type from a node. Here's an example:
+# 잘못된 그래프 노드 반환 값
+
+LangGraph [`StateGraph`](https://langchain-ai.github.io/langgraph/reference/graphs/#langgraph.graph.state.StateGraph)가 노드에서 비딕 반환 유형을 받았습니다. 다음은 예시입니다:
 
 ```python
 class State(TypedDict):
     some_key: str
 
 def bad_node(state: State):
-    # Should return an dict with a value for "some_key", not a list
+    # "some_key"에 대한 값을 가진 dict를 반환해야 하며, 리스트를 반환해서는 안 됩니다.
     return ["whoops"]
 
 builder = StateGraph(State)
@@ -18,7 +19,7 @@ builder.add_node(bad_node)
 graph = builder.compile()
 ```
 
-Invoking the above graph will result in an error like this:
+위의 그래프를 호출하면 다음과 같은 오류가 발생합니다:
 
 ```python
 graph.invoke({ "some_key": "someval" });
@@ -26,13 +27,13 @@ graph.invoke({ "some_key": "someval" });
 
 ```
 InvalidUpdateError: Expected dict, got ['whoops']
-For troubleshooting, visit: https://python.langchain.com/docs/troubleshooting/errors/INVALID_GRAPH_NODE_RETURN_VALUE
+문제 해결을 위해 방문하세요: https://python.langchain.com/docs/troubleshooting/errors/INVALID_GRAPH_NODE_RETURN_VALUE
 ```
 
-Nodes in your graph must return an dict containing one or more keys defined in your state.
+그래프의 노드는 상태에 정의된 하나 이상의 키를 포함하는 dict를 반환해야 합니다.
 
-## Troubleshooting
+## 문제 해결
 
-The following may help resolve this error:
+다음은 이 오류를 해결하는 데 도움이 될 수 있습니다:
 
-- If you have complex logic in your node, make sure all code paths return an appropriate dict for your defined state.
+- 노드에 복잡한 로직이 있는 경우 모든 코드 경로가 정의된 상태에 대해 적절한 dict를 반환하는지 확인하십시오.

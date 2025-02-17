@@ -1,12 +1,12 @@
-# MULTIPLE_SUBGRAPHS
+_한국어로 기계번역됨_
 
-You are calling subgraphs multiple times within a single LangGraph node with checkpointing enabled for each subgraph.
+# 다중 서브그래프
 
-This is currently not allowed due to internal restrictions on how checkpoint namespacing for subgraphs works.
+체크포인팅이 활성화된 상태에서 하나의 LangGraph 노드 내에서 서브그래프를 여러 번 호출하는 것은 현재 내부 제한으로 인해 허용되지 않습니다.
 
-## Troubleshooting
+## 문제 해결
 
-The following may help resolve this error:
+다음 사항이 이 오류를 해결하는 데 도움이 될 수 있습니다:
 
-- If you don't need to interrupt/resume from a subgraph, pass `checkpointer=False` when compiling it like this: `.compile(checkpointer=False)`
-- Don't imperatively call graphs multiple times in the same node, and instead use the [`Send`](https://langchain-ai.github.io/langgraph/concepts/low_level/#send) API.
+- 서브그래프에서 중단/재개할 필요가 없다면, 이를 컴파일할 때 `checkpointer=False`를 전달하세요. 예: `.compile(checkpointer=False)`
+- 동일한 노드 내에서 그래프를 여러 번 강제로 호출하지 말고, 대신 [`Send`](https://langchain-ai.github.io/langgraph/concepts/low_level/#send) API를 사용하세요.

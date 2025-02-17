@@ -1,7 +1,9 @@
-# Error reference
+_한국어로 기계번역됨_
 
-This page contains guides around resolving common errors you may find while building with LangGraph.
-Errors referenced below will have an `lc_error_code` property corresponding to one of the below codes when they are thrown in code.
+# 오류 참조
+
+이 페이지에는 LangGraph로 빌드하는 동안 발생할 수 있는 일반적인 오류를 해결하는 가이드가 포함되어 있습니다.
+아래 참조된 오류는 코드에서 발생할 때 하나의 `lc_error_code` 속성에 해당하는 코드 중 하나를 가집니다.
 
 - [GRAPH_RECURSION_LIMIT](./GRAPH_RECURSION_LIMIT.md)
 - [INVALID_CONCURRENT_GRAPH_UPDATE](./INVALID_CONCURRENT_GRAPH_UPDATE.md)
@@ -9,8 +11,8 @@ Errors referenced below will have an `lc_error_code` property corresponding to o
 - [MULTIPLE_SUBGRAPHS](./MULTIPLE_SUBGRAPHS.md)
 - [INVALID_CHAT_HISTORY](./INVALID_CHAT_HISTORY.md)
 
-## LangGraph Platform
+## LangGraph 플랫폼
 
-These guides provide troubleshooting information for errors that are specific to the LangGraph Platform.
+이 가이드는 LangGraph 플랫폼에 특정한 오류에 대한 문제 해결 정보를 제공합니다.
 
 - [INVALID_LICENSE](./INVALID_LICENSE.md)

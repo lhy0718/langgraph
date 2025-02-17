@@ -1,48 +1,49 @@
-# INVALID_LICENSE
+_한국어로 기계번역됨_
 
-This error is raised when license verification fails while attempting to start a self-hosted LangGraph Platform server. This error is specific to the LangGraph Platform and is not related to the open source libraries.
+# 유효하지 않은 라이센스
 
-## When This Occurs
+이 오류는 자체 호스팅된 LangGraph 플랫폼 서버를 시작하려고 할 때 라이센스 검증에 실패할 때 발생합니다. 이 오류는 LangGraph 플랫폼에 특정되며 오픈 소스 라이브러리와는 관련이 없습니다.
 
-This error occurs when running a self-hosted deployment of LangGraph Platform without a valid enterprise license or API key.
+## 언제 발생하나요
 
-## Troubleshooting
+이 오류는 유효한 기업 라이센스 또는 API 키 없이 LangGraph 플랫폼의 자체 호스팅 배포를 실행할 때 발생합니다.
 
-### Confirm deployment type
+## 문제 해결
 
-First, confirm the desired mode of deployment.
+### 배포 유형 확인
 
-#### For Local Development
+먼저, 원하는 배포 모드를 확인하십시오.
 
-If you're just developing locally, you can use the lightweight in-memory server by running `langgraph dev`.
-See the [local server](../../tutorials/langgraph-platform/local-server.md) docs for more information.
+#### 로컬 개발용
 
-#### For Managed LangGraph Platform
+로컬에서 개발 중이라면, `langgraph dev`를 실행하여 경량 인메모리 서버를 사용할 수 있습니다. 추가 정보는 [로컬 서버](../../tutorials/langgraph-platform/local-server.md) 문서를 참조하십시오.
 
-If you would like a fast managed environment, consider the [Cloud SaaS](../../concepts/langgraph_cloud.md) deployment option. This requires no additional license key.
+#### 관리형 LangGraph 플랫폼용
 
-#### For Self-Hosted Lite (Limited Features)
+빠른 관리형 환경을 원하신다면, [클라우드 SaaS](../../concepts/langgraph_cloud.md) 배포 옵션을 고려해 보십시오. 이 경우 추가 라이센스 키가 필요하지 않습니다.
 
-If your deployment is unlikely to see more than 1 million node executions per year and don't need Crons and other enterprise features, consider the [Self-Hosted Lite](../../concepts/deployment_options.md#self-hosted-lite) deployment option.
+#### 자체 호스팅 라이트(제한된 기능)용
 
-You can deploy with Self-Hosted Lite by setting a valid `LANGSMITH_API_KEY` in your environment (e.g., in the `.env` file referenced by `langgraph.json`) and building a Docker image. The API key must be associated with an account on a **Plus** plan or greater.
+배포가 연간 100만 개의 노드 실행을 초과할 가능성이 낮고, 크론 및 기타 기업 기능이 필요하지 않다면, [자체 호스팅 라이트](../../concepts/deployment_options.md#self-hosted-lite) 배포 옵션을 고려하십시오. 
 
-#### For Self-Hosted Enterprise (Full Features)
+자체 호스팅 라이트로 배포하려면 유효한 `LANGSMITH_API_KEY`를 환경에 설정하고(예: `langgraph.json`에서 참조되는 `.env` 파일) Docker 이미지를 빌드해야 합니다. API 키는 **Plus** 플랜 또는 그 이상의 계정과 연관되어야 합니다.
 
-For full self-hosting, set the `LANGGRAPH_CLOUD_LICENSE_KEY` environment variable. If you are interested in an enterprise license key, please contact the LangChain support team.
+#### 자체 호스팅 기업(전체 기능)용
 
-For more information on deployment options and their features, see the [Deployment Options](../../concepts/deployment_options.md) documentation.
+전체 자체 호스팅을 원하신다면 `LANGGRAPH_CLOUD_LICENSE_KEY` 환경 변수를 설정하십시오. 기업 라이센스 키에 관심이 있으시다면, LangChain 지원팀에 문의하시기 바랍니다.
 
-### Confirm credentials
+배포 옵션 및 기능에 대한 자세한 정보는 [배포 옵션](../../concepts/deployment_options.md) 문서를 참조하십시오.
 
-If you have confirmed that you would like to self-host LangGraph Platform, please verify your credentials.
+### 자격 증명 확인
 
-#### For Self-Hosted Lite
+LangGraph 플랫폼을 자체 호스팅하고자 하는 경우, 자격 증명을 확인하십시오.
 
-1. Confirm that you have provided a working `LANGSMITH_API_KEY` environment variable in your deployment environment or `.env` file
-2. Confirm the provided API key is associated with an account on a **Plus** or **Enterprise** plan (or equivalent)
+#### 자체 호스팅 라이트용
 
-#### For Self-Hosted Enterprise
+1. 배포 환경 또는 `.env` 파일에 작동하는 `LANGSMITH_API_KEY` 환경 변수를 제공했는지 확인하십시오.
+2. 제공된 API 키가 **Plus** 또는 **Enterprise** 플랜(또는 동등한 플랜)과 연관되어 있는지 확인하십시오.
 
-1. Confirm that you have provided a working `LANGGRAPH_CLOUD_LICENSE_KEY` environment variable in your deployment environment or `.env` file
-2. Confirm the key is still valid and has not surpassed its expiration date
+#### 자체 호스팅 기업용
+
+1. 배포 환경 또는 `.env` 파일에 작동하는 `LANGGRAPH_CLOUD_LICENSE_KEY` 환경 변수를 제공했는지 확인하십시오.
+2. 키가 여전히 유효하고 만료 날짜를 초과하지 않았는지 확인하십시오.
