@@ -1,16 +1,18 @@
-# Adding nodes as dataset examples in Studio
+_한국어로 기계번역됨_
 
-In LangGraph Studio you can create dataset examples from the thread history in the right-hand pane. This can be especially useful when you want to evaluate intermediate steps of the agent.
+# 스튜디오에서 노드를 데이터셋 예제로 추가하기
 
-1. Click on the `Add to Dataset` button to enter the dataset mode.
-1. Select nodes which you want to add to dataset.
-1. Select the target dataset to create the example in.
+LangGraph Studio에서는 오른쪽 패널의 스레드 기록에서 데이터셋 예제를 생성할 수 있습니다. 이는 에이전트의 중간 단계를 평가하고자 할 때 특히 유용합니다.
 
-You can edit the example payload before sending it to the dataset, which is useful if you need to make changes to conform the example to the dataset schema.
+1. `데이터셋에 추가` 버튼을 클릭하여 데이터셋 모드로 들어갑니다.
+1. 데이터셋에 추가할 노드를 선택합니다.
+1. 예제를 생성할 대상 데이터셋을 선택합니다.
 
-Finally, you can customise the target dataset by clicking on the `Settings` button.
+예제를 데이터셋에 보내기 전에 예제 페이로드를 편집할 수 있으며, 이는 예제가 데이터셋 스키마에 부합하도록 변경해야 할 때 유용합니다.
 
-See [Evaluating intermediate steps](https://docs.smith.langchain.com/evaluation/how_to_guides/langgraph#evaluating-intermediate-steps) for more details on how to evaluate intermediate steps.
+마지막으로 `설정` 버튼을 클릭하여 대상 데이터셋을 사용자 정의할 수 있습니다.
+
+중간 단계를 평가하는 방법에 대한 자세한 내용은 [중간 단계 평가](https://docs.smith.langchain.com/evaluation/how_to_guides/langgraph#evaluating-intermediate-steps)를 참조하세요.
 
 <video controls allowfullscreen="true" poster="../img/studio_datasets.jpg">
     <source src="https://langgraph-docs-assets.pages.dev/studio_datasets.mp4" type="video/mp4">

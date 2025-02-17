@@ -1,115 +1,118 @@
-# Check the Status of your Threads
+_한국어로 기계번역됨_
 
-## Setup
+# 스레드 상태 확인하기
 
-To start, we can setup our client with whatever URL you are hosting your graph from:
+## 설정
 
-### SDK initialization
+시작하기 위해, 그래프를 호스팅하고 있는 URL로 클라이언트를 설정할 수 있습니다:
 
-First, we need to setup our client so that we can communicate with our hosted graph:
+### SDK 초기화
 
-=== "Python"
-
-    ```python
-    from langgraph_sdk import get_client
-    client = get_client(url=<DEPLOYMENT_URL>)
-    # Using the graph deployed with the name "agent"
-    assistant_id = "agent"
-    thread = await client.threads.create()
-    ```
-
-=== "Javascript"
-
-    ```js
-    import { Client } from "@langchain/langgraph-sdk";
-
-    const client = new Client({ apiUrl: <DEPLOYMENT_URL> });
-    // Using the graph deployed with the name "agent"
-    const assistantId = "agent";
-    const thread = await client.threads.create();
-    ```
-
-=== "CURL"
-
-    ```bash
-    curl --request POST \
-      --url <DEPLOYMENT_URL>/threads \
-      --header 'Content-Type: application/json' \
-      --data '{}'
-    ```
-
-## Find idle threads
-
-We can use the following commands to find threads that are idle, which means that all runs executed on the thread have finished running:
+먼저, 호스팅된 그래프와 소통할 수 있도록 클라이언트를 설정해야 합니다:
 
 === "Python"
 
-    ```python
-    print(await client.threads.search(status="idle",limit=1))
-    ```
+```python
+from langgraph_sdk import get_client
+client = get_client(url=<DEPLOYMENT_URL>)
+# "agent"라는 이름으로 배포된 그래프 사용
+assistant_id = "agent"
+thread = await client.threads.create()
+```
 
 === "Javascript"
 
-    ```js
-    console.log(await client.threads.search({ status: "idle", limit: 1 }));
-    ```
+```js
+import { Client } from "@langchain/langgraph-sdk";
+
+const client = new Client({ apiUrl: <DEPLOYMENT_URL> });
+// "agent"라는 이름으로 배포된 그래프 사용
+const assistantId = "agent";
+const thread = await client.threads.create();
+```
 
 === "CURL"
 
-    ```bash
-    curl --request POST \  
-    --url <DEPLOYMENT_URL>/threads/search \
-    --header 'Content-Type: application/json' \
-    --data '{"status": "idle", "limit": 1}'
-    ```
+```bash
+curl --request POST \
+  --url <DEPLOYMENT_URL>/threads \
+  --header 'Content-Type: application/json' \
+  --data '{}'
+```
 
-Output:
+## 유휴 스레드 찾기
 
-    [{'thread_id': 'cacf79bb-4248-4d01-aabc-938dbd60ed2c',
-    'created_at': '2024-08-14T17:36:38.921660+00:00',
-    'updated_at': '2024-08-14T17:36:38.921660+00:00',
-    'metadata': {'graph_id': 'agent'},
-    'status': 'idle',
-    'config': {'configurable': {}}}]
-
-
-## Find interrupted threads
-
-We can use the following commands to find threads that have been interrupted in the middle of a run, which could either mean an error occurred before the run finished or a human-in-the-loop breakpoint was reached and the run is waiting to continue: 
+다음 명령을 사용하여 모든 실행이 완료된 유휴 상태의 스레드를 찾을 수 있습니다:
 
 === "Python"
 
-    ```python
-    print(await client.threads.search(status="interrupted",limit=1))
-    ```
+```python
+print(await client.threads.search(status="idle",limit=1))
+```
 
 === "Javascript"
 
-    ```js
-    console.log(await client.threads.search({ status: "interrupted", limit: 1 }));
-    ```
+```js
+console.log(await client.threads.search({ status: "idle", limit: 1 }));
+```
 
 === "CURL"
 
-    ```bash
-    curl --request POST \  
-    --url <DEPLOYMENT_URL>/threads/search \
-    --header 'Content-Type: application/json' \
-    --data '{"status": "interrupted", "limit": 1}'
-    ```
+```bash
+curl --request POST \  
+--url <DEPLOYMENT_URL>/threads/search \
+--header 'Content-Type: application/json' \
+--data '{"status": "idle", "limit": 1}'
+```
 
-Output:
+출력:
+
+```json
+[{'thread_id': 'cacf79bb-4248-4d01-aabc-938dbd60ed2c',
+'created_at': '2024-08-14T17:36:38.921660+00:00',
+'updated_at': '2024-08-14T17:36:38.921660+00:00',
+'metadata': {'graph_id': 'agent'},
+'status': 'idle',
+'config': {'configurable': {}}}]
+```
+
+## 중단된 스레드 찾기
+
+다음 명령을 사용하여 실행 도중 중단된 스레드를 찾을 수 있습니다. 이는 실행이 끝나기 전에 오류가 발생했거나, 인간 개입 포인트에 도달해 실행이 계속되기를 기다리는 경우를 의미할 수 있습니다:
+
+=== "Python"
+
+```python
+print(await client.threads.search(status="interrupted",limit=1))
+```
+
+=== "Javascript"
+
+```js
+console.log(await client.threads.search({ status: "interrupted", limit: 1 }));
+```
+
+=== "CURL"
+
+```bash
+curl --request POST \  
+--url <DEPLOYMENT_URL>/threads/search \
+--header 'Content-Type: application/json' \
+--data '{"status": "interrupted", "limit": 1}'
+```
+
+출력:
 
     [{'thread_id': '0d282b22-bbd5-4d95-9c61-04dcc2e302a5',
     'created_at': '2024-08-14T17:41:50.235455+00:00',
     'updated_at': '2024-08-14T17:41:50.235455+00:00',
     'metadata': {'graph_id': 'agent'},
-    'status': 'interrupted',
+    'status': '중단됨',
     'config': {'configurable': {}}}]
     
-## Find busy threads
+## 바쁜 스레드 찾기
 
-We can use the following commands to find threads that are busy, meaning they are currently handling the execution of a run:
+다음 명령어를 사용하여 현재 실행을 처리하고 있는 바쁜 스레드를 찾을 수 있습니다:
 
 === "Python"
 
@@ -132,22 +135,22 @@ We can use the following commands to find threads that are busy, meaning they ar
     --data '{"status": "busy", "limit": 1}'
     ```
 
-Output:
+출력:
 
     [{'thread_id': '0d282b22-bbd5-4d95-9c61-04dcc2e302a5',
     'created_at': '2024-08-14T17:41:50.235455+00:00',
     'updated_at': '2024-08-14T17:41:50.235455+00:00',
     'metadata': {'graph_id': 'agent'},
-    'status': 'busy',
+    'status': '바쁨',
     'config': {'configurable': {}}}]
 
-## Find specific threads
+## 특정 스레드 찾기
 
-You may also want to check the status of specific threads, which you can do in a few ways:
+특정 스레드의 상태를 확인하려는 경우 몇 가지 방법으로 확인할 수 있습니다:
 
-### Find by ID
+### ID로 찾기
 
-You can use the `get` function to find the status of a specific thread, as long as you have the ID saved
+ID를 저장하고 있다면 `get` 함수를 사용하여 특정 스레드의 상태를 찾을 수 있습니다.
 
 === "Python"
 
@@ -169,13 +172,13 @@ You can use the `get` function to find the status of a specific thread, as long 
     --header 'Content-Type: application/json' | jq -r '.status'
     ```
 
-Output:
+출력:
 
-    'idle'
+    '유휴'
 
-### Find by metadata
+### 메타데이터로 찾기
 
-The search endpoint for threads also allows you to filter on metadata, which can be helpful if you use metadata to tag threads in order to keep them organized:
+스레드 검색 엔드포인트는 메타데이터로 필터링할 수 있도록 하여 스레드를 정리하는 데 도움이 될 수 있습니다:
 
 === "Python"
 
@@ -198,6 +201,4 @@ The search endpoint for threads also allows you to filter on metadata, which can
     --data '{"metadata": {"foo":"bar"}, "limit": 1}' | jq -r '.[0].status'
     ```
 
-Output:
-
-    'idle'
+'유휴'

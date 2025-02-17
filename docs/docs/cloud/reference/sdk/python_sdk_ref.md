@@ -1,17 +1,19 @@
-# Python SDK Reference
+_한국어로 기계번역됨_
+
+# 파이썬 SDK 참조
 
 ::: langgraph_sdk.client
-    handler: python
+    핸들러: 파이썬
 
 
 ::: langgraph_sdk.schema
-    handler: python
+    핸들러: 파이썬
 
 ::: langgraph_sdk.auth
-    handler: python
+    핸들러: 파이썬
 
 ::: langgraph_sdk.auth.types
-    handler: python
+    핸들러: 파이썬
 
 ::: langgraph_sdk.auth.exceptions
-    handler: python
+    핸들러: 파이썬

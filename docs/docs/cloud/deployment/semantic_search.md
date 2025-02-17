@@ -1,16 +1,18 @@
-# How to add semantic search to your LangGraph deployment
+_한국어로 기계번역됨_
 
-This guide explains how to add semantic search to your LangGraph deployment's cross-thread [store](../../concepts/persistence.md#memory-store), so that your agent can search for memories and other documents by semantic similarity.
+# LangGraph 배포에 의미 검색 추가하는 방법
 
-## Prerequisites
+이 가이드는 의미 검색을 LangGraph 배포의 스레드 간 [저장소](../../concepts/persistence.md#memory-store)에 추가하는 방법을 설명합니다. 이를 통해 에이전트가 기억과 다른 문서를 의미적 유사성으로 검색할 수 있습니다.
 
-- A LangGraph deployment (see [how to deploy](setup_pyproject.md))
-- API keys for your embedding provider (in this case, OpenAI)
-- `langchain >= 0.3.8` (if you specify using the string format below)
+## 전제 조건
 
-## Steps
+- LangGraph 배포가 필요합니다(배포하는 방법은 [여기](setup_pyproject.md)를 참조).
+- 임베딩 제공자의 API 키가 필요합니다(이 경우 OpenAI).
+- `langchain >= 0.3.8` (아래 문자열 형식을 지정할 경우)
 
-1. Update your `langgraph.json` configuration file to include the store configuration:
+## 단계
+
+1. `langgraph.json` 구성 파일을 업데이트하여 저장소 구성을 포함합니다:
 
 ```json
 {
@@ -25,48 +27,48 @@ This guide explains how to add semantic search to your LangGraph deployment's cr
 }
 ```
 
-This configuration:
+이 구성의 의미:
 
-- Uses OpenAI's text-embeddings-3-small model for generating embeddings
-- Sets the embedding dimension to 1536 (matching the model's output)
-- Indexes all fields in your stored data (`["$"]` means index everything, or specify specific fields like `["text", "metadata.title"]`)
+- OpenAI의 text-embeddings-3-small 모델을 사용하여 임베딩을 생성합니다.
+- 임베딩 차원을 1536으로 설정합니다(모델의 출력에 맞춤).
+- 저장된 데이터의 모든 필드를 인덱싱합니다(`["$"]`는 모든 것을 인덱싱함을 의미하며, 특정 필드를 지정하려면 `["text", "metadata.title"]`와 같이 합니다).
 
-2. To use the string embedding format above, make sure your dependencies include `langchain >= 0.3.8`:
+2. 위의 문자열 임베딩 형식을 사용하려면 종속성이 `langchain >= 0.3.8`이 포함되어 있는지 확인합니다:
 
 ```toml
-# In pyproject.toml
+# pyproject.toml에서
 [project]
 dependencies = [
     "langchain>=0.3.8"
 ]
 ```
 
-Or if using requirements.txt:
+또는 requirements.txt를 사용하는 경우:
 
 ```
 langchain>=0.3.8
 ```
 
-## Usage
+## 사용법
 
-Once configured, you can use semantic search in your LangGraph nodes. The store requires a namespace tuple to organize memories:
+구성이 완료되면 LangGraph 노드에서 의미 검색을 사용할 수 있습니다. 저장소는 기억을 구성하기 위한 네임스페이스 튜플이 필요합니다:
 
 ```python
 def search_memory(state: State, *, store: BaseStore):
-    # Search the store using semantic similarity
-    # The namespace tuple helps organize different types of memories
-    # e.g., ("user_facts", "preferences") or ("conversation", "summaries")
+    # 의미적 유사성을 사용하여 저장소 검색
+    # 네임스페이스 튜플은 서로 다른 유형의 기억을 조직하는 데 도움을 줍니다.
+    # 예: ("user_facts", "preferences") 또는 ("conversation", "summaries")
     results = store.search(
-        namespace=("memory", "facts"),  # Organize memories by type
-        query="your search query",
-        limit=3  # number of results to return
+        namespace=("memory", "facts"),  # 유형별로 기억을 조직
+        query="검색 쿼리",
+        limit=3  # 반환할 결과 수
     )
     return results
 ```
 
-## Custom Embeddings
+## 사용자 지정 임베딩
 
-If you want to use custom embeddings, you can pass a path to a custom embedding function:
+사용자 지정 임베딩을 사용하고 싶다면 사용자 지정 임베딩 함수에 대한 경로를 전달할 수 있습니다:
 
 ```json
 {
@@ -81,7 +83,7 @@ If you want to use custom embeddings, you can pass a path to a custom embedding 
 }
 ```
 
-The deployment will look for the function in the specified path. The function must be async and accept a list of strings:
+배포는 지정된 경로에서 함수를 찾습니다. 이 함수는 비동기 함수여야 하며 문자열 목록을 받아야 합니다:
 
 ```python
 # path/to/embedding_function.py
@@ -90,10 +92,10 @@ from openai import AsyncOpenAI
 client = AsyncOpenAI()
 
 async def aembed_texts(texts: list[str]) -> list[list[float]]:
-    """Custom embedding function that must:
-    1. Be async
-    2. Accept a list of strings
-    3. Return a list of float arrays (embeddings)
+    """비동기 사용자 정의 임베딩 함수는 다음과 같은 조건을 만족해야 합니다:
+    1. 비동기여야 한다
+    2. 문자열 리스트를 받아야 한다
+    3. 부동소수점 배열(임베딩)의 리스트를 반환해야 한다
     """
     response = await client.embeddings.create(
         model="text-embedding-3-small",
@@ -102,9 +104,9 @@ async def aembed_texts(texts: list[str]) -> list[list[float]]:
     return [e.embedding for e in response.data]
 ```
 
-## Querying via the API
+## API를 통한 조회
 
-You can also query the store using the LangGraph SDK. Since the SDK uses async operations:
+LangGraph SDK를 사용하여 저장소를 조회할 수도 있습니다. SDK는 비동기 작업을 사용하므로:
 
 ```python
 from langgraph_sdk import get_client
@@ -113,11 +115,11 @@ async def search_store():
     client = get_client()
     results = await client.store.search_items(
         ("memory", "facts"),
-        query="your search query",
-        limit=3  # number of results to return
+        query="검색 쿼리 입력",
+        limit=3  # 반환할 결과 수
     )
     return results
 
-# Use in an async context
+# 비동기 컨텍스트에서 사용
 results = await search_store()
 ```

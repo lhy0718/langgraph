@@ -1,31 +1,33 @@
-# How to Set Up a LangGraph.js Application for Deployment
+_한국어로 기계번역됨_
 
-A [LangGraph.js](https://langchain-ai.github.io/langgraphjs/) application must be configured with a [LangGraph API configuration file](../reference/cli.md#configuration-file) in order to be deployed to LangGraph Cloud (or to be self-hosted). This how-to guide discusses the basic steps to setup a LangGraph.js application for deployment using `package.json` to specify project dependencies.
+# LangGraph.js 애플리케이션 배포 설정 방법
 
-This walkthrough is based on [this repository](https://github.com/langchain-ai/langgraphjs-studio-starter), which you can play around with to learn more about how to setup your LangGraph application for deployment.
+[LangGraph.js](https://langchain-ai.github.io/langgraphjs/) 애플리케이션은 LangGraph Cloud에 배포되거나 자체 호스팅을 위해 [LangGraph API 구성 파일](../reference/cli.md#configuration-file)로 설정되어야 합니다. 이 가이드에서는 `package.json`을 사용하여 프로젝트 종속성을 지정하면서 LangGraph.js 애플리케이션을 배포하도록 설정하는 기본 단계를 설명합니다.
 
-The final repo structure will look something like this:
+이 과정은 [이 리포지토리](https://github.com/langchain-ai/langgraphjs-studio-starter)를 기반으로 하며, 이 리포지토리를 사용해 LangGraph 애플리케이션을 배포하는 방법을 더 알아볼 수 있습니다.
+
+최종 리포지토리 구조는 다음과 같습니다:
 
 ```bash
 my-app/
-├── src # all project code lies within here
-│   ├── utils # optional utilities for your graph
-│   │   ├── tools.ts # tools for your graph
-│   │   ├── nodes.ts # node functions for you graph
-│   │   └── state.ts # state definition of your graph
-│   └── agent.ts # code for constructing your graph
-├── package.json # package dependencies
-├── .env # environment variables
-└── langgraph.json # configuration file for LangGraph
+├── src # 모든 프로젝트 코드가 여기에 포함됩니다
+│   ├── utils # 그래프를 위한 선택적 유틸리티
+│   │   ├── tools.ts # 그래프를 위한 도구
+│   │   ├── nodes.ts # 그래프를 위한 노드 함수
+│   │   └── state.ts # 그래프의 상태 정의
+│   └── agent.ts # 그래프를 구성하는 코드
+├── package.json # 패키지 종속성
+├── .env # 환경 변수
+└── langgraph.json # LangGraph 구성 파일
 ```
 
-After each step, an example file directory is provided to demonstrate how code can be organized.
+각 단계 후에는 코드를 어떻게 구성할 수 있는지 보여주는 예시 파일 디렉토리가 제공됩니다.
 
-## Specify Dependencies
+## 종속성 지정
 
-Dependencies can be specified in a `package.json`. If none of these files is created, then dependencies can be specified later in the [LangGraph API configuration file](#create-langgraph-api-config).
+종속성은 `package.json`에 지정할 수 있습니다. 이러한 파일이 생성되지 않은 경우, 이후 [LangGraph API 구성 파일](#create-langgraph-api-config)에서 종속성을 지정할 수 있습니다.
 
-Example `package.json` file:
+예시 `package.json` 파일:
 
 ```json
 {
@@ -40,18 +42,18 @@ Example `package.json` file:
 }
 ```
 
-Example file directory:
+예시 파일 디렉토리:
 
 ```bash
 my-app/
-└── package.json # package dependencies
+└── package.json # 패키지 종속성
 ```
 
-## Specify Environment Variables
+## 환경 변수 지정
 
-Environment variables can optionally be specified in a file (e.g. `.env`). See the [Environment Variables reference](../reference/env_var.md) to configure additional variables for a deployment.
+환경 변수는 선택적으로 파일(예: `.env`)에 지정할 수 있습니다. 배포를 위해 추가 변수를 구성하려면 [환경 변수 참조](../reference/env_var.md)를 참조하세요.
 
-Example `.env` file:
+예시 `.env` 파일:
 
 ```
 MY_ENV_VAR_1=foo
@@ -60,19 +62,19 @@ OPENAI_API_KEY=key
 TAVILY_API_KEY=key_2
 ```
 
-Example file directory:
+예시 파일 디렉토리:
 
 ```bash
 my-app/
 ├── package.json
-└── .env # environment variables
+└── .env # 환경 변수
 ```
 
-## Define Graphs
+## 그래프 정의
 
-Implement your graphs! Graphs can be defined in a single file or multiple files. Make note of the variable names of each compiled graph to be included in the LangGraph application. The variable names will be used later when creating the [LangGraph API configuration file](../reference/cli.md#configuration-file).
+그래프를 구현하세요! 그래프는 단일 파일 또는 여러 파일로 정의할 수 있습니다. LangGraph 애플리케이션에 포함될 각 컴파일된 그래프의 변수 이름에 유의하세요. 이 변수 이름은 [LangGraph API 구성 파일](../reference/cli.md#configuration-file)을 만들 때 사용됩니다.
 
-Here is an example `agent.ts`:
+다음은 예시 `agent.ts`입니다:
 
 ```ts
 import type { AIMessage } from "@langchain/core/messages";
@@ -86,13 +88,13 @@ const tools = [
   new TavilySearchResults({ maxResults: 3, }),
 ];
 
-// Define the function that calls the model
+// 모델을 호출하는 함수를 정의합니다.
 async function callModel(
   state: typeof MessagesAnnotation.State,
 ) {
   /**
-   * Call the LLM powering our agent.
-   * Feel free to customize the prompt, model, and other logic!
+   * 우리의 에이전트를 지원하는 LLM을 호출합니다.
+   * 프롬프트, 모델 및 기타 논리를 자유롭게 사용자 정의하세요!
    */
   const model = new ChatOpenAI({
     model: "gpt-4o",
@@ -101,82 +103,80 @@ async function callModel(
   const response = await model.invoke([
     {
       role: "system",
-      content: `You are a helpful assistant. The current date is ${new Date().getTime()}.`
+      content: `당신은 유용한 조수입니다. 현재 날짜는 ${new Date().getTime()}입니다.`
     },
     ...state.messages
   ]);
 
-  // MessagesAnnotation supports returning a single message or array of messages
+  // MessagesAnnotation은 단일 메시지 또는 메시지 배열을 반환하는 것을 지원합니다.
   return { messages: response };
 }
 
-// Define the function that determines whether to continue or not
+// 계속할지 여부를 결정하는 함수를 정의합니다.
 function routeModelOutput(state: typeof MessagesAnnotation.State) {
   const messages = state.messages;
   const lastMessage: AIMessage = messages[messages.length - 1];
-  // If the LLM is invoking tools, route there.
+  // LLM이 도구를 호출 중일 경우, 해당 위치로 라우팅합니다.
   if ((lastMessage?.tool_calls?.length ?? 0) > 0) {
     return "tools";
   }
-  // Otherwise end the graph.
+  // 그렇지 않으면 그래프를 종료합니다.
   return "__end__";
 }
 
-// Define a new graph.
-// See https://langchain-ai.github.io/langgraphjs/how-tos/define-state/#getting-started for
-// more on defining custom graph states.
+// 새로운 그래프를 정의합니다.
+// 사용자 정의 그래프 상태 정의에 대한 자세한 내용은 https://langchain-ai.github.io/langgraphjs/how-tos/define-state/#getting-started을 참조하세요.
 const workflow = new StateGraph(MessagesAnnotation)
-  // Define the two nodes we will cycle between
+  // 우리가 순환할 두 노드를 정의합니다.
   .addNode("callModel", callModel)
   .addNode("tools", new ToolNode(tools))
-  // Set the entrypoint as `callModel`
-  // This means that this node is the first one called
+  // 진입점을 `callModel`로 설정합니다.
+  // 이는 이 노드가 처음 호출되는 노드임을 의미합니다.
   .addEdge("__start__", "callModel")
   .addConditionalEdges(
-    // First, we define the edges' source node. We use `callModel`.
-    // This means these are the edges taken after the `callModel` node is called.
+    // 먼저, 에지의 출발 노드를 정의합니다. `callModel`을 사용합니다.
+    // 이는 `callModel` 노드가 호출된 후의 에지들입니다.
     "callModel",
-    // Next, we pass in the function that will determine the sink node(s), which
-    // will be called after the source node is called.
+    // 다음으로, 출발 노드가 호출된 후에 호출될 노드(들)를 결정할 함수를 전달합니다.
     routeModelOutput,
-    // List of the possible destinations the conditional edge can route to.
-    // Required for conditional edges to properly render the graph in Studio
+    // 조건부 에지가 라우팅할 수 있는 가능한 목적지 목록입니다.
+    // 스튜디오에서 그래프가 제대로 렌더링되도록 요구됩니다.
     [
       "tools",
       "__end__"
     ],
   )
-  // This means that after `tools` is called, `callModel` node is called next.
+  // 이는 `tools`가 호출된 후, 다음에 `callModel` 노드가 호출된다는 의미입니다.
   .addEdge("tools", "callModel");
 
-// Finally, we compile it!
-// This compiles it into a graph you can invoke and deploy.
+// 마지막으로, 컴파일합니다!
+// 이는 호출하고 배포할 수 있는 그래프로 컴파일합니다.
 export const graph = workflow.compile();
 ```
 
-!!! info "Assign `CompiledGraph` to Variable"
-    The build process for LangGraph Cloud requires that the `CompiledGraph` object be assigned to a variable at the top-level of a JavaScript module (alternatively, you can provide [a function that creates a graph](./graph_rebuild.md)).
+!!! 정보 "변수에 `CompiledGraph` 할당"
+    LangGraph Cloud의 빌드 프로세스는 `CompiledGraph` 객체가 JavaScript 모듈의 최상위에 변수로 할당되어야 합니다 (또는 그래프를 생성하는 [함수를 제공할 수 있습니다](./graph_rebuild.md)).
 
-Example file directory:
+예시 파일 디렉토리:
 
 ```bash
 my-app/
-├── src # all project code lies within here
-│   ├── utils # optional utilities for your graph
-│   │   ├── tools.ts # tools for your graph
-│   │   ├── nodes.ts # node functions for you graph
-│   │   └── state.ts # state definition of your graph
-│   └── agent.ts # code for constructing your graph
-├── package.json # package dependencies
-├── .env # environment variables
-└── langgraph.json # configuration file for LangGraph
+├── src # 모든 프로젝트 코드가 여기 있습니다
+│   ├── utils # 그래프에 대한 선택적 유틸리티
+│   │   ├── tools.ts # 그래프에 대한 도구
+│   │   ├── nodes.ts # 그래프에 대한 노드 함수
+│   │   └── state.ts # 그래프의 상태 정의
+│   └── agent.ts # 그래프를 구성하는 코드
+├── package.json # 패키지 의존성
+├── .env # 환경 변수
+└── langgraph.json # LangGraph 구성 파일
 ```
 
-## Create LangGraph API Config
+## LangGraph API 구성 생성
 
-Create a [LangGraph API configuration file](../reference/cli.md#configuration-file) called `langgraph.json`. See the [LangGraph CLI reference](../reference/cli.md#configuration-file) for detailed explanations of each key in the JSON object of the configuration file.
+`langgraph.json`이라는 LangGraph API 구성 파일을 생성합니다. 구성 파일의 JSON 객체에 있는 각 키에 대한 자세한 설명은 LangGraph CLI 참조를 확인하십시오.
 
-Example `langgraph.json` file:
+예시 `langgraph.json` 파일:
 
 ```json
 {
@@ -190,11 +190,11 @@ Example `langgraph.json` file:
 }
 ```
 
-Note that the variable name of the `CompiledGraph` appears at the end of the value of each subkey in the top-level `graphs` key (i.e. `:<variable_name>`).
+상위 `graphs` 키의 각 하위 키 값 끝에 `CompiledGraph`의 변수 이름이 나타나야 한다는 점에 유의하세요 (즉, `:<variable_name>`).
 
-!!! info "Configuration Location"
-    The LangGraph API configuration file must be placed in a directory that is at the same level or higher than the TypeScript files that contain compiled graphs and associated dependencies.
+!!! 정보 "구성 위치"
+    LangGraph API 구성 파일은 컴파일된 그래프 및 관련 종속성을 포함하는 TypeScript 파일과 동일한 수준이거나 그보다 높은 디렉터리에 배치해야 합니다.
 
-## Next
+## 다음
 
-After you setup your project and place it in a github repo, it's time to [deploy your app](./cloud.md).
+프로젝트를 설정하고 GitHub 저장소에 배치한 후에는 [앱 배포](./cloud.md)로 이동할 시간입니다.

@@ -1,109 +1,104 @@
-# How to Add Breakpoints
+_한국어로 기계번역됨_
 
-When creating LangGraph agents, it is often nice to add a human-in-the-loop component.
-This can be helpful when giving them access to tools.
-Often in these situations you may want to manually approve an action before taking.
+# 중단점 추가 방법
 
-This can be in several ways, but the primary supported way is to add an "interrupt" before a node is executed.
-This interrupts execution at that node.
-You can then resume from that spot to continue.  
+LangGraph 에이전트를 생성할 때, 종종 인간의 개입이 필요한 요소를 추가하는 것이 유용할 수 있습니다. 이는 도구에 접근할 수 있게 할 때 도움이 될 수 있습니다. 이러한 상황에서는 작업을 실행하기 전에 수동으로 승인하고 싶을 수 있습니다.
 
-## Setup
+이는 여러 가지 방법으로 이루어질 수 있지만, 주로 지원되는 방법은 노드가 실행되기 전에 "중단(interrupt)"을 추가하는 것입니다. 이는 해당 노드에서 실행을 중단시킵니다. 그 자리를 계속 진행할 수 있습니다.
 
-### Code for your graph
+## 설정
 
-In this how-to we use a simple ReAct style hosted graph (you can see the full code for defining it [here](../../how-tos/human_in_the_loop/breakpoints.ipynb)). The important thing is that there are two nodes (one named `agent` that calls the LLM, and one named `action` that calls the tool), and a routing function from `agent` that determines whether to call `action` next or just end the graph run (the `action` node always calls the `agent` node after execution).
+### 그래프 코드
 
-### SDK Initialization
+이 방법에서는 간단한 ReAct 스타일의 호스팅된 그래프를 사용합니다(정의에 대한 전체 코드는 [여기](../../how-tos/human_in_the_loop/breakpoints.ipynb)에서 볼 수 있습니다). 중요한 것은 두 개의 노드가 있어야 한다는 것입니다(하나는 LLM을 호출하는 `agent`, 다른 하나는 도구를 호출하는 `action`), 그리고 `agent`에서 `action`을 호출할지 아니면 그래프 실행을 종료할지를 결정하는 라우팅 함수가 있어야 합니다(`action` 노드는 실행 후 항상 `agent` 노드를 호출합니다).
 
+### SDK 초기화
 
-=== "Python"
+=== "파이썬"
 
-    ```python
-    from langgraph_sdk import get_client
-    client = get_client(url=<DEPLOYMENT_URL>)
-    # Using the graph deployed with the name "agent"
-    assistant_id = "agent"
-    thread = await client.threads.create()
-    ```
+```python
+from langgraph_sdk import get_client
+client = get_client(url=<DEPLOYMENT_URL>)
+# "agent"라는 이름으로 배포된 그래프 사용
+assistant_id = "agent"
+thread = await client.threads.create()
+```
 
-=== "Javascript"
+=== "자바스크립트"
 
-    ```js
-    import { Client } from "@langchain/langgraph-sdk";
+```js
+import { Client } from "@langchain/langgraph-sdk";
 
-    const client = new Client({ apiUrl: <DEPLOYMENT_URL> });
-    // Using the graph deployed with the name "agent"
-    const assistantId = "agent";
-    const thread = await client.threads.create();
-    ```
+const client = new Client({ apiUrl: <DEPLOYMENT_URL> });
+// "agent"라는 이름으로 배포된 그래프 사용
+const assistantId = "agent";
+const thread = await client.threads.create();
+```
+
+=== "CURL"
+
+```bash
+curl --request POST \
+  --url <DEPLOYMENT_URL>/threads \
+  --header 'Content-Type: application/json' \
+  --data '{}'
+```
+
+## 중단점 추가
+
+이제 그래프 실행에 중단점을 추가하고자 하며, 이는 도구가 호출되기 전에 수행됩니다. `interrupt_before=["action"]`를 추가하여 action 노드를 호출하기 전에 중단하라는 지시를 할 수 있습니다. 이는 그래프를 컴파일 할 때 또는 실행을 시작할 때 수행할 수 있습니다. 여기서는 실행을 시작할 때 수행할 것이며, 컴파일 시 추가하고 싶다면 그래프가 정의된 파이썬 파일을 수정하고 `.compile`을 호출할 때 `interrupt_before` 매개변수를 추가해야 합니다.
+
+먼저 SDK를 통해 호스팅된 LangGraph 인스턴스에 접근해 보겠습니다:
+
+그리고 이제 도구 노드 앞에 중단점을 추가하여 컴파일해 보겠습니다:
+
+=== "파이썬"
+
+```python
+input = {"messages": [{"role": "user", "content": "샌프란시스코의 날씨는 어때요?"}]}
+async for chunk in client.runs.stream(
+    thread["thread_id"],
+    assistant_id,
+    input=input,
+    stream_mode="updates",
+    interrupt_before=["action"],
+):
+    print(f"새로운 타입의 이벤트 수신: {chunk.event}...")
+    print(chunk.data)
+    print("\n\n")
+```
+
+=== "자바스크립트"
+
+```js
+const input = { messages: [{ role: "human", content: "샌프란시스코의 날씨는 어때요?" }] };
+
+const streamResponse = client.runs.stream(
+  thread["thread_id"],
+  assistantId,
+  {
+    input: input,
+    streamMode: "updates",
+    interruptBefore: ["action"]
+  }
+);
+
+for await (const chunk of streamResponse) {
+  console.log(`새로운 타입의 이벤트 수신: ${chunk.event}...`);
+  console.log(chunk.data);
+  console.log("\n\n");
+}
+```
 
 === "CURL"
 
     ```bash
     curl --request POST \
-      --url <DEPLOYMENT_URL>/threads \
-      --header 'Content-Type: application/json' \
-      --data '{}'
-    ```
-
-## Adding a breakpoint
-
-We now want to add a breakpoint in our graph run, which we will do before a tool is called.
-We can do this by adding `interrupt_before=["action"]`, which tells us to interrupt before calling the action node.
-We can do this either when compiling the graph or when kicking off a run.
-Here we will do it when kicking of a run, if you would like to to do it at compile time you need to edit the python file where your graph is defined and add the `interrupt_before` parameter when you call `.compile`.
-
-First let's access our hosted LangGraph instance through the SDK:
-
-And, now let's compile it with a breakpoint before the tool node:
-
-=== "Python"
-
-    ```python
-    input = {"messages": [{"role": "user", "content": "what's the weather in sf"}]}
-    async for chunk in client.runs.stream(
-        thread["thread_id"],
-        assistant_id,
-        input=input,
-        stream_mode="updates",
-        interrupt_before=["action"],
-    ):
-        print(f"Receiving new event of type: {chunk.event}...")
-        print(chunk.data)
-        print("\n\n")
-    ```
-=== "Javascript"
-
-    ```js
-    const input = { messages: [{ role: "human", content: "what's the weather in sf" }] };
-
-    const streamResponse = client.runs.stream(
-      thread["thread_id"],
-      assistantId,
-      {
-        input: input,
-        streamMode: "updates",
-        interruptBefore: ["action"]
-      }
-    );
-
-    for await (const chunk of streamResponse) {
-      console.log(`Receiving new event of type: ${chunk.event}...`);
-      console.log(chunk.data);
-      console.log("\n\n");
-    }
-    ```
-    
-=== "CURL"
-
-    ```bash
-    curl --request POST \
-     --url <DEPLOYMENT_URL>/threads/<THREAD_ID>/runs/stream \
+     --url <배포_URL>/threads/<스레드_ID>/runs/stream \
      --header 'Content-Type: application/json' \
      --data "{
        \"assistant_id\": \"agent\",
-       \"input\": {\"messages\": [{\"role\": \"human\", \"content\": \"what's the weather in sf\"}]},
+       \"input\": {\"messages\": [{\"role\": \"human\", \"content\": \"샌프란시스코의 날씨는 어때?\"}]},
        \"interrupt_before\": [\"action\"],
        \"stream_mode\": [
          \"messages\"
@@ -115,7 +110,7 @@ And, now let's compile it with a breakpoint before the tool node:
          if (data_content != "") {
              print data_content "\n"
          }
-         sub(/^event: /, "Receiving event of type: ", $0)
+         sub(/^event: /, "수신된 이벤트 유형: ", $0)
          printf "%s...\n", $0
          data_content = ""
      }
@@ -131,19 +126,15 @@ And, now let's compile it with a breakpoint before the tool node:
      '
     ```
 
-Output:
+출력:
 
-    Receiving new event of type: metadata...
+    수신된 새 이벤트 유형: metadata...
     {'run_id': '3b77ef83-687a-4840-8858-0371f91a92c3'}
     
+    수신된 새 이벤트 유형: data...
+    {'agent': {'messages': [{'content': [{'id': 'toolu_01HwZqM1ptX6E15A5LAmyZTB', 'input': {'query': '샌프란시스코의 날씨'}, 'name': 'tavily_search_results_json', 'type': 'tool_use'}], 'additional_kwargs': {}, 'response_metadata': {}, 'type': 'ai', 'name': None, 'id': 'run-e5d17791-4d37-4ad2-815f-a0c4cba62585', 'example': False, 'tool_calls': [{'name': 'tavily_search_results_json', 'args': {'query': '샌프란시스코의 날씨'}, 'id': 'toolu_01HwZqM1ptX6E15A5LAmyZTB'}], 'invalid_tool_calls': []}]}}
     
-    
-    Receiving new event of type: data...
-    {'agent': {'messages': [{'content': [{'id': 'toolu_01HwZqM1ptX6E15A5LAmyZTB', 'input': {'query': 'weather in san francisco'}, 'name': 'tavily_search_results_json', 'type': 'tool_use'}], 'additional_kwargs': {}, 'response_metadata': {}, 'type': 'ai', 'name': None, 'id': 'run-e5d17791-4d37-4ad2-815f-a0c4cba62585', 'example': False, 'tool_calls': [{'name': 'tavily_search_results_json', 'args': {'query': 'weather in san francisco'}, 'id': 'toolu_01HwZqM1ptX6E15A5LAmyZTB'}], 'invalid_tool_calls': []}]}}
-    
-    
-    
-    Receiving new event of type: end...
+    수신된 새 이벤트 유형: end...
     None
     
     

@@ -1,104 +1,108 @@
-# How to kick off background runs
- 
+_한국어로 기계번역됨_
 
-This guide covers how to kick off background runs for your agent.
-This can be useful for long running jobs.
+# 백그라운드 실행 시작하기
 
-## Setup
+이 가이드는 에이전트를 위한 백그라운드 실행을 시작하는 방법을 다룹니다. 이는 장시간 실행되는 작업에 유용할 수 있습니다.
 
-First let's set up our client and thread:
+## 설정
+
+먼저 클라이언트와 스레드를 설정해보겠습니다.
 
 === "Python"
 
-    ```python
-    from langgraph_sdk import get_client
+```python
+from langgraph_sdk import get_client
 
-    client = get_client(url=<DEPLOYMENT_URL>)
-    # Using the graph deployed with the name "agent"
-    assistant_id = "agent"
-    # create thread
-    thread = await client.threads.create()
-    print(thread)
-    ```
+client = get_client(url=<DEPLOYMENT_URL>)
+# 이름이 "agent"인 그래프 사용
+assistant_id = "agent"
+# 스레드 생성
+thread = await client.threads.create()
+print(thread)
+```
 
 === "Javascript"
 
-    ```js
-    import { Client } from "@langchain/langgraph-sdk";
+```js
+import { Client } from "@langchain/langgraph-sdk";
 
-    const client = new Client({ apiUrl: <DEPLOYMENT_URL> });
-    // Using the graph deployed with the name "agent"
-    const assistantID = "agent";
-    // create thread
-    const thread = await client.threads.create();
-    console.log(thread);
-    ```
+const client = new Client({ apiUrl: <DEPLOYMENT_URL> });
+// 이름이 "agent"인 그래프 사용
+const assistantID = "agent";
+// 스레드 생성
+const thread = await client.threads.create();
+console.log(thread);
+```
 
 === "CURL"
 
-    ```bash
-    curl --request POST \
-      --url <DEPLOYMENT_URL>/threads \
-      --header 'Content-Type: application/json' \
-      --data '{}'
-    ```
+```bash
+curl --request POST \
+  --url <DEPLOYMENT_URL>/threads \
+  --header 'Content-Type: application/json' \
+  --data '{}'
+```
 
-Output:
+출력:
 
-    {
-        'thread_id': '5cb1e8a1-34b3-4a61-a34e-71a9799bd00d',
-        'created_at': '2024-08-30T20:35:52.062934+00:00',
-        'updated_at': '2024-08-30T20:35:52.062934+00:00',
-        'metadata': {},
-        'status': 'idle',
-        'config': {},
-        'values': None
-    }
+```json
+{
+    'thread_id': '5cb1e8a1-34b3-4a61-a34e-71a9799bd00d',
+    'created_at': '2024-08-30T20:35:52.062934+00:00',
+    'updated_at': '2024-08-30T20:35:52.062934+00:00',
+    'metadata': {},
+    'status': 'idle',
+    'config': {},
+    'values': None
+}
+```
 
-## Check runs on thread
+## 스레드에서 실행 목록 확인
 
-If we list the current runs on this thread, we will see that it's empty:
+이 스레드에서 현재 실행 목록을 나열하면 빈 목록이 표시됩니다:
 
 === "Python"
 
-    ```python
-    runs = await client.runs.list(thread["thread_id"])
-    print(runs)
-    ```
+```python
+runs = await client.runs.list(thread["thread_id"])
+print(runs)
+```
 
 === "Javascript"
 
-    ```js
-    let runs = await client.runs.list(thread['thread_id']);
-    console.log(runs);
-    ```
+```js
+let runs = await client.runs.list(thread['thread_id']);
+console.log(runs);
+```
 
 === "CURL"
 
-    ```bash
-    curl --request GET \
-        --url <DEPLOYMENT_URL>/threads/<THREAD_ID>/runs
-    ```
+```bash
+curl --request GET \
+    --url <DEPLOYMENT_URL>/threads/<THREAD_ID>/runs
+```
 
-Output:
+출력:
 
-    []
+```json
+[]
+```
 
-## Start runs on thread
+## 스레드에서 실행 시작하기
 
-Now let's kick off a run:
+이제 실행을 시작해보겠습니다:
 
 === "Python"
 
-    ```python
-    input = {"messages": [{"role": "user", "content": "what's the weather in sf"}]}
-    run = await client.runs.create(thread["thread_id"], assistant_id, input=input)
-    ```
+```python
+input = {"messages": [{"role": "user", "content": "샌프란시스코의 날씨는 어때?"}]}
+run = await client.runs.create(thread["thread_id"], assistant_id, input=input)
+```
 
 === "Javascript"
 
     ```js
-    let input = {"messages": [{"role": "user", "content": "what's the weather in sf"}]};
+    let input = {"messages": [{"role": "user", "content": "샌프란시스코의 날씨는 어떻습니까?"}]};
     let run = await client.runs.create(thread["thread_id"], assistantID, { input });
     ```
 
@@ -113,7 +117,7 @@ Now let's kick off a run:
         }'
     ```
 
-The first time we poll it, we can see `status=pending`:
+처음으로 폴링할 때, `status=pending`을 볼 수 있습니다:
 
 === "Python"
 
@@ -134,7 +138,7 @@ The first time we poll it, we can see `status=pending`:
         --url <DEPLOYMENT_URL>/threads/<THREAD_ID>/runs/<RUN_ID>
     ```
 
-Output:
+출력:
 
         {
             "run_id": "1ef6a5f8-bd86-6763-bbd6-bff042db7b1b",
@@ -149,7 +153,7 @@ Output:
                     "messages": [
                         {
                             "role": "user",
-                            "content": "what's the weather in sf"
+                            "content": "샌프란시스코의 날씨는 어떻습니까?"
                         }
                     ]
                 },
@@ -178,9 +182,7 @@ Output:
             "multitask_strategy": "reject"
         }
 
-
-
-Now we can join the run, wait for it to finish and check that status again:
+이제 실행을 참여하고, 완료될 때까지 기다린 후 다시 상태를 확인할 수 있습니다:
 
 === "Python"
 
@@ -200,12 +202,12 @@ Now we can join the run, wait for it to finish and check that status again:
 
     ```bash
     curl --request GET \
-        --url <DEPLOYMENT_URL>/threads/<THREAD_ID>/runs/<RUN_ID>/join &&
+        --url <배포_URL>/threads/<스레드_ID>/runs/<실행_ID>/join &&
     curl --request GET \
-        --url <DEPLOYMENT_URL>/threads/<THREAD_ID>/runs/<RUN_ID>
+        --url <배포_URL>/threads/<스레드_ID>/runs/<실행_ID>
     ```
 
-Output:
+출력:
 
     {
         "run_id": "1ef6a5f8-bd86-6763-bbd6-bff042db7b1b",
@@ -220,7 +222,7 @@ Output:
                 "messages": [
                     {
                         "role": "user",
-                        "content": "what's the weather in sf"
+                        "content": "샌프란시스코 날씨 어때?"
                     }
                 ]
             },
@@ -250,16 +252,16 @@ Output:
     }
 
 
-Perfect! The run succeeded as we would expect. We can double check that the run worked as expected by printing out the final state:
+완벽합니다! 실행이 예상대로 성공했습니다. 최종 상태를 출력하여 실행이 제대로 되었는지 다시 확인할 수 있습니다:
 
-=== "Python"
+=== "파이썬"
 
     ```python
     final_result = await client.threads.get_state(thread["thread_id"])
     print(final_result)
     ```
 
-=== "Javascript"
+=== "자바스크립트"
 
     ```js
     let finalResult = await client.threads.getState(thread["thread_id"]);
@@ -270,16 +272,16 @@ Perfect! The run succeeded as we would expect. We can double check that the run 
 
     ```bash
     curl --request GET \
-        --url <DEPLOYMENT_URL>/threads/<THREAD_ID>/state
+        --url <배포_URL>/threads/<스레드_ID>/state
     ```
 
-Output:
+출력:
 
     {
         "values": {
             "messages": [
                 {
-                    "content": "what's the weather in sf",
+                    "content": "샌프란시스코 날씨 어때?",
                     "additional_kwargs": {},
                     "response_metadata": {},
                     "type": "human",
@@ -295,7 +297,7 @@ Output:
                             "name": "tavily_search_results_json",
                             "type": "tool_use",
                             "index": 0,
-                            "partial_json": "{\"query\": \"weather in san francisco\"}"
+                            "partial_json": "{\"query\": \"샌프란시스코 날씨\"}"
                         }
                     ],
                     "additional_kwargs": {},
@@ -311,7 +313,7 @@ Output:
                         {
                             "name": "tavily_search_results_json",
                             "args": {
-                                "query": "weather in san francisco"
+                                "query": "샌프란시스코 날씨"
                             },
                             "id": "toolu_01AaNPSPzqia21v7aAKwbKYm",
                             "type": "tool_call"
@@ -325,7 +327,7 @@ Output:
                     }
                 },
                 {
-                    "content": "[{\"url\": \"https://www.weatherapi.com/\", \"content\": \"{'location': {'name': 'San Francisco', 'region': 'California', 'country': 'United States of America', 'lat': 37.78, 'lon': -122.42, 'tz_id': 'America/Los_Angeles', 'localtime_epoch': 1725052131, 'localtime': '2024-08-30 14:08'}, 'current': {'last_updated_epoch': 1725051600, 'last_updated': '2024-08-30 14:00', 'temp_c': 21.1, 'temp_f': 70.0, 'is_day': 1, 'condition': {'text': 'Partly cloudy', 'icon': '//cdn.weatherapi.com/weather/64x64/day/116.png', 'code': 1003}, 'wind_mph': 11.9, 'wind_kph': 19.1, 'wind_degree': 290, 'wind_dir': 'WNW', 'pressure_mb': 1018.0, 'pressure_in': 30.07, 'precip_mm': 0.0, 'precip_in': 0.0, 'humidity': 59, 'cloud': 25, 'feelslike_c': 21.1, 'feelslike_f': 70.0, 'windchill_c': 18.6, 'windchill_f': 65.5, 'heatindex_c': 18.6, 'heatindex_f': 65.5, 'dewpoint_c': 12.2, 'dewpoint_f': 54.0, 'vis_km': 16.0, 'vis_miles': 9.0, 'uv': 5.0, 'gust_mph': 15.0, 'gust_kph': 24.2}}\"}]",
+                    "content": "[{\"url\": \"https://www.weatherapi.com/\", \"content\": \"{'location': {'name': '샌프란시스코', 'region': '캘리포니아', 'country': '미국', 'lat': 37.78, 'lon': -122.42, 'tz_id': 'America/Los_Angeles', 'localtime_epoch': 1725052131, 'localtime': '2024-08-30 14:08'}, 'current': {'last_updated_epoch': 1725051600, 'last_updated': '2024-08-30 14:00', 'temp_c': 21.1, 'temp_f': 70.0, 'is_day': 1, 'condition': {'text': '부분적으로 흐림', 'icon': '//cdn.weatherapi.com/weather/64x64/day/116.png', 'code': 1003}, 'wind_mph': 11.9, 'wind_kph': 19.1, 'wind_degree': 290, 'wind_dir': '서북서', 'pressure_mb': 1018.0, 'pressure_in': 30.07, 'precip_mm': 0.0, 'precip_in': 0.0, 'humidity': 59, 'cloud': 25, 'feelslike_c': 21.1, 'feelslike_f': 70.0, 'windchill_c': 18.6, 'windchill_f': 65.5, 'heatindex_c': 18.6, 'heatindex_f': 65.5, 'dewpoint_c': 12.2, 'dewpoint_f': 54.0, 'vis_km': 16.0, 'vis_miles': 9.0, 'uv': 5.0, 'gust_mph': 15.0, 'gust_kph': 24.2}}\"}]",
                     "additional_kwargs": {},
                     "response_metadata": {},
                     "type": "tool",
@@ -333,15 +335,15 @@ Output:
                     "id": "686b2487-f332-4e58-9508-89b3a814cd81",
                     "tool_call_id": "toolu_01AaNPSPzqia21v7aAKwbKYm",
                     "artifact": {
-                        "query": "weather in san francisco",
+                        "query": "샌프란시스코 날씨",
                         "follow_up_questions": null,
                         "answer": null,
                         "images": [],
                         "results": [
                             {
-                                "title": "Weather in San Francisco",
+                                "title": "샌프란시스코 날씨",
                                 "url": "https://www.weatherapi.com/",
-                                "content": "{'location': {'name': 'San Francisco', 'region': 'California', 'country': 'United States of America', 'lat': 37.78, 'lon': -122.42, 'tz_id': 'America/Los_Angeles', 'localtime_epoch': 1725052131, 'localtime': '2024-08-30 14:08'}, 'current': {'last_updated_epoch': 1725051600, 'last_updated': '2024-08-30 14:00', 'temp_c': 21.1, 'temp_f': 70.0, 'is_day': 1, 'condition': {'text': 'Partly cloudy', 'icon': '//cdn.weatherapi.com/weather/64x64/day/116.png', 'code': 1003}, 'wind_mph': 11.9, 'wind_kph': 19.1, 'wind_degree': 290, 'wind_dir': 'WNW', 'pressure_mb': 1018.0, 'pressure_in': 30.07, 'precip_mm': 0.0, 'precip_in': 0.0, 'humidity': 59, 'cloud': 25, 'feelslike_c': 21.1, 'feelslike_f': 70.0, 'windchill_c': 18.6, 'windchill_f': 65.5, 'heatindex_c': 18.6, 'heatindex_f': 65.5, 'dewpoint_c': 12.2, 'dewpoint_f': 54.0, 'vis_km': 16.0, 'vis_miles': 9.0, 'uv': 5.0, 'gust_mph': 15.0, 'gust_kph': 24.2}}",
+                                "content": "{'location': {'name': '샌프란시스코', 'region': '캘리포니아', 'country': '미국', 'lat': 37.78, 'lon': -122.42, 'tz_id': 'America/Los_Angeles', 'localtime_epoch': 1725052131, 'localtime': '2024-08-30 14:08'}, 'current': {'last_updated_epoch': 1725051600, 'last_updated': '2024-08-30 14:00', 'temp_c': 21.1, 'temp_f': 70.0, 'is_day': 1, 'condition': {'text': '부분적으로 흐림', 'icon': '//cdn.weatherapi.com/weather/64x64/day/116.png', 'code': 1003}, 'wind_mph': 11.9, 'wind_kph': 19.1, 'wind_degree': 290, 'wind_dir': '서북서', 'pressure_mb': 1018.0, 'pressure_in': 30.07, 'precip_mm': 0.0, 'precip_in': 0.0, 'humidity': 59, 'cloud': 25, 'feelslike_c': 21.1, 'feelslike_f': 70.0, 'windchill_c': 18.6, 'windchill_f': 65.5, 'heatindex_c': 18.6, 'heatindex_f': 65.5, 'dewpoint_c': 12.2, 'dewpoint_f': 54.0, 'vis_km': 16.0, 'vis_miles': 9.0, 'uv': 5.0, 'gust_mph': 15.0, 'gust_kph': 24.2}}",
                                 "score": 0.976148,
                                 "raw_content": null
                             }
@@ -353,7 +355,7 @@ Output:
                 {
                     "content": [
                         {
-                            "text": "\n\nThe search results provide the current weather conditions in San Francisco. According to the data, as of 2:00 PM on August 30, 2024, the temperature in San Francisco is 70\u00b0F (21.1\u00b0C) with partly cloudy skies. The wind is blowing from the west-northwest at around 12 mph (19 km/h). The humidity is 59% and visibility is 9 miles (16 km). Overall, it looks like a nice late summer day in San Francisco with comfortable temperatures and partly sunny conditions.",
+                            "text": "\n\n검색 결과는 샌프란시스코의 현재 날씨 조건을 제공합니다. 데이터에 따르면, 2024년 8월 30일 오후 2시 기준 샌프란시스코의 기온은 70°F(21.1°C)로 부분적으로 흐림 상태입니다. 바람은 서북서에서 시속 약 12마일(19km/h)로 불고 있습니다. 습도는 59%이며 시야는 9마일(16km)입니다. 전반적으로 샌프란시스코의 늦여름에 기온이 쾌적하고 부분적으로 맑은 날씨로 보입니다.",
                             "type": "text",
                             "index": 0
                         }
@@ -392,60 +394,7 @@ Output:
                             "type": "ai",
                             "content": [
                                 {
-                                    "text": "\n\nThe search results provide the current weather conditions in San Francisco. According to the data, as of 2:00 PM on August 30, 2024, the temperature in San Francisco is 70\u00b0F (21.1\u00b0C) with partly cloudy skies. The wind is blowing from the west-northwest at around 12 mph (19 km/h). The humidity is 59% and visibility is 9 miles (16 km). Overall, it looks like a nice late summer day in San Francisco with comfortable temperatures and partly sunny conditions.",
+                                    "text": "\n\n검색 결과는 샌프란시스코의 현재 날씨 조건을 제공합니다. 데이터에 따르면, 2024년 8월 30일 오후 2시 기준 샌프란시스코의 기온은 70°F(21.1°C)로 부분적으로 흐림 상태입니다. 바람은 서북서에서 시속 약 12마일(19km/h)로 불고 있습니다. 습도는 59%이며 시야는 9마일(16km)입니다. 전반적으로 샌프란시스코의 늦여름에 기온이 쾌적하고 부분적으로 맑은 날씨로 보입니다.",
                                     "type": "text",
                                     "index": 0
-                                }
-                            ],
-                            "example": false,
-                            "tool_calls": [],
-                            "usage_metadata": {
-                                "input_tokens": 837,
-                                "total_tokens": 961,
-                                "output_tokens": 124
-                            },
-                            "additional_kwargs": {},
-                            "response_metadata": {
-                                "stop_reason": "end_turn",
-                                "stop_sequence": null
-                            },
-                            "invalid_tool_calls": []
-                        }
-                    ]
-                }
-            },
-            "user_id": "",
-            "graph_id": "agent",
-            "thread_id": "5cb1e8a1-34b3-4a61-a34e-71a9799bd00d",
-            "created_by": "system",
-            "assistant_id": "fe096781-5601-53d2-b2f6-0d3403f7e9ca"
-        },
-        "created_at": "2024-08-30T21:09:00.079909+00:00",
-        "checkpoint_id": "1ef67141-3ca2-6fae-8003-fe96832e57d6",
-        "parent_checkpoint_id": "1ef67141-2129-6b37-8002-61fc3bf69cb5"
-    }
-
-We can also just print the content of the last AIMessage:
-
-=== "Python"
-
-    ```python
-    print(final_result['values']['messages'][-1]['content'][0]['text'])
-    ```
-
-=== "Javascript"
-
-    ```js
-    console.log(finalResult['values']['messages'][finalResult['values']['messages'].length-1]['content'][0]['text']);
-    ```
-
-=== "CURL"
-
-    ```bash
-    curl --request GET \
-        --url <DEPLOYMENT_URL>/threads/<THREAD_ID>/state | jq -r '.values.messages[-1].content.[0].text'
-    ```
-
-Output:
-
-    The search results provide the current weather conditions in San Francisco. According to the data, as of 2:00 PM on August 30, 2024, the temperature in San Francisco is 70°F (21.1°C) with partly cloudy skies. The wind is blowing from the west-northwest at around 12 mph (19 km/h). The humidity is 59% and visibility is 9 miles (16 km). Overall, it looks like a nice late summer day in San Francisco with comfortable temperatures and partly sunny conditions.
+                                검색 결과는 샌프란시스코의 현재 날씨를 제공합니다. 데이터에 따르면, 2024년 8월 30일 오후 2시 기준으로 샌프란시스코의 기온은 70°F(21.1°C)로 부분적으로 흐린 하늘을 보이고 있습니다. 바람은 서북서쪽에서 시속 약 12마일(19km/h)로 불고 있으며, 습도는 59%이고 가시거리는 9마일(16km)입니다. 전반적으로 샌프란시스코에서는 편안한 기온과 부분적으로 맑은 날씨로 좋은 늦여름 날이 될 것으로 보입니다.

@@ -1,12 +1,14 @@
-# How to run multiple agents on the same thread
+_한국어로 기계번역됨_
 
-In LangGraph Cloud, a thread is not explicitly associated with a particular agent.
-This means that you can run multiple agents on the same thread, which allows a different agent to continue from an initial agent's progress.
+# 동일 스레드에서 여러 에이전트를 실행하는 방법
 
-In this example, we will create two agents and then call them both on the same thread.
-You'll see that the second agent will respond using information from the [checkpoint](https://langchain-ai.github.io/langgraph/concepts/low_level/#checkpointer-state) generated in the thread by the first agent as context.
+LangGraph Cloud에서 스레드는 특정 에이전트와 명시적으로 연결되지 않습니다.  
+즉, 동일한 스레드에서 여러 에이전트를 실행할 수 있으며, 이는 다른 에이전트가 초기 에이전트의 진행 상황에서 계속 진행할 수 있게 해줍니다.
 
-## Setup
+이번 예제에서는 두 개의 에이전트를 생성한 다음 두 에이전트를 모두 동일한 스레드에서 호출할 것입니다.  
+두 번째 에이전트가 첫 번째 에이전트가 스레드에서 생성한 [체크포인트](https://langchain-ai.github.io/langgraph/concepts/low_level/#checkpointer-state)의 정보를 컨텍스트로 사용하여 응답하는 것을 볼 수 있습니다.
+
+## 설정
 
 === "Python"
 
@@ -19,7 +21,7 @@ You'll see that the second agent will respond using information from the [checkp
         graph_id="agent", config={"configurable": {"model_name": "openai"}}
     )
 
-    # There should always be a default assistant with no configuration
+    # 항상 구성 없이 기본 보조자가 있어야 합니다.
     assistants = await client.assistants.search()
     default_assistant = [a for a in assistants if not a["config"]][0]
     ```
@@ -58,7 +60,7 @@ You'll see that the second agent will respond using information from the [checkp
         }' | jq -c 'map(select(.config == null or .config == {})) | .[0]'
     ```
 
-We can see that these agents are different:
+이 에이전트들이 서로 다름을 확인할 수 있습니다:
 
 === "Python"
 
@@ -79,7 +81,7 @@ We can see that these agents are different:
         --url <DEPLOYMENT_URL>/assistants/<OPENAI_ASSISTANT_ID>
     ```
 
-Output:
+출력:
 
     {
         "assistant_id": "db87f39d-b2b1-4da8-ac65-cf81beb3c766",
@@ -100,7 +102,7 @@ Output:
     print(default_assistant)
     ```
 
-=== "Javascript"
+=== "자바스크립트"
 
     ```js
     console.log(defaultAssistant);
@@ -113,7 +115,7 @@ Output:
         --url <DEPLOYMENT_URL>/assistants/<DEFAULT_ASSISTANT_ID>
     ```
 
-Output:
+출력:
 
     {
         "assistant_id": "fe096781-5601-53d2-b2f6-0d3403f7e9ca",
@@ -126,33 +128,33 @@ Output:
         }
     }
 
-## Run assistants on thread
+## 스레드에서 어시스턴트 실행
 
-### Run OpenAI assistant
+### OpenAI 어시스턴트 실행
 
-We can now run the OpenAI assistant on the thread first.
+이제 스레드에서 OpenAI 어시스턴트를 먼저 실행할 수 있습니다.
 
-=== "Python"
+=== "파이썬"
 
     ```python
     thread = await client.threads.create()
-    input = {"messages": [{"role": "user", "content": "who made you?"}]}
+    input = {"messages": [{"role": "user", "content": "누가 너를 만들었니?"}]}
     async for event in client.runs.stream(
         thread["thread_id"],
         openai_assistant["assistant_id"],
         input=input,
         stream_mode="updates",
     ):
-        print(f"Receiving event of type: {event.event}")
+        print(f"수신한 이벤트 유형: {event.event}")
         print(event.data)
         print("\n\n")
     ```
 
-=== "Javascript"
+=== "자바스크립트"
 
     ```js
     const thread = await client.threads.create();
-    let input =  {"messages": [{"role": "user", "content": "who made you?"}]}
+    let input =  {"messages": [{"role": "user", "content": "누가 너를 만들었니?"}]}
 
     const streamResponse = client.runs.stream(
       thread["thread_id"],
@@ -163,7 +165,7 @@ We can now run the OpenAI assistant on the thread first.
       }
     );
     for await (const event of streamResponse) {
-      console.log(`Receiving event of type: ${event.event}`);
+      console.log(`수신한 이벤트 유형: ${event.event}`);
       console.log(event.data);
       console.log("\n\n");
     }
@@ -173,11 +175,11 @@ We can now run the OpenAI assistant on the thread first.
 
     ```bash
     thread_id=$(curl --request POST \
-        --url <DEPLOYMENT_URL>/threads \
+        --url <배포_URL>/threads \
         --header 'Content-Type: application/json' \
         --data '{}' | jq -r '.thread_id') && \
     curl --request POST \
-        --url "<DEPLOYMENT_URL>/threads/${thread_id}/runs/stream" \
+        --url "<배포_URL>/threads/${thread_id}/runs/stream" \
         --header 'Content-Type: application/json' \
         --data '{
             "assistant_id": <OPENAI_ASSISTANT_ID>,
@@ -185,12 +187,12 @@ We can now run the OpenAI assistant on the thread first.
                 "messages": [
                     {
                         "role": "user",
-                        "content": "who made you?"
+                        "content": "누가 너를 만들었니?"
                     }
                 ]
             },
             "stream_mode": [
-                "updates"
+                "업데이트"
             ]
         }' | \
         sed 's/\r$//' | \
@@ -199,7 +201,7 @@ We can now run the OpenAI assistant on the thread first.
             if (data_content != "") {
                 print data_content "\n"
             }
-            sub(/^event: /, "Receiving event of type: ", $0)
+            sub(/^event: /, "받은 이벤트 유형: ", $0)
             printf "%s...\n", $0
             data_content = ""
         }
@@ -215,49 +217,49 @@ We can now run the OpenAI assistant on the thread first.
     '
     ```
 
-Output:
+출력:
 
-    Receiving event of type: metadata
+    받은 이벤트 유형: 메타데이터
     {'run_id': '1ef671c5-fb83-6e70-b698-44dba2d9213e'}
 
 
-    Receiving event of type: updates
-    {'agent': {'messages': [{'content': 'I was created by OpenAI, a research organization focused on developing and advancing artificial intelligence technology.', 'additional_kwargs': {}, 'response_metadata': {'finish_reason': 'stop', 'model_name': 'gpt-4o-2024-05-13', 'system_fingerprint': 'fp_157b3831f5'}, 'type': 'ai', 'name': None, 'id': 'run-f5735b86-b80d-4c71-8dc3-4782b5a9c7c8', 'example': False, 'tool_calls': [], 'invalid_tool_calls': [], 'usage_metadata': None}]}}
+    받은 이벤트 유형: 업데이트
+    {'agent': {'messages': [{'content': '저는 OpenAI에 의해 만들어졌습니다. OpenAI는 인공지능 기술을 개발하고 발전시키는 데 초점을 맞춘 연구 기관입니다.', 'additional_kwargs': {}, 'response_metadata': {'finish_reason': 'stop', 'model_name': 'gpt-4o-2024-05-13', 'system_fingerprint': 'fp_157b3831f5'}, 'type': 'ai', 'name': None, 'id': 'run-f5735b86-b80d-4c71-8dc3-4782b5a9c7c8', 'example': False, 'tool_calls': [], 'invalid_tool_calls': [], 'usage_metadata': None}]}}
 
-### Run default assistant
+### 기본 어시스턴트 실행
 
-Now, we can run it on the default assistant and see that this second assistant is aware of the initial question, and can answer the question, "and you?":
+이제 기본 어시스턴트로 실행하여 두 번째 어시스턴트가 초기 질문을 알고 있으며, "너는?"이라는 질문에 답할 수 있는지 확인해 보겠습니다:
 
-=== "Python"
+=== "파이썬"
 
     ```python
-    input = {"messages": [{"role": "user", "content": "and you?"}]}
+    입력 = {"messages": [{"role": "user", "content": "너는?"}]}
     async for event in client.runs.stream(
         thread["thread_id"],
         default_assistant["assistant_id"],
-        input=input,
-        stream_mode="updates",
+        input=입력,
+        stream_mode="업데이트",
     ):
-        print(f"Receiving event of type: {event.event}")
+        print(f"받은 이벤트 유형: {event.event}")
         print(event.data)
         print("\n\n")
     ```
 
-=== "Javascript"
+=== "자바스크립트"
 
     ```js
-    let input =  {"messages": [{"role": "user", "content": "and you?"}]}
+    let input =  {"messages": [{"role": "user", "content": "너는?"}]}
 
     const streamResponse = client.runs.stream(
       thread["thread_id"],
       defaultAssistant["assistant_id"],
       {
         input,
-        streamMode: "updates"
+        streamMode: "업데이트"
       }
     );
     for await (const event of streamResponse) {
-      console.log(`Receiving event of type: ${event.event}`);
+      console.log(`받은 이벤트 유형: ${event.event}`);
       console.log(event.data);
       console.log("\n\n");
     }
@@ -267,20 +269,20 @@ Now, we can run it on the default assistant and see that this second assistant i
 
     ```bash
     curl --request POST \
-        --url <DEPLOYMENT_URL>/threads/<THREAD_ID>/runs/stream \
+        --url <배포_URL>/threads/<스레드_ID>/runs/stream \
         --header 'Content-Type: application/json' \
         --data '{
-            "assistant_id": <DEFAULT_ASSISTANT_ID>,
+            "assistant_id": <기본_어시스턴트_ID>,
             "input": {
                 "messages": [
                     {
                         "role": "user",
-                        "content": "and you?"
+                        "content": "그리고 당신은?"
                     }
                 ]
             },
             "stream_mode": [
-                "updates"
+                "업데이트"
             ]
         }' | \
         sed 's/\r$//' | \
@@ -289,7 +291,7 @@ Now, we can run it on the default assistant and see that this second assistant i
             if (data_content != "") {
                 print data_content "\n"
             }
-            sub(/^event: /, "Receiving event of type: ", $0)
+            sub(/^event: /, "유형의 이벤트 수신: ", $0)
             printf "%s...\n", $0
             data_content = ""
         }
@@ -305,14 +307,14 @@ Now, we can run it on the default assistant and see that this second assistant i
     '
     ```
 
-Output:
+출력:
 
-    Receiving event of type: metadata
+    유형의 이벤트 수신: 메타데이터
     {'run_id': '1ef6722d-80b3-6fbb-9324-253796b1cd13'}
 
 
-    Receiving event of type: updates
-    {'agent': {'messages': [{'content': [{'text': 'I am an artificial intelligence created by Anthropic, not by OpenAI. I should not have stated that OpenAI created me, as that is incorrect. Anthropic is the company that developed and trained me using advanced language models and AI technology. I will be more careful about providing accurate information regarding my origins in the future.', 'type': 'text', 'index': 0}], 'additional_kwargs': {}, 'response_metadata': {'stop_reason': 'end_turn', 'stop_sequence': None}, 'type': 'ai', 'name': None, 'id': 'run-ebaacf62-9dd9-4165-9535-db432e4793ec', 'example': False, 'tool_calls': [], 'invalid_tool_calls': [], 'usage_metadata': {'input_tokens': 302, 'output_tokens': 72, 'total_tokens': 374}}]}}
+    유형의 이벤트 수신: 업데이트
+    {'agent': {'messages': [{'content': [{'text': '나는 OpenAI가 아닌 Anthropic에 의해 생성된 인공지능입니다. OpenAI가 나를 만들었다고 말해서는 안 되며, 그것은 사실이 아닙니다. Anthropic은 나를 발전된 언어 모델과 AI 기술을 사용하여 개발하고 훈련한 회사입니다. 앞으로 내 기원에 대한 정확한 정보를 제공하는 데 더 주의하겠습니다.', 'type': 'text', 'index': 0}], 'additional_kwargs': {}, 'response_metadata': {'stop_reason': 'end_turn', 'stop_sequence': None}, 'type': 'ai', 'name': None, 'id': 'run-ebaacf62-9dd9-4165-9535-db432e4793ec', 'example': False, 'tool_calls': [], 'invalid_tool_calls': [], 'usage_metadata': {'input_tokens': 302, 'output_tokens': 72, 'total_tokens': 374}}]}}
 
 
 

@@ -1,92 +1,94 @@
-# Copying Threads
+_한국어로 기계번역됨_
 
-You may wish to copy (i.e. "fork") an existing thread in order to keep the existing thread's history and create independent runs that do not affect the original thread. This guide shows how you can do that.
+# 스레드 복사하기
 
-## Setup
+기존 스레드의 기록을 유지하고 원래 스레드에 영향을 주지 않는 독립적인 실행을 생성하기 위해 기존 스레드를 복사(즉, "포크")하고 싶을 수 있습니다. 이 가이드는 이를 수행하는 방법을 보여줍니다.
 
-This code assumes you already have a thread to copy. You can read about what a thread is [here](../../concepts/langgraph_server.md#threads) and learn how to stream a run on a thread in [these how-to guides](../../how-tos/index.md#streaming_1).
+## 설정
 
-### SDK initialization
+이 코드는 복사할 스레드가 이미 존재한다고 가정합니다. 스레드가 무엇인지에 대한 내용은 [여기](../../concepts/langgraph_server.md#threads)에서 읽을 수 있으며, 스레드에서 실행을 스트리밍하는 방법은 [이 사용 안내서](../../how-tos/index.md#streaming_1)에서 배울 수 있습니다.
 
-First, we need to setup our client so that we can communicate with our hosted graph:
+### SDK 초기화
+
+먼저, 호스팅된 그래프와 통신할 수 있도록 클라이언트를 설정해야 합니다:
 
 === "Python"
 
-    ```python
-    from langgraph_sdk import get_client
-    client = get_client(url="<DEPLOYMENT_URL>")
-    assistant_id = "agent"
-    thread = await client.threads.create()
-    ```
+```python
+from langgraph_sdk import get_client
+client = get_client(url="<DEPLOYMENT_URL>")
+assistant_id = "agent"
+thread = await client.threads.create()
+```
 
 === "Javascript"
 
-    ```js
-    import { Client } from "@langchain/langgraph-sdk";
+```js
+import { Client } from "@langchain/langgraph-sdk";
 
-    const client = new Client({ apiUrl: "<DEPLOYMENT_URL>" });
-    const assistantId = "agent";
-    const thread = await client.threads.create();
-    ```
+const client = new Client({ apiUrl: "<DEPLOYMENT_URL>" });
+const assistantId = "agent";
+const thread = await client.threads.create();
+```
 
 === "CURL"
 
-    ```bash
-    curl --request POST \
-      --url <DEPLOYMENT_URL>/threads \
-      --header 'Content-Type: application/json' \
-      --data '{
-        "metadata": {}
-      }'
-    ```
+```bash
+curl --request POST \
+  --url <DEPLOYMENT_URL>/threads \
+  --header 'Content-Type: application/json' \
+  --data '{
+    "metadata": {}
+  }'
+```
 
-## Copying a thread
+## 스레드 복사하기
 
-The code below assumes that a thread you'd like to copy already exists.
+다음 코드는 복사할 스레드가 이미 존재한다고 가정합니다.
 
-Copying a thread will create a new thread with the same history as the existing thread, and then allow you to continue executing runs.
+스레드를 복사하면 기존 스레드와 동일한 기록을 가진 새로운 스레드가 생성되며, 이후 실행을 계속 진행할 수 있습니다.
 
-### Create copy
+### 복사 생성
 
 === "Python"
 
-    ```python
-    copied_thread = await client.threads.copy(<THREAD_ID>)
-    ```
+```python
+copied_thread = await client.threads.copy(<THREAD_ID>)
+```
 
 === "Javascript"
 
-    ```js
-    let copiedThread = await client.threads.copy(<THREAD_ID>);
-    ```
+```js
+let copiedThread = await client.threads.copy(<THREAD_ID>);
+```
 
 === "CURL"
 
-    ```bash
-    curl --request POST --url <DEPLOYMENT_URL>/threads/<THREAD_ID>/copy \
-    --header 'Content-Type: application/json'
-    ```
+```bash
+curl --request POST --url <DEPLOYMENT_URL>/threads/<THREAD_ID>/copy \
+--header 'Content-Type: application/json'
+```
 
-### Verify copy
+### 복사 확인
 
-We can verify that the history from the prior thread did indeed copy over correctly:
+이전 스레드의 기록이 정확하게 복사되었는지 확인할 수 있습니다:
 
 === "Python"
 
-    ```python
-    def remove_thread_id(d):
-      if 'metadata' in d and 'thread_id' in d['metadata']:
-          del d['metadata']['thread_id']
-      return d
+```python
+def remove_thread_id(d):
+  if 'metadata' in d and 'thread_id' in d['metadata']:
+      del d['metadata']['thread_id']
+  return d
 
-    original_thread_history = list(map(remove_thread_id,await client.threads.get_history(<THREAD_ID>)))
-    copied_thread_history = list(map(remove_thread_id,await client.threads.get_history(copied_thread['thread_id'])))
+original_thread_history = list(map(remove_thread_id, await client.threads.get_history(<THREAD_ID>)))
+copied_thread_history = list(map(remove_thread_id, await client.threads.get_history(copied_thread['thread_id'])))
 
-    # Compare the two histories
-    assert original_thread_history == copied_thread_history
-    # if we made it here the assertion passed!
-    print("The histories are the same.")
-    ```
+# 두 기록 비교하기
+assert original_thread_history == copied_thread_history
+# 여기까지 온다면 단언이 통과했습니다!
+print("기록이 동일합니다.")
+```
 
 === "Javascript"
 
@@ -98,18 +100,18 @@ We can verify that the history from the prior thread did indeed copy over correc
       return d;
     }
 
-    // Assuming `client.threads.getHistory(threadId)` is an async function that returns a list of dicts
+    // `client.threads.getHistory(threadId)`가 비동기 함수이며 dict 목록을 반환한다고 가정
     async function compareThreadHistories(threadId, copiedThreadId) {
       const originalThreadHistory = (await client.threads.getHistory(threadId)).map(removeThreadId);
       const copiedThreadHistory = (await client.threads.getHistory(copiedThreadId)).map(removeThreadId);
 
-      // Compare the two histories
+      // 두 히스토리 비교
       console.assert(JSON.stringify(originalThreadHistory) === JSON.stringify(copiedThreadHistory));
-      // if we made it here the assertion passed!
-      console.log("The histories are the same.");
+      // 여기까지 오면 assertion이 통과한 것임!
+      console.log("두 히스토리는 같습니다.");
     }
 
-    // Example usage
+    // 사용 예시
     compareThreadHistories(<THREAD_ID>, copiedThread.thread_id);
     ```
 
@@ -121,12 +123,12 @@ We can verify that the history from the prior thread did indeed copy over correc
     ) <(
         curl --request GET --url <DEPLOYMENT_URL>/threads/<COPIED_THREAD_ID>/history | jq -S 'map(del(.metadata.thread_id))'
     ) >/dev/null; then
-        echo "The histories are the same."
+        echo "두 히스토리는 같습니다."
     else
-        echo "The histories are different."
+        echo "두 히스토리는 다릅니다."
     fi
     ```
 
-Output:
+출력:
 
-    The histories are the same.
+    두 히스토리는 같습니다.

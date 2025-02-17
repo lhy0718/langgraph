@@ -1,32 +1,34 @@
-# Stateless Runs
+_한국어로 기계번역됨_
 
-Most of the time, you provide a `thread_id` to your client when you run your graph in order to keep track of prior runs through the persistent state implemented in LangGraph Cloud. However, if you don't need to persist the runs you don't need to use the built in persistent state and can create stateless runs.
+# 상태 비저장 실행
 
-## Setup
+대부분의 경우, LangGraph Cloud에서 구현된 지속 상태를 통해 이전 실행을 추적하기 위해 클라이언트에 `thread_id`를 제공합니다. 그러나 실행을 지속할 필요가 없다면 내장된 지속 상태를 사용할 필요가 없으며 상태 비저장 실행을 생성할 수 있습니다.
 
-First, let's setup our client:
+## 설정
 
-=== "Python"
+먼저 클라이언트를 설정해 봅시다:
+
+=== "파이썬"
 
     ```python
     from langgraph_sdk import get_client
 
     client = get_client(url=<DEPLOYMENT_URL>)
-    # Using the graph deployed with the name "agent"
+    # "agent"라는 이름으로 배포된 그래프 사용
     assistant_id = "agent"
-    # create thread
+    # 스레드 생성
     thread = await client.threads.create()
     ```
 
-=== "Javascript"
+=== "자바스크립트"
 
     ```js
     import { Client } from "@langchain/langgraph-sdk";
 
     const client = new Client({ apiUrl: <DEPLOYMENT_URL> });
-    // Using the graph deployed with the name "agent"
+    // "agent"라는 이름으로 배포된 그래프 사용
     const assistantId = "agent";
-    // create thread
+    // 스레드 생성
     const thread = await client.threads.create();
     ```
 
@@ -46,21 +48,21 @@ First, let's setup our client:
         --data '{}'
     ```
 
-## Stateless streaming
+## 상태 비저장 스트리밍
 
-We can stream the results of a stateless run in an almost identical fashion to how we stream from a run with the state attribute, but instead of passing a value to the `thread_id` parameter, we pass `None`:
+상태가 있는 실행에서 스트리밍하는 방법과 거의 동일한 방식으로 상태 비저장 실행의 결과를 스트리밍할 수 있지만, `thread_id` 매개변수에 값을 전달하는 대신 `None`을 전달합니다:
 
-=== "Python"
+=== "파이썬"
 
     ```python
     input = {
         "messages": [
-            {"role": "user", "content": "Hello! My name is Bagatur and I am 26 years old."}
+            {"role": "user", "content": "안녕하세요! 제 이름은 바가투르이고, 26세입니다."}
         ]
     }
 
     async for chunk in client.runs.stream(
-        # Don't pass in a thread_id and the stream will be stateless
+        # thread_id를 전달하지 않으면 스트림은 상태 비저장이 됩니다
         None,
         assistant_id,
         input=input,
@@ -70,17 +72,17 @@ We can stream the results of a stateless run in an almost identical fashion to h
             print(chunk.data)
     ```
 
-=== "Javascript"
+=== "자바스크립트"
 
     ```js
     let input = {
       messages: [
-        { role: "user", content: "Hello! My name is Bagatur and I am 26 years old." }
+        { role: "user", content: "안녕하세요! 제 이름은 바가투르이고, 26세입니다." }
       ]
     };
 
     const streamResponse = client.runs.stream(
-      // Don't pass in a thread_id and the stream will be stateless
+      // thread_id를 전달하지 않으면 스트림은 상태 비저장이 됩니다
       null,
       assistantId,
       {
@@ -103,20 +105,20 @@ We can stream the results of a stateless run in an almost identical fashion to h
         --header 'Content-Type: application/json' \
         --data "{
             \"assistant_id\": \"agent\",
-            \"input\": {\"messages\": [{\"role\": \"human\", \"content\": \"Hello! My name is Bagatur and I am 26 years old.\"}]},
+            \"input\": {\"messages\": [{\"role\": \"human\", \"content\": \"안녕하세요! 제 이름은 바가투르이고 26세입니다.\"}]},
             \"stream_mode\": [
                 \"updates\"
             ]
         }" | jq -c 'select(.data and (.data | has("run_id") | not)) | .data'
     ```
 
-Output:
+출력:
 
-    {'agent': {'messages': [{'content': "Hello Bagatur! It's nice to meet you. Thank you for introducing yourself and sharing your age. Is there anything specific you'd like to know or discuss? I'm here to help with any questions or topics you're interested in.", 'additional_kwargs': {}, 'response_metadata': {}, 'type': 'ai', 'name': None, 'id': 'run-489ec573-1645-4ce2-a3b8-91b391d50a71', 'example': False, 'tool_calls': [], 'invalid_tool_calls': [], 'usage_metadata': None}]}}
+    {'agent': {'messages': [{'content': "안녕하세요 바가투르! 만나서 반가워요. 자기소개와 나이를 알려줘서 감사해요. 궁금한 점이나 논의하고 싶은 특정한 주제가 있다면 말씀해 주세요. 제가 도와드릴 수 있는 질문이나 관심 있는 주제에 대해 준비되어 있습니다.", 'additional_kwargs': {}, 'response_metadata': {}, 'type': 'ai', 'name': None, 'id': 'run-489ec573-1645-4ce2-a3b8-91b391d50a71', 'example': False, 'tool_calls': [], 'invalid_tool_calls': [], 'usage_metadata': None}]}}
 
-## Waiting for stateless results
+## 무상태 결과 기다리기
 
-In addition to streaming, you can also wait for a stateless result by using the `.wait` function like follows:
+스트리밍 외에도 `.wait` 함수를 사용해 무상태 결과를 기다릴 수 있습니다. 사용 예는 다음과 같습니다:
 
 === "Python"
 
@@ -151,12 +153,12 @@ In addition to streaming, you can also wait for a stateless result by using the 
         }'
     ```
 
-Output:
+출력:
 
     {
         'messages': [
             {
-                'content': 'Hello! My name is Bagatur and I am 26 years old.',
+                'content': '안녕하세요! 제 이름은 바가투르이고 26세입니다.',
                 'additional_kwargs': {},
                 'response_metadata': {},
                 'type': 'human',
@@ -165,7 +167,7 @@ Output:
                 'example': False}
             ,
             {
-                'content': "Hello Bagatur! It's nice to meet you. Thank you for introducing yourself and sharing your age. Is there anything specific you'd like to know or discuss? I'm here to help with any questions or topics you'd like to explore.",
+                'content': "안녕하세요 바가투르! 만나서 반가워요. 자기소개와 나이를 알려줘서 감사해요. 궁금한 점이나 논의하고 싶은 특정한 주제가 있다면 말씀해 주세요. 제가 도와드릴 수 있는 질문이나 탐색하고 싶은 주제가 있다면 준비되어 있습니다.",
                 'additional_kwargs': {},
                 'response_metadata': {},
                 'type': 'ai',

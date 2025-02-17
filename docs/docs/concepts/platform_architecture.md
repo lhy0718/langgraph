@@ -1,3 +1,5 @@
+_한국어로 기계번역됨_
+
 # LangGraph 플랫폼 아키텍처
 
 ![](img/langgraph_platform_deployment_architecture.png)

@@ -1,3 +1,5 @@
+_한국어로 기계번역됨_
+
 # 중단점
 
 중단점은 특정 지점에서 그래프 실행을 일시 중지하고 단계별로 실행을 진행할 수 있도록 합니다. 중단점은 각 그래프 단계 후 상태를 저장하는 LangGraph의 [**영속성 계층**](./persistence.md)에 의해 지원됩니다. 중단점은 [**인간-루프**](./human_in_the_loop.md) 작업 흐름을 활성화하는 데에도 사용할 수 있지만, 이 목적을 위해 [`interrupt` 함수](./human_in_the_loop.md#interrupt)를 사용하는 것이 좋습니다.
@@ -26,7 +28,7 @@
 
     ```python
     graph = graph_builder.compile(
-        interrupt_before=["node_a"], 
+        interrupt_before=["node_a"],
         interrupt_after=["node_b", "node_c"],
         checkpointer=..., # 체크포인터 지정
     )
@@ -51,9 +53,9 @@
 
     ```python
     graph.invoke(
-        inputs, 
-        config={"configurable": {"thread_id": "some_thread"}}, 
-        interrupt_before=["node_a"], 
+        inputs,
+        config={"configurable": {"thread_id": "some_thread"}},
+        interrupt_before=["node_a"],
         interrupt_after=["node_b", "node_c"]
     )
 
@@ -106,7 +108,7 @@ for event in graph.stream(None, thread_config, stream_mode="values"):
 
 그래프는 *다시 중단*될 것입니다. 왜냐하면 이 노드는 동일한 그래프 상태로 *다시 실행*되기 때문입니다. 따라서 동적 중단점을 트리거하는 조건이 더 이상 충족되지 않도록 그래프 상태를 변경해야 합니다. 그래서 우리는 단순히 입력을 동적 중단점의 조건(< 5자)을 충족하는 값으로 업데이트하고 노드를 다시 실행할 수 있습니다.
 
-```python 
+```python
 # 동적 중단점을 통과하도록 상태 업데이트
 graph.update_state(config=thread_config, values={"input": "foo"})
 for event in graph.stream(None, thread_config, stream_mode="values"):

@@ -1,3 +1,5 @@
+_한국어로 기계번역됨_
+
 # 배포 옵션
 
 !!! info " prerequisites"
@@ -38,8 +40,8 @@ LangGraph 플랫폼을 사용한 배포에는 4가지 주요 옵션이 있습니
 
 자세한 내용은 다음을 참조하십시오:
 
-* [셀프 호스팅 개념 가이드](./self_hosted.md)
-* [셀프 호스팅 배포 방법 가이드](../how-tos/deploy-self-hosted.md)
+- [셀프 호스팅 개념 가이드](./self_hosted.md)
+- [셀프 호스팅 배포 방법 가이드](../how-tos/deploy-self-hosted.md)
 
 ## 셀프 호스팅 라이트
 
@@ -61,8 +63,8 @@ LangGraph 플랫폼을 사용한 배포에는 4가지 주요 옵션이 있습니
 
 자세한 내용은 다음을 참조하십시오:
 
-* [셀프 호스팅 개념 가이드](./self_hosted.md)
-* [셀프 호스팅 배포 방법 가이드](../how-tos/deploy-self-hosted.md)
+- [셀프 호스팅 개념 가이드](./self_hosted.md)
+- [셀프 호스팅 배포 방법 가이드](../how-tos/deploy-self-hosted.md)
 
 ## 클라우드 SaaS
 
@@ -78,8 +80,8 @@ LangGraph 플랫폼의 [클라우드 SaaS](./langgraph_cloud.md) 버전은 [Lang
 
 자세한 내용은 다음을 참조하십시오:
 
-* [클라우드 SaaS 개념 가이드](./langgraph_cloud.md)
-* [클라우드 SaaS에 배포하는 방법](../cloud/deployment/cloud.md)
+- [클라우드 SaaS 개념 가이드](./langgraph_cloud.md)
+- [클라우드 SaaS에 배포하는 방법](../cloud/deployment/cloud.md)
 
 ## 내 클라우드 사용하기
 
@@ -91,12 +93,12 @@ LangGraph 플랫폼의 [클라우드 SaaS](./langgraph_cloud.md) 버전은 [Lang
 
 자세한 내용은 다음을 참조하십시오:
 
-* [내 클라우드 사용하기 개념 가이드](./bring_your_own_cloud.md)
+- [내 클라우드 사용하기 개념 가이드](./bring_your_own_cloud.md)
 
 ## 관련
 
 자세한 정보는 다음을 참조하십시오:
 
-* [LangGraph 플랫폼 계획](./plans.md)
-* [LangGraph 플랫폼 가격](https://www.langchain.com/langgraph-platform-pricing)
-* [배포 방법 가이드](../how-tos/index.md#deployment)
+- [LangGraph 플랫폼 계획](./plans.md)
+- [LangGraph 플랫폼 가격](https://www.langchain.com/langgraph-platform-pricing)
+- [배포 방법 가이드](../how-tos/index.md#deployment)

@@ -1,7 +1,9 @@
+_한국어로 기계번역됨_
+
 # 기능 API
 
 !!! 경고 "베타"
-    기능 API는 현재 **베타** 상태이며 변경될 수 있습니다. 문제나 피드백이 있는 경우 [LangGraph 팀에 보고해 주세요](https://github.com/langchain-ai/langgraph/issues).
+기능 API는 현재 **베타** 상태이며 변경될 수 있습니다. 문제나 피드백이 있는 경우 [LangGraph 팀에 보고해 주세요](https://github.com/langchain-ai/langgraph/issues).
 
 ## 개요
 
@@ -130,7 +132,7 @@ def workflow(topic: str) -> dict:
 
 ## 엔트리포인트
 
-[`@entrypoint`][langgraph.func.entrypoint] 데코레이터는 함수를 작업 흐름으로 만들 때 사용됩니다. 작업 흐름 로직을 캡슐화하고 실행 흐름을 관리하며, *오랜 시간이 걸리는 작업* 및 [interrupts](./low_level.md#interrupt)를 처리합니다.
+[`@entrypoint`][langgraph.func.entrypoint] 데코레이터는 함수를 작업 흐름으로 만들 때 사용됩니다. 작업 흐름 로직을 캡슐화하고 실행 흐름을 관리하며, _오랜 시간이 걸리는 작업_ 및 [interrupts](./low_level.md#interrupt)를 처리합니다.
 
 ### 정의
 
@@ -165,25 +167,23 @@ def workflow(topic: str) -> dict:
         # API 호출과 같은 긴 작업을 포함할 수 있는 일부 로직,
         # 인간의 개입이 필요한 경우 중단될 수도 있습니다.
         ...
-        return result 
+        return result
     ```
 
 !!! 중요 "직렬화"
 
     엔트리포인트의 **입력** 및 **출력**은 체크포인팅을 지원하기 위해 JSON 직렬화가 가능해야 합니다. 자세한 내용은 [직렬화](#serialization) 섹션을 참조하세요.
 
-
 ### 주입 가능한 매개변수
 
 `entrypoint`를 선언할 때 런타임에 자동으로 주입될 추가 매개변수에 접근할 수 있습니다. 이러한 매개변수는 다음과 같습니다:
 
-
-| 매개변수    | 설명                                                                                                                                                       |
-|--------------|-------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| **previous** | 주어진 스레드에 대한 이전 `checkpoint`와 관련된 상태에 접근합니다. [상태 관리](#state-management)를 참조하세요.                                             |
-| **store**    | [BaseStore][langgraph.store.base.BaseStore]의 인스턴스입니다. [장기 기억](#long-term-memory)에 유용합니다.                                                  |
-| **writer**   | 사용자 정의 데이터를 `custom` 스트림에 쓰기 위한 스트리밍 사용자 정의 데이터입니다. [사용자 정의 데이터 스트리밍](#streaming-custom-data)에 유용합니다.               |
-| **config**   | 런타임 구성에 접근합니다. [RunnableConfig](https://python.langchain.com/docs/concepts/runnables/#runnableconfig) 정보를 참조하세요.                          |
+| 매개변수     | 설명                                                                                                                                                    |
+| ------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **previous** | 주어진 스레드에 대한 이전 `checkpoint`와 관련된 상태에 접근합니다. [상태 관리](#state-management)를 참조하세요.                                         |
+| **store**    | [BaseStore][langgraph.store.base.BaseStore]의 인스턴스입니다. [장기 기억](#long-term-memory)에 유용합니다.                                              |
+| **writer**   | 사용자 정의 데이터를 `custom` 스트림에 쓰기 위한 스트리밍 사용자 정의 데이터입니다. [사용자 정의 데이터 스트리밍](#streaming-custom-data)에 유용합니다. |
+| **config**   | 런타임 구성에 접근합니다. [RunnableConfig](https://python.langchain.com/docs/concepts/runnables/#runnableconfig) 정보를 참조하세요.                     |
 
 !!! 중요
 
@@ -202,7 +202,7 @@ def workflow(topic: str) -> dict:
     @entrypoint(
         checkpointer=checkpointer,  # 체크포인터 지정
         store=in_memory_store  # 저장소 지정
-    )  
+    )
     def my_workflow(
         some_input: dict,  # 입력 (예: `invoke`를 통해 전달됨)
         *,
@@ -240,7 +240,7 @@ def workflow(topic: str) -> dict:
     ```
 
 === "스트림"
-    
+
     ```python
     config = {
         "configurable": {
@@ -279,7 +279,7 @@ def workflow(topic: str) -> dict:
             "thread_id": "some_thread_id"
         }
     }
-    
+
     my_workflow.invoke(Command(resume=some_resume_value), config)
     ```
 
@@ -293,7 +293,7 @@ def workflow(topic: str) -> dict:
             "thread_id": "some_thread_id"
         }
     }
-    
+
     await my_workflow.ainvoke(Command(resume=some_resume_value), config)
     ```
 
@@ -307,7 +307,7 @@ def workflow(topic: str) -> dict:
             "thread_id": "some_thread_id"
         }
     }
-    
+
     for chunk in my_workflow.stream(Command(resume=some_resume_value), config):
         print(chunk)
     ```
@@ -342,21 +342,23 @@ def workflow(topic: str) -> dict:
             "thread_id": "some_thread_id"
         }
     }
-    
+
     my_workflow.invoke(None, config)
     ```
 
 === "비동기 호출"
 
     ```python
+
 config = {
-    "configurable": {
-        "thread_id": "some_thread_id"
-    }
+"configurable": {
+"thread_id": "some_thread_id"
+}
 }
 
 await my_workflow.ainvoke(None, config)
-```
+
+````
 
 === "스트림"
 
@@ -369,7 +371,7 @@ config = {
 
 for chunk in my_workflow.stream(None, config):
     print(chunk)
-```
+````
 
 === "비동기 스트림"
 
@@ -437,8 +439,8 @@ my_workflow.invoke(1, config)  # 6 (이전 값은 이전 호출에서의 3 * 2)
 
 작업은 API 호출이나 데이터 처리 단계와 같은 독립적인 작업 단위를 나타냅니다. 작업은 두 가지 주요 특성을 갖습니다:
 
-* **비동기 실행**: 작업은 비동기적으로 실행되도록 설계되어, 여러 작업이 동시에 실행되면서 차단되지 않습니다.
-* **체크포인트**: 작업 결과는 체크포인트에 저장되어, 마지막 저장된 상태에서 워크플로를 재개할 수 있게 합니다. (자세한 내용은 [저장소](persistence.md)를 참조하세요).
+- **비동기 실행**: 작업은 비동기적으로 실행되도록 설계되어, 여러 작업이 동시에 실행되면서 차단되지 않습니다.
+- **체크포인트**: 작업 결과는 체크포인트에 저장되어, 마지막 저장된 상태에서 워크플로를 재개할 수 있게 합니다. (자세한 내용은 [저장소](persistence.md)를 참조하세요).
 
 ### 정의
 
@@ -578,8 +580,8 @@ LangGraph는 실행 중에 **작업** 및 [**서브그래프**](./low_level.md#s
 
 매번 다른 결과를 줄 수 있는 작업(예: 현재 시간 가져오기 또는 랜덤 숫자 생성)은 작업에 캡슐화되어야 합니다. 그래야 재개 시 동일한 결과가 반환됩니다.
 
-* 작업 내: 랜덤 숫자 가져오기 (5) → 인터럽트 → 재개 → (다시 5 반환) → ...
-* 작업 외: 랜덤 숫자 가져오기 (5) → 인터럽트 → 재개 → 새로운 랜덤 숫자 가져오기 (7) → ...
+- 작업 내: 랜덤 숫자 가져오기 (5) → 인터럽트 → 재개 → (다시 5 반환) → ...
+- 작업 외: 랜덤 숫자 가져오기 (5) → 인터럽트 → 재개 → 새로운 랜덤 숫자 가져오기 (7) → ...
 
 이는 **인간-참여형** 워크플로우를 사용할 때 특히 중요합니다. LangGraph는 각 작업/진입점에 대한 재개 값 목록을 유지합니다. 인터럽트가 발생하면 해당 재개 값과 일치시킵니다. 이 매칭은 엄밀히 **인덱스 기반**으로 이루어지므로 재개 값의 순서는 인터럽트의 순서와 일치해야 합니다.
 
@@ -599,16 +601,16 @@ LangGraph는 실행 중에 **작업** 및 [**서브그래프**](./low_level.md#s
         t0 = inputs["t0"]
         # 하이라이트-다음-줄
         t1 = time.time()
-        
+
         delta_t = t1 - t0
-        
+
         if delta_t > 1:
             result = slow_task(1).result()
             value = interrupt("질문")
         else:
             result = slow_task(2).result()
             value = interrupt("질문")
-            
+
         return {
             "result": result,
             "value": value
@@ -635,16 +637,16 @@ LangGraph는 실행 중에 **작업** 및 [**서브그래프**](./low_level.md#s
         t0 = inputs["t0"]
         # 하이라이트-다음-라인
         t1 = get_time().result()
-        
+
         delta_t = t1 - t0
-        
+
         if delta_t > 1:
             result = slow_task(1).result()
             value = interrupt("question")
         else:
             result = slow_task(2).result()
             value = interrupt("question")
-            
+
         return {
             "result": result,
             "value": value
@@ -664,7 +666,7 @@ def my_workflow(inputs: dict) -> int:
     another_value = inputs["another_value"]
     ...
 
-my_workflow.invoke({"value": 1, "another_value": 2})  
+my_workflow.invoke({"value": 1, "another_value": 2})
 ```
 
 ### 병렬 실행
@@ -747,7 +749,7 @@ def main(inputs, writer: StreamWriter) -> int:
     add_one(inputs['number']).result() # `updates` 스트림에 데이터를 씁니다
     writer("world") # `custom` 스트림에 추가 데이터를 씁니다
     add_two(inputs['number']).result() # `updates` 스트림에 데이터를 씁니다
-    return 5 
+    return 5
 
 config = {
     "configurable": {
@@ -769,9 +771,8 @@ for chunk in main.stream({"number": 1}, stream_mode=["custom", "updates"], confi
 
 !!! 중요
 
-    `writer` 매개변수는 런타임에 자동으로 주입됩니다. 매개변수 이름이 함수 시그니처에 
+    `writer` 매개변수는 런타임에 자동으로 주입됩니다. 매개변수 이름이 함수 시그니처에
     그 *정확한* 이름으로 나타나야만 주입됩니다.
-
 
 ### 재시도 정책
 
@@ -786,7 +787,7 @@ attempts = 0
 # 기본 RetryPolicy는 특정 네트워크 오류에 대한 재시도에 최적화되어 있습니다.
 retry_policy = RetryPolicy(retry_on=ValueError)
 
-@task(retry=retry_policy) 
+@task(retry=retry_policy)
 def get_info():
     global attempts
     attempts += 1
@@ -896,8 +897,8 @@ main.invoke(None, config=config)
 
 자세한 내용은 다음 예제를 참조하십시오:
 
-* [사용자 입력 대기 방법 (기능적 API)](../how-tos/wait-user-input-functional.ipynb): 기능적 API를 사용하여 간단한 사람 개입 워크플로우를 구현하는 방법을 보여줍니다.
-* [도구 호출 검토 방법 (기능적 API)](../how-tos/review-tool-calls-functional.ipynb): LangGraph 기능적 API를 사용하여 ReAct 에이전트에서 사람 개입 워크플로우를 구현하는 방법을 설명합니다.
+- [사용자 입력 대기 방법 (기능적 API)](../how-tos/wait-user-input-functional.ipynb): 기능적 API를 사용하여 간단한 사람 개입 워크플로우를 구현하는 방법을 보여줍니다.
+- [도구 호출 검토 방법 (기능적 API)](../how-tos/review-tool-calls-functional.ipynb): LangGraph 기능적 API를 사용하여 ReAct 에이전트에서 사람 개입 워크플로우를 구현하는 방법을 설명합니다.
 
 ### 단기 기억
 
@@ -905,7 +906,7 @@ main.invoke(None, config=config)
 
 자세한 내용은 다음의 사용 가이드를 참조하십시오:
 
-* [스레드 수준 지속성 추가 방법 (기능적 API)](../how-tos/persistence-functional.ipynb): 기능적 API 워크플로우에 스레드 수준의 지속성을 추가하는 방법과 간단한 챗봇을 구현하는 방법을 보여줍니다.
+- [스레드 수준 지속성 추가 방법 (기능적 API)](../how-tos/persistence-functional.ipynb): 기능적 API 워크플로우에 스레드 수준의 지속성을 추가하는 방법과 간단한 챗봇을 구현하는 방법을 보여줍니다.
 
 ### 장기 기억
 
@@ -913,15 +914,14 @@ main.invoke(None, config=config)
 
 자세한 내용은 다음의 가이드들을 참조하시기 바랍니다:
 
-* [크로스 스레드 지속성 추가 방법 (기능 API)](../how-tos/cross-thread-persistence-functional.ipynb): 기능 API 워크플로우에 크로스 스레드 지속성을 추가하는 방법을 보여주고 간단한 챗봇을 구현합니다.
+- [크로스 스레드 지속성 추가 방법 (기능 API)](../how-tos/cross-thread-persistence-functional.ipynb): 기능 API 워크플로우에 크로스 스레드 지속성을 추가하는 방법을 보여주고 간단한 챗봇을 구현합니다.
 
 ### 워크플로우
 
-* [워크플로우와 에이전트](../tutorials/workflows/index.md) 가이드에서는 기능 API를 사용하여 워크플로우를 구축하는 방법에 대한 더 많은 예제를 제공합니다.
+- [워크플로우와 에이전트](../tutorials/workflows/index.md) 가이드에서는 기능 API를 사용하여 워크플로우를 구축하는 방법에 대한 더 많은 예제를 제공합니다.
 
 ### 에이전트
 
-* [기능 API를 사용하여 제로에서부터 리액트 에이전트 만들기](../how-tos/react-agent-from-scratch-functional.ipynb): 기능 API를 사용하여 제로에서 간단한 리액트 에이전트를 만드는 방법을 보여줍니다.
-* [다중 에이전트 네트워크 구축 방법](../how-tos/multi-agent-network-functional.ipynb): 기능 API를 사용하여 다중 에이전트 네트워크를 구축하는 방법을 보여줍니다.
-* [다중 에이전트 애플리케이션에서 다중 턴 대화 추가 방법 (기능 API)](../how-tos/multi-agent-multi-turn-convo-functional.ipynb): 최종 사용자가 하나 이상의 에이전트와 다중 턴 대화를 진행할 수 있도록 합니다.  
-
+- [기능 API를 사용하여 제로에서부터 리액트 에이전트 만들기](../how-tos/react-agent-from-scratch-functional.ipynb): 기능 API를 사용하여 제로에서 간단한 리액트 에이전트를 만드는 방법을 보여줍니다.
+- [다중 에이전트 네트워크 구축 방법](../how-tos/multi-agent-network-functional.ipynb): 기능 API를 사용하여 다중 에이전트 네트워크를 구축하는 방법을 보여줍니다.
+- [다중 에이전트 애플리케이션에서 다중 턴 대화 추가 방법 (기능 API)](../how-tos/multi-agent-multi-turn-convo-functional.ipynb): 최종 사용자가 하나 이상의 에이전트와 다중 턴 대화를 진행할 수 있도록 합니다.

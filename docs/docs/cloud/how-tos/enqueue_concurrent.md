@@ -1,12 +1,14 @@
-# Enqueue
+_한국어로 기계번역됨_
 
-This guide assumes knowledge of what double-texting is, which you can learn about in the [double-texting conceptual guide](../../concepts/double_texting.md).
+# 큐에 추가하기
 
-The guide covers the `enqueue` option for double texting, which adds the interruptions to a queue and executes them in the order they are received by the client. Below is a quick example of using the `enqueue` option.
+이 가이드는 더블 텍스트가 무엇인지에 대한 지식을 가정하며, 이에 대한 정보는 [더블 텍스트 개념 가이드](../../concepts/double_texting.md)에서 확인할 수 있습니다.
 
-## Setup
+이 가이드는 더블 텍스트를 위한 `enqueue` 옵션을 다루며, 이는 중단되는 내용을 큐에 추가하고 클라이언트가 수신한 순서대로 실행합니다. 아래는 `enqueue` 옵션을 사용하는 간단한 예입니다.
 
-First, we will define a quick helper function for printing out JS and CURL model outputs (you can skip this if using Python):
+## 설정
+
+먼저, JS와 CURL 모델 출력을 인쇄하기 위한 도움 함수 하나를 정의하겠습니다 (Python을 사용하는 경우 이 부분은 건너뛰어도 됩니다):
 
 === "Javascript"
 
@@ -26,7 +28,7 @@ First, we will define a quick helper function for printing out JS and CURL model
 === "CURL"
 
     ```bash
-    # PLACE THIS IN A FILE CALLED pretty_print.sh
+    # 이를 pretty_print.sh라는 파일에 저장합니다.
     pretty_print() {
       local type="$1"
       local content="$2"
@@ -45,7 +47,7 @@ First, we will define a quick helper function for printing out JS and CURL model
     }
     ```
 
-Then, let's import our required packages and instantiate our client, assistant, and thread.
+그런 다음, 필요한 패키지를 가져오고 클라이언트, 조수 및 스레드를 인스턴스화하겠습니다.
 
 === "Python"
 
@@ -57,7 +59,7 @@ Then, let's import our required packages and instantiate our client, assistant, 
     from langgraph_sdk import get_client
 
     client = get_client(url=<DEPLOYMENT_URL>)
-    # Using the graph deployed with the name "agent"
+    # "agent"라는 이름으로 배포된 그래프 사용
     assistant_id = "agent"
     thread = await client.threads.create()
     ```
@@ -66,10 +68,9 @@ Then, let's import our required packages and instantiate our client, assistant, 
 
     ```js
     import { Client } from "@langchain/langgraph-sdk";
-    
 
     const client = new Client({ apiUrl: <DEPLOYMENT_URL> });
-    // Using the graph deployed with the name "agent"
+    // "agent"라는 이름으로 배포된 그래프 사용
     const assistantId = "agent";
     const thread = await client.threads.create();
     ```
@@ -83,22 +84,22 @@ Then, let's import our required packages and instantiate our client, assistant, 
       --data '{}'
     ```
 
-## Create runs
+## 실행 생성
 
-Now let's start two runs, with the second interrupting the first one with a multitask strategy of "enqueue":
+이제 두 개의 실행을 시작하겠습니다. 두 번째 실행이 첫 번째 실행을 중단하며 "enqueue" 멀티태스킹 전략을 사용합니다.
 
 === "Python"
 
     ```python
-    first_run = await client.runs.create(
+    첫 번째 실행 = await client.runs.create(
         thread["thread_id"],
         assistant_id,
-        input={"messages": [{"role": "user", "content": "what's the weather in sf?"}]},
+        input={"messages": [{"role": "user", "content": "샌프란시스코 날씨 어때?"}]},
     )
-    second_run = await client.runs.create(
+    두 번째 실행 = await client.runs.create(
         thread["thread_id"],
         assistant_id,
-        input={"messages": [{"role": "user", "content": "what's the weather in nyc?"}]},
+        input={"messages": [{"role": "user", "content": "뉴욕 날씨 어때?"}]},
         multitask_strategy="enqueue",
     )
     ```
@@ -106,16 +107,16 @@ Now let's start two runs, with the second interrupting the first one with a mult
 === "Javascript"
 
     ```js
-    const firstRun = await client.runs.create(
+    const 첫 번째 실행 = await client.runs.create(
       thread["thread_id"],
       assistantId,
-      input={"messages": [{"role": "user", "content": "what's the weather in sf?"}]},
+      input={"messages": [{"role": "user", "content": "샌프란시스코 날씨 어때?"}]},
     )
 
-    const secondRun = await client.runs.create(
+    const 두 번째 실행 = await client.runs.create(
       thread["thread_id"],
       assistantId,
-      input={"messages": [{"role": "user", "content": "what's the weather in nyc?"}]},
+      input={"messages": [{"role": "user", "content": "뉴욕 날씨 어때?"}]},
       multitask_strategy="enqueue",
     )
     ```
@@ -124,45 +125,45 @@ Now let's start two runs, with the second interrupting the first one with a mult
 
     ```bash
     curl --request POST \
-    --url <DEPLOY<ENT_URL>>/threads/<THREAD_ID>/runs \
+    --url <장배치_URL>>/threads/<THREAD_ID>/runs \
     --header 'Content-Type: application/json' \
     --data "{
-      \"assistant_id\": \"agent\",
-      \"input\": {\"messages\": [{\"role\": \"human\", \"content\": \"what\'s the weather in sf?\"}]},
+      \"assistant_id\": \"에이전트\",
+      \"input\": {\"messages\": [{\"role\": \"human\", \"content\": \"샌프란시스코 날씨 어때?\"}]},
     }" && curl --request POST \
-    --url <DEPLOY<ENT_URL>>/threads/<THREAD_ID>/runs \
+    --url <장배치_URL>>/threads/<THREAD_ID>/runs \
     --header 'Content-Type: application/json' \
     --data "{
-      \"assistant_id\": \"agent\",
-      \"input\": {\"messages\": [{\"role\": \"human\", \"content\": \"what\'s the weather in nyc?\"}]},
+      \"assistant_id\": \"에이전트\",
+      \"input\": {\"messages\": [{\"role\": \"human\", \"content\": \"뉴욕 날씨 어때?\"}]},
       \"multitask_strategy\": \"enqueue\"
     }"
     ```
 
-## View run results
+## 실행 결과 보기
 
-Verify that the thread has data from both runs:
+스레드에 두 실행의 데이터가 있는지 확인하세요:
 
 === "Python"
 
     ```python
-    # wait until the second run completes
-    await client.runs.join(thread["thread_id"], second_run["run_id"])
+    # 두 번째 실행이 완료될 때까지 대기
+    await client.runs.join(thread["thread_id"], 두 번째 실행["run_id"])
 
-    state = await client.threads.get_state(thread["thread_id"])
+    상태 = await client.threads.get_state(thread["thread_id"])
 
-    for m in convert_to_messages(state["values"]["messages"]):
+    for m in convert_to_messages(상태["values"]["messages"]):
         m.pretty_print()
     ```
 
 === "Javascript"
 
     ```js
-    await client.runs.join(thread["thread_id"], secondRun["run_id"]);
+    await client.runs.join(thread["thread_id"], 두 번째 실행["run_id"]);
 
-    const state = await client.threads.getState(thread["thread_id"]);
+    const 상태 = await client.threads.getState(thread["thread_id"]);
 
-    for (const m of state["values"]["messages"]) {
+    for (const m of 상태["values"]["messages"]) {
       prettyPrint(m);
     }
     ```
@@ -171,8 +172,8 @@ Verify that the thread has data from both runs:
 
     ```bash
     source pretty_print.sh && curl --request GET \
-    --url <DEPLOYMENT_URL>/threads/<THREAD_ID>/runs/<RUN_ID>/join && \
-    curl --request GET --url <DEPLOYMENT_URL>/threads/<THREAD_ID>/state | \
+    --url <장배치_URL>/threads/<THREAD_ID>/runs/<RUN_ID>/join && \
+    curl --request GET --url <장배치_URL>/threads/<THREAD_ID>/state | \
     jq -c '.values.messages[]' | while read -r element; do
         type=$(echo "$element" | jq -r '.type')
         content=$(echo "$element" | jq -r '.content | if type == "array" then tostring else . end')
@@ -180,76 +181,49 @@ Verify that the thread has data from both runs:
     done
     ```
 
-Output:
+출력:
+    
+    ================================ 인간 메시지 =================================
+    
+    샌프란시스코 날씨 어때?
+    ================================== AI 메시지 ==================================
+    
+    [{'id': 'toolu_01Dez1sJre4oA2Y7NsKJV6VT', 'input': {'query': '샌프란시스코 날씨'}, 'name': 'tavily_search_results_json', 'type': 'tool_use'}]
+    도구 호출:
+      현재 샌프란시스코의 날씨 조건은 다음과 같습니다:
 
-    ================================ Human Message =================================
-    
-    what's the weather in sf?
-    ================================== Ai Message ==================================
-    
-    [{'id': 'toolu_01Dez1sJre4oA2Y7NsKJV6VT', 'input': {'query': 'weather in san francisco'}, 'name': 'tavily_search_results_json', 'type': 'tool_use'}]
-    Tool Calls:
-      tavily_search_results_json (toolu_01Dez1sJre4oA2Y7NsKJV6VT)
-     Call ID: toolu_01Dez1sJre4oA2Y7NsKJV6VT
-      Args:
-        query: weather in san francisco
-    ================================= Tool Message =================================
-    Name: tavily_search_results_json
-    
-    [{"url": "https://www.accuweather.com/en/us/san-francisco/94103/weather-forecast/347629", "content": "Get the current and future weather conditions for San Francisco, CA, including temperature, precipitation, wind, air quality and more. See the hourly and 10-day outlook, radar maps, alerts and allergy information."}]
-    ================================== Ai Message ==================================
-    
-    According to AccuWeather, the current weather conditions in San Francisco are:
-    
-    Temperature: 57°F (14°C)
-    Conditions: Mostly Sunny
-    Wind: WSW 10 mph
-    Humidity: 72%
-    
-    The forecast for the next few days shows partly sunny skies with highs in the upper 50s to mid 60s F (14-18°C) and lows in the upper 40s to low 50s F (9-11°C). Typical mild, dry weather for San Francisco this time of year.
-    
-    Some key details from the AccuWeather forecast:
-    
-    Today: Mostly sunny, high of 62°F (17°C)
-    Tonight: Partly cloudy, low of 49°F (9°C) 
-    Tomorrow: Partly sunny, high of 59°F (15°C)
-    Saturday: Mostly sunny, high of 64°F (18°C)
-    Sunday: Partly sunny, high of 61°F (16°C)
-    
-    So in summary, expect seasonable spring weather in San Francisco over the next several days, with a mix of sun and clouds and temperatures ranging from the upper 40s at night to the low 60s during the days. Typical dry conditions with no rain in the forecast.
-    ================================ Human Message =================================
-    
-    what's the weather in nyc?
-    ================================== Ai Message ==================================
-    
-    [{'text': 'Here are the current weather conditions and forecast for New York City:', 'type': 'text'}, {'id': 'toolu_01FFft5Sx9oS6AdVJuRWWcGp', 'input': {'query': 'weather in new york city'}, 'name': 'tavily_search_results_json', 'type': 'tool_use'}]
-    Tool Calls:
-      tavily_search_results_json (toolu_01FFft5Sx9oS6AdVJuRWWcGp)
-     Call ID: toolu_01FFft5Sx9oS6AdVJuRWWcGp
-      Args:
-        query: weather in new york city
-    ================================= Tool Message =================================
-    Name: tavily_search_results_json
-    
-    [{"url": "https://www.weatherapi.com/", "content": "{'location': {'name': 'New York', 'region': 'New York', 'country': 'United States of America', 'lat': 40.71, 'lon': -74.01, 'tz_id': 'America/New_York', 'localtime_epoch': 1718734479, 'localtime': '2024-06-18 14:14'}, 'current': {'last_updated_epoch': 1718733600, 'last_updated': '2024-06-18 14:00', 'temp_c': 29.4, 'temp_f': 84.9, 'is_day': 1, 'condition': {'text': 'Sunny', 'icon': '//cdn.weatherapi.com/weather/64x64/day/113.png', 'code': 1000}, 'wind_mph': 2.2, 'wind_kph': 3.6, 'wind_degree': 158, 'wind_dir': 'SSE', 'pressure_mb': 1025.0, 'pressure_in': 30.26, 'precip_mm': 0.0, 'precip_in': 0.0, 'humidity': 63, 'cloud': 0, 'feelslike_c': 31.3, 'feelslike_f': 88.3, 'windchill_c': 28.3, 'windchill_f': 82.9, 'heatindex_c': 29.6, 'heatindex_f': 85.3, 'dewpoint_c': 18.4, 'dewpoint_f': 65.2, 'vis_km': 16.0, 'vis_miles': 9.0, 'uv': 7.0, 'gust_mph': 16.5, 'gust_kph': 26.5}}"}]
-    ================================== Ai Message ==================================
-    
-    According to the weather data from WeatherAPI:
-    
-    Current Conditions in New York City (as of 2:00 PM local time):
-    - Temperature: 85°F (29°C)
-    - Conditions: Sunny
-    - Wind: 2 mph (4 km/h) from the SSE
-    - Humidity: 63%
-    - Heat Index: 85°F (30°C)
-    
-    The forecast shows sunny and warm conditions persisting over the next few days:
-    
-    Today: Sunny, high of 85°F (29°C)
-    Tonight: Clear, low of 68°F (20°C)
-    Tomorrow: Sunny, high of 88°F (31°C) 
-    Thursday: Mostly sunny, high of 90°F (32°C)
-    Friday: Partly cloudy, high of 87°F (31°C)
-    
-    So New York City is experiencing beautiful sunny weather with seasonably warm temperatures in the mid-to-upper 80s Fahrenheit (around 30°C). Humidity is moderate in the 60% range. Overall, ideal late spring/early summer conditions for being outdoors in the city over the next several days.
+- 기온: 57°F (14°C)
+- 상황: 대체로 맑음
+- 바람: WSW 10 mph
+- 습도: 72%
+
+다음 며칠간의 예보는 부분적으로 맑은 날씨와 기온이 50대 후반에서 60대 중반(Fahrenheit, 14-18°C)으로, 최저 기온은 40대 후반에서 50대 초반(Fahrenheit, 9-11°C)으로 예상됩니다. 이 시기에 샌프란시스코에서 흔히 볼 수 있는 온난하고 건조한 날씨입니다.
+
+AccuWeather 예보의 주요 세부 사항은 다음과 같습니다:
+
+- 오늘: 대체로 맑음, 최고 기온 62°F (17°C)
+- 오늘 밤: 부분적으로 흐림, 최저 기온 49°F (9°C) 
+- 내일: 부분적으로 맑음, 최고 기온 59°F (15°C)
+- 토요일: 대체로 맑음, 최고 기온 64°F (18°C)
+- 일요일: 부분적으로 맑음, 최고 기온 61°F (16°C)
+
+결론적으로, 샌프란시스코는 다음 며칠간 계절에 알맞은 봄 날씨가 예상되며, 햇빛과 구름이 섞인 날씨 및 기온은 밤에는 40대 후반, 낮에는 60도 초반으로 변동할 것으로 보입니다. 비 예보가 없는 전형적인 건조한 날씨입니다. 
+
+현재 뉴욕시의 날씨 조건과 예보는 다음과 같습니다:
+
+- 기온: 85°F (29°C)
+- 상황: 맑음
+- 바람: SSE에서 2 mph (4 km/h)
+- 습도: 63%
+- 체감 온도: 85°F (30°C)
+
+예보에 따르면, 향후 며칠 동안 맑고 따뜻한 날씨가 지속될 것으로 보입니다:
+
+- 오늘: 맑음, 최고 기온 85°F (29°C)
+- 오늘 밤: 맑음, 최저 기온 68°F (20°C)
+- 내일: 맑음, 최고 기온 88°F (31°C) 
+- 목요일: 대체로 맑음, 최고 기온 90°F (32°C)
+- 금요일: 부분적으로 흐림, 최고 기온 87°F (31°C)
+
+따라서 뉴욕시는 아름다운 맑은 날씨와 적정 온도가 지속되고 있으며, 80도 중반(Fahrenheit, 약 30°C)의 따뜻한 날씨가 이어질 것으로 보입니다. 습도는 60% 범위로 적당합니다. 전반적으로 외출하기에 이상적인 늦봄/초여름 날씨가 예상됩니다.
 

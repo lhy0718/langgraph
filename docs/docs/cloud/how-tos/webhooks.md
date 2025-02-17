@@ -1,109 +1,113 @@
-# Use Webhooks
+_한국어로 기계번역됨_
 
-You may wish to use webhooks in your client, especially when using async streams in case you want to update something in your service once the API call to LangGraph Cloud has finished running. To do so, you will need to expose an endpoint that can accept POST requests, and then pass it to your API request in the "webhook" parameter.
+# 웹훅 사용하기
 
-Currently, the SDK has not exposed this endpoint but you can access it through curl commands as follows.
+클라이언트에서 웹훅을 사용하고 싶을 수 있습니다. 특히 비동기 스트림을 사용할 때, LangGraph Cloud에 대한 API 호출이 완료된 후 서비스에서 무언가를 업데이트하고 싶을 경우입니다. 이를 위해서는 POST 요청을 받을 수 있는 엔드포인트를 노출해야 하며, "webhook" 매개변수에 API 요청으로 전달해야 합니다.
 
-The following endpoints accept `webhook` as a parameter: 
+현재 SDK는 이 엔드포인트를 노출하지 않았지만, curl 명령어를 통해 접근할 수 있습니다.
 
-- Create Run -> POST /thread/{thread_id}/runs
-- Create Thread Cron -> POST /thread/{thread_id}/runs/crons
-- Stream Run -> POST /thread/{thread_id}/runs/stream
-- Wait Run -> POST /thread/{thread_id}/runs/wait
-- Create Cron -> POST /runs/crons
-- Stream Run Stateless -> POST /runs/stream
-- Wait Run Stateless -> POST /runs/wait
+다음 엔드포인트가 `webhook`을 매개변수로 허용합니다:
 
-In this example, we will show calling a webhook after streaming a run. 
+- 실행 생성 -> POST /thread/{thread_id}/runs
+- 스레드 크론 생성 -> POST /thread/{thread_id}/runs/crons
+- 스트림 실행 -> POST /thread/{thread_id}/runs/stream
+- 실행 대기 -> POST /thread/{thread_id}/runs/wait
+- 크론 생성 -> POST /runs/crons
+- 무상태 스트림 실행 -> POST /runs/stream
+- 무상태 실행 대기 -> POST /runs/wait
 
-## Setup
+이번 예제에서는 스트리밍 실행 후 웹훅을 호출하는 방법을 보여줍니다.
 
-First, let's setup our assistant and thread:
+## 설정
+
+먼저, 우리 도우미와 스레드를 설정해보겠습니다:
 
 === "Python"
 
-    ```python
-    from langgraph_sdk import get_client
+```python
+from langgraph_sdk import get_client
 
-    client = get_client(url=<DEPLOYMENT_URL>)
-    # Using the graph deployed with the name "agent"
-    assistant_id = "agent"
-    # create thread
-    thread = await client.threads.create()
-    print(thread)
-    ```
+client = get_client(url=<DEPLOYMENT_URL>)
+# "agent"라는 이름으로 배포된 그래프 사용
+assistant_id = "agent"
+# 스레드 생성
+thread = await client.threads.create()
+print(thread)
+```
 
 === "Javascript"
 
-    ```js
-    import { Client } from "@langchain/langgraph-sdk";
+```js
+import { Client } from "@langchain/langgraph-sdk";
 
-    const client = new Client({ apiUrl: <DEPLOYMENT_URL> });
-    // Using the graph deployed with the name "agent"
-    const assistantID = "agent";
-    // create thread
-    const thread = await client.threads.create();
-    console.log(thread);
-    ```
+const client = new Client({ apiUrl: <DEPLOYMENT_URL> });
+// "agent"라는 이름으로 배포된 그래프 사용
+const assistantID = "agent";
+// 스레드 생성
+const thread = await client.threads.create();
+console.log(thread);
+```
 
 === "CURL"
 
-    ```bash
-    curl --request POST \
-        --url <DEPLOYMENT_URL>/assistants/search \
-        --header 'Content-Type: application/json' \
-        --data '{
-            "limit": 10,
-            "offset": 0
-        }' | jq -c 'map(select(.config == null or .config == {})) | .[0]' && \
-    curl --request POST \
-        --url <DEPLOYMENT_URL>/threads \
-        --header 'Content-Type: application/json' \
-        --data '{}'
-    ```
+```bash
+curl --request POST \
+    --url <DEPLOYMENT_URL>/assistants/search \
+    --header 'Content-Type: application/json' \
+    --data '{
+        "limit": 10,
+        "offset": 0
+    }' | jq -c 'map(select(.config == null or .config == {})) | .[0]' && \
+curl --request POST \
+    --url <DEPLOYMENT_URL>/threads \
+    --header 'Content-Type: application/json' \
+    --data '{}'
+```
 
-Output:
+출력:
 
-    {
-        'thread_id': '9dde5490-2b67-47c8-aa14-4bfec88af217', 
-        'created_at': '2024-08-30T23:07:38.242730+00:00', 
-        'updated_at': '2024-08-30T23:07:38.242730+00:00', 
-        'metadata': {}, 
-        'status': 'idle', 
-        'config': {}, 
-        'values': None
-    }
+```json
+{
+    'thread_id': '9dde5490-2b67-47c8-aa14-4bfec88af217', 
+    'created_at': '2024-08-30T23:07:38.242730+00:00', 
+    'updated_at': '2024-08-30T23:07:38.242730+00:00', 
+    'metadata': {}, 
+    'status': 'idle', 
+    'config': {}, 
+    'values': None
+}
+```
 
-## Use graph with a webhook
+## 웹훅을 사용한 그래프 활용
 
-To invoke a run with a webhook, we specify the `webhook` parameter with the desired endpoint when creating a run. Webhook requests are triggered by the end of a run.
+웹훅을 사용하여 실행을 호출하기 위해, 실행을 생성할 때 원하는 엔드포인트와 함께 `webhook` 매개변수를 지정합니다. 웹훅 요청은 실행이 종료된 후에 트리거됩니다.
 
-For example, if we can receive requests at `https://my-server.app/my-webhook-endpoint`, we can pass this to `stream`:
+예를 들어 `https://my-server.app/my-webhook-endpoint`에서 요청을 받을 수 있다면, 이를 `stream`에 전달할 수 있습니다:
 
 === "Python"
 
-    ```python
-    # create input
-    input = { "messages": [{ "role": "user", "content": "Hello!" }] }
+```python
+# 입력 생성
+input = { "messages": [{ "role": "user", "content": "Hello!" }] }
 
-    async for chunk in client.runs.stream(
-        thread_id=thread["thread_id"],
-        assistant_id=assistant_id,
-        input=input,
-        stream_mode="events",
-        webhook="https://my-server.app/my-webhook-endpoint"
-    ):
-        # Do something with the stream output
-        pass
-    ```
+async for chunk in client.runs.stream(
+    thread_id=thread["thread_id"],
+    assistant_id=assistant_id,
+    input=input,
+    stream_mode="events",
+    webhook="https://my-server.app/my-webhook-endpoint"
+):
+    # 스트림 출력으로 무언가 수행
+    pass
+```
 
 === "Javascript"
 
     ```js
-    // create input
-    const input = { messages: [{ role: "human", content: "Hello!" }] };
+    // 입력 생성
+    const input = { messages: [{ role: "human", content: "안녕하세요!" }] };
 
-    // stream events
+    // 스트림 이벤트
     const streamResponse = client.runs.stream(
       thread["thread_id"],
       assistantID,
@@ -113,7 +117,7 @@ For example, if we can receive requests at `https://my-server.app/my-webhook-end
       }
     );
     for await (const chunk of streamResponse) {
-      // Do something with the stream output
+      // 스트림 출력으로 무언가를 수행합니다
     }
     ```
 
@@ -125,18 +129,18 @@ For example, if we can receive requests at `https://my-server.app/my-webhook-end
         --header 'Content-Type: application/json' \
         --data '{
             "assistant_id": <ASSISTANT_ID>,
-            "input" : {"messages":[{"role": "user", "content": "Hello!"}]},
+            "input" : {"messages":[{"role": "user", "content": "안녕하세요!"}]},
             "webhook": "https://my-server.app/my-webhook-endpoint"
         }'
     ```
 
-The schema for the payload sent to `my-webhook-endpoint` is that of a [run](../../concepts/langgraph_server.md/#runs). See [API Reference](https://langchain-ai.github.io/langgraph/cloud/reference/api/api_ref.html#model/run) for more detail. Note that the run input, configuration, etc. are included in the `kwargs` field.
+`my-webhook-endpoint`에 전송되는 페이로드의 스키마는 [run](../../concepts/langgraph_server.md/#runs)입니다. 자세한 내용은 [API 참조](https://langchain-ai.github.io/langgraph/cloud/reference/api/api_ref.html#model/run)를 참조하세요. 실행 입력, 구성 등이 `kwargs` 필드에 포함된다는 점에 유의하세요.
 
-### Signing webhook requests
+### 웹훅 요청 서명하기
 
-To sign the webhook requests, we can specify a token parameter in the webhook URL, e.g.,
+웹훅 요청에 서명하려면 웹훅 URL에 토큰 매개변수를 지정할 수 있습니다. 예를 들어,
 ```
 https://my-server.app/my-webhook-endpoint?token=...
 ```
 
-The server should then extract the token from the request's parameters and validate it before processing the payload.
+서버는 요청의 매개변수에서 토큰을 추출한 다음 페이로드를 처리하기 전에 이를 검증해야 합니다.

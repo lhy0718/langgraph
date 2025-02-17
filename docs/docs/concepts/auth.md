@@ -1,3 +1,5 @@
+_한국어로 기계번역됨_
+
 # 인증 및 접근 제어
 
 LangGraph 플랫폼은 대부분의 인증 방식과 통합 가능한 유연한 인증 및 권한 부여 시스템을 제공합니다.
@@ -39,24 +41,24 @@ LangGraph 플랫폼은 다양한 보안 기본값을 제공합니다:
 
 1. **인증 제공자** (Identity Provider/IdP)
 
-    * 사용자 신원 및 자격 증명을 관리하는 전용 서비스
-    * 사용자 등록, 로그인, 비밀번호 재설정 등을 처리
-    * 성공적인 인증 후 토큰(JWT, 세션 토큰 등)을 발급
-    * 예: Auth0, Supabase Auth, Okta 또는 자체 인증 서버
+   - 사용자 신원 및 자격 증명을 관리하는 전용 서비스
+   - 사용자 등록, 로그인, 비밀번호 재설정 등을 처리
+   - 성공적인 인증 후 토큰(JWT, 세션 토큰 등)을 발급
+   - 예: Auth0, Supabase Auth, Okta 또는 자체 인증 서버
 
 2. **LangGraph 백엔드** (리소스 서버)
 
-    * 비즈니스 논리 및 보호된 리소스를 포함하는 LangGraph 애플리케이션
-    * 인증 제공자와 함께 토큰을 검증
-    * 사용자 신원 및 권한에 기반하여 접근 제어를 시행
-    * 사용자 자격 증명을 직접 저장하지 않음
+   - 비즈니스 논리 및 보호된 리소스를 포함하는 LangGraph 애플리케이션
+   - 인증 제공자와 함께 토큰을 검증
+   - 사용자 신원 및 권한에 기반하여 접근 제어를 시행
+   - 사용자 자격 증명을 직접 저장하지 않음
 
 3. **클라이언트 애플리케이션** (프론트엔드)
 
-    * 웹 앱, 모바일 앱 또는 API 클라이언트
-    * 시간 민감한 사용자 자격 증명을 수집하고 인증 제공자에게 전송
-    * 인증 제공자로부터 토큰 수신
-    * LangGraph 백엔드에 대한 요청에 이 토큰 포함
+   - 웹 앱, 모바일 앱 또는 API 클라이언트
+   - 시간 민감한 사용자 자격 증명을 수집하고 인증 제공자에게 전송
+   - 인증 제공자로부터 토큰 수신
+   - LangGraph 백엔드에 대한 요청에 이 토큰 포함
 
 이러한 구성 요소가 전형적으로 상호작용하는 방식은 다음과 같습니다:
 
@@ -130,7 +132,7 @@ async def authenticate(headers: dict) -> Auth.types.MinimalUserDict:
     * query_params (dict[str, str]): URL 쿼리 매개변수, 예: {"stream": "true"}
     * headers (dict[bytes, bytes]): 요청 헤더
     * authorization (str | None): 인증 헤더 값 (예: "Bearer <token>")
-    
+
     많은 튜토리얼에서는 간결성을 위해 "authorization" 매개변수만 표시하지만, 필요에 따라 더 많은 정보를 수용하도록 선택할 수 있습니다.
     사용자 정의 인증 체계를 구현합니다.
 
@@ -279,11 +281,12 @@ async def on_assistant_create(
         )
 ```
 
-위 예에서 전역 및 리소스 특정 핸들러를 혼합하고 있음을 주목하십시오. 각 요청은 가장 구체적인 핸들러에 의해 처리되므로 `thread`를 생성하려는 요청은 `on_thread_create` 핸들러와 일치하지만 `reject_unhandled_requests` 핸들러와는 일치하지 않습니다. 그러나 스레드를 `update`하려는 요청은 해당 리소스 및 작업에 대해 더 구체적인 핸들러가 없으므로 전역 핸들러에 의해 처리됩니다. 생성, 업데이트 요청은 
+위 예에서 전역 및 리소스 특정 핸들러를 혼합하고 있음을 주목하십시오. 각 요청은 가장 구체적인 핸들러에 의해 처리되므로 `thread`를 생성하려는 요청은 `on_thread_create` 핸들러와 일치하지만 `reject_unhandled_requests` 핸들러와는 일치하지 않습니다. 그러나 스레드를 `update`하려는 요청은 해당 리소스 및 작업에 대해 더 구체적인 핸들러가 없으므로 전역 핸들러에 의해 처리됩니다. 생성, 업데이트 요청은
 
 ### 필터 작업 {#filter-operations}
 
 인증 핸들러는 `None`, 부울 값 또는 필터 사전을 반환할 수 있습니다.
+
 - `None` 및 `True`는 "모든 하위 리소스에 대한 접근을 허용"을 의미합니다.
 - `False`는 "모든 하위 리소스에 대한 접근을 거부합니다 (403 예외 발생)"를 의미합니다.
 - 메타데이터 필터 사전은 리소스 접근을 제한합니다.
@@ -365,22 +368,22 @@ LangGraph는 인증 핸들러의 세 가지 수준을 제공합니다. 가장 �
 더 구체적인 핸들러가 등록되면 해당 리소스와 작업에 대한 더 일반적인 핸들러는 호출되지 않습니다.
 
 ???+ 팁 "타입 안전성"
-    각 핸들러는 `value` 매개변수에 대한 타입 힌트를 제공받습니다. `Auth.types.on.<resource>.<action>.value`. 예를 들어:
-    ```python
-    @auth.on.threads.create
-    async def on_thread_create(
-        ctx: Auth.types.AuthContext,
-        value: Auth.types.on.threads.create.value  # 스레드 생성을 위한 특정 타입
-    ):
-        ...
-    
+각 핸들러는 `value` 매개변수에 대한 타입 힌트를 제공받습니다. `Auth.types.on.<resource>.<action>.value`. 예를 들어:
+```python
+@auth.on.threads.create
+async def on_thread_create(
+ctx: Auth.types.AuthContext,
+value: Auth.types.on.threads.create.value # 스레드 생성을 위한 특정 타입
+):
+...
+
     @auth.on.threads
     async def on_threads(
         ctx: Auth.types.AuthContext,
         value: Auth.types.on.threads.value  # 모든 스레드 작업의 유니온 타입
     ):
         ...
-    
+
     @auth.on
     async def on_all(
         ctx: Auth.types.AuthContext,
@@ -391,31 +394,31 @@ LangGraph는 인증 핸들러의 세 가지 수준을 제공합니다. 가장 �
     더 구체적인 핸들러는 더 적은 작업 유형을 처리하기 때문에 더 나은 타입 힌트를 제공합니다.
 
 #### 지원되는 작업 및 타입 {#supported-actions}
+
 다음은 모든 지원되는 작업 핸들러입니다:
 
-| 리소스 | 핸들러 | 설명 | 값 타입 |
-|----------|---------|-------------|------------|
-| **스레드** | `@auth.on.threads.create` | 스레드 생성 | [`ThreadsCreate`](../cloud/reference/sdk/python_sdk_ref.md#langgraph_sdk.auth.types.ThreadsCreate) |
-| | `@auth.on.threads.read` | 스레드 검색 | [`ThreadsRead`](../cloud/reference/sdk/python_sdk_ref.md#langgraph_sdk.auth.types.ThreadsRead) |
-| | `@auth.on.threads.update` | 스레드 업데이트 | [`ThreadsUpdate`](../cloud/reference/sdk/python_sdk_ref.md#langgraph_sdk.auth.types.ThreadsUpdate) |
-| | `@auth.on.threads.delete` | 스레드 삭제 | [`ThreadsDelete`](../cloud/reference/sdk/python_sdk_ref.md#langgraph_sdk.auth.types.ThreadsDelete) |
-| | `@auth.on.threads.search` | 스레드 목록 | [`ThreadsSearch`](../cloud/reference/sdk/python_sdk_ref.md#langgraph_sdk.auth.types.ThreadsSearch) |
-| | `@auth.on.threads.create_run` | 실행 생성 또는 업데이트 | [`RunsCreate`](../cloud/reference/sdk/python_sdk_ref.md#langgraph_sdk.auth.types.RunsCreate) |
-| **어시스턴트** | `@auth.on.assistants.create` | 어시스턴트 생성 | [`AssistantsCreate`](../cloud/reference/sdk/python_sdk_ref.md#langgraph_sdk.auth.types.AssistantsCreate) |
-| | `@auth.on.assistants.read` | 어시스턴트 검색 | [`AssistantsRead`](../cloud/reference/sdk.python_sdk_ref.md#langgraph_sdk.auth.types.AssistantsRead) |
-| | `@auth.on.assistants.update` | 어시스턴트 업데이트 | [`AssistantsUpdate`](../cloud/reference/sdk/python_sdk_ref.md#langgraph_sdk.auth.types.AssistantsUpdate) |
-| | `@auth.on.assistants.delete` | 어시스턴트 삭제 | [`AssistantsDelete`](../cloud/reference/sdk/python_sdk_ref.md#langgraph_sdk.auth.types.AssistantsDelete) |
-| | `@auth.on.assistants.search` | 어시스턴트 목록 | [`AssistantsSearch`](../cloud/reference/sdk.python_sdk_ref.md#langgraph_sdk.auth.types.AssistantsSearch) |
-| **크론** | `@auth.on.crons.create` | 크론 작업 생성 | [`CronsCreate`](../cloud/reference/sdk/python_sdk_ref.md#langgraph_sdk.auth.types.CronsCreate) |
-| | `@auth.on.crons.read` | 크론 작업 검색 | [`CronsRead`](../cloud/reference/sdk/python_sdk_ref.md#langgraph_sdk.auth.types.CronsRead) |
-| | `@auth.on.crons.update` | 크론 작업 업데이트 | [`CronsUpdate`](../cloud/reference/sdk/python_sdk_ref.md#langgraph_sdk.auth.types.CronsUpdate) |
-| | `@auth.on.crons.delete` | 크론 작업 삭제 | [`CronsDelete`](../cloud/reference/sdk/python_sdk_ref.md#langgraph_sdk.auth.types.CronsDelete) |
-| | `@auth.on.crons.search` | 크론 작업 목록 | [`CronsSearch`](../cloud/reference/sdk/python_sdk_ref.md#langgraph_sdk.auth.types.CronsSearch) |
+| 리소스         | 핸들러                        | 설명                    | 값 타입                                                                                                  |
+| -------------- | ----------------------------- | ----------------------- | -------------------------------------------------------------------------------------------------------- |
+| **스레드**     | `@auth.on.threads.create`     | 스레드 생성             | [`ThreadsCreate`](../cloud/reference/sdk/python_sdk_ref.md#langgraph_sdk.auth.types.ThreadsCreate)       |
+|                | `@auth.on.threads.read`       | 스레드 검색             | [`ThreadsRead`](../cloud/reference/sdk/python_sdk_ref.md#langgraph_sdk.auth.types.ThreadsRead)           |
+|                | `@auth.on.threads.update`     | 스레드 업데이트         | [`ThreadsUpdate`](../cloud/reference/sdk/python_sdk_ref.md#langgraph_sdk.auth.types.ThreadsUpdate)       |
+|                | `@auth.on.threads.delete`     | 스레드 삭제             | [`ThreadsDelete`](../cloud/reference/sdk/python_sdk_ref.md#langgraph_sdk.auth.types.ThreadsDelete)       |
+|                | `@auth.on.threads.search`     | 스레드 목록             | [`ThreadsSearch`](../cloud/reference/sdk/python_sdk_ref.md#langgraph_sdk.auth.types.ThreadsSearch)       |
+|                | `@auth.on.threads.create_run` | 실행 생성 또는 업데이트 | [`RunsCreate`](../cloud/reference/sdk/python_sdk_ref.md#langgraph_sdk.auth.types.RunsCreate)             |
+| **어시스턴트** | `@auth.on.assistants.create`  | 어시스턴트 생성         | [`AssistantsCreate`](../cloud/reference/sdk/python_sdk_ref.md#langgraph_sdk.auth.types.AssistantsCreate) |
+|                | `@auth.on.assistants.read`    | 어시스턴트 검색         | [`AssistantsRead`](../cloud/reference/sdk.python_sdk_ref.md#langgraph_sdk.auth.types.AssistantsRead)     |
+|                | `@auth.on.assistants.update`  | 어시스턴트 업데이트     | [`AssistantsUpdate`](../cloud/reference/sdk/python_sdk_ref.md#langgraph_sdk.auth.types.AssistantsUpdate) |
+|                | `@auth.on.assistants.delete`  | 어시스턴트 삭제         | [`AssistantsDelete`](../cloud/reference/sdk/python_sdk_ref.md#langgraph_sdk.auth.types.AssistantsDelete) |
+|                | `@auth.on.assistants.search`  | 어시스턴트 목록         | [`AssistantsSearch`](../cloud/reference/sdk.python_sdk_ref.md#langgraph_sdk.auth.types.AssistantsSearch) |
+| **크론**       | `@auth.on.crons.create`       | 크론 작업 생성          | [`CronsCreate`](../cloud/reference/sdk/python_sdk_ref.md#langgraph_sdk.auth.types.CronsCreate)           |
+|                | `@auth.on.crons.read`         | 크론 작업 검색          | [`CronsRead`](../cloud/reference/sdk/python_sdk_ref.md#langgraph_sdk.auth.types.CronsRead)               |
+|                | `@auth.on.crons.update`       | 크론 작업 업데이트      | [`CronsUpdate`](../cloud/reference/sdk/python_sdk_ref.md#langgraph_sdk.auth.types.CronsUpdate)           |
+|                | `@auth.on.crons.delete`       | 크론 작업 삭제          | [`CronsDelete`](../cloud/reference/sdk/python_sdk_ref.md#langgraph_sdk.auth.types.CronsDelete)           |
+|                | `@auth.on.crons.search`       | 크론 작업 목록          | [`CronsSearch`](../cloud/reference/sdk/python_sdk_ref.md#langgraph_sdk.auth.types.CronsSearch)           |
 
 ???+ note "실행에 대하여"
-    실행은 접근 제어를 위해 부모 스레드에 범위가 설정됩니다. 이는 권한이 일반적으로 스레드에서 상속되어 데이터 모델의 대화식 특성을 반영함을 의미합니다. 생성 제외 모든 실행 작업(읽기, 목록)은 스레드 핸들러에 의해 제어됩니다.
-    새로운 실행을 생성하기 위한 구체적인 `create_run` 핸들러가 있는 이유는 핸들러에서 볼 수 있는 더 많은 인수가 있기 때문입니다.
-
+실행은 접근 제어를 위해 부모 스레드에 범위가 설정됩니다. 이는 권한이 일반적으로 스레드에서 상속되어 데이터 모델의 대화식 특성을 반영함을 의미합니다. 생성 제외 모든 실행 작업(읽기, 목록)은 스레드 핸들러에 의해 제어됩니다.
+새로운 실행을 생성하기 위한 구체적인 `create_run` 핸들러가 있는 이유는 핸들러에서 볼 수 있는 더 많은 인수가 있기 때문입니다.
 
 ## 다음 단계
 

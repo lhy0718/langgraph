@@ -1,30 +1,32 @@
-# Rebuild Graph at Runtime
+_한국어로 기계번역됨_
 
-You might need to rebuild your graph with a different configuration for a new run. For example, you might need to use a different graph state or graph structure depending on the config. This guide shows how you can do this.
+# 런타임에 그래프 재구성
 
-!!! note "Note"
-    In most cases, customizing behavior based on the config should be handled by a single graph where each node can read a config and change its behavior based on it
+새로운 실행을 위해 다른 구성으로 그래프를 재구성해야 할 수도 있습니다. 예를 들어, 구성에 따라 다른 그래프 상태나 그래프 구조를 사용해야 할 수 있습니다. 이 가이드는 이를 수행하는 방법을 보여줍니다.
 
-## Prerequisites
+!!! 주의 "주의"
+    대부분의 경우, 구성에 따라 동작을 사용자 정의하는 것은 각 노드가 구성 정보를 읽고 그에 따라 동작을 변경할 수 있는 단일 그래프에서 처리해야 합니다.
 
-Make sure to check out [this how-to guide](./setup.md) on setting up your app for deployment first.
+## 전제 조건
 
-## Define graphs
+먼저 앱을 배포하기 위해 설정하는 방법에 대한 [이 가이드](./setup.md)를 확인하세요.
 
-Let's say you have an app with a simple graph that calls an LLM and returns the response to the user. The app file directory looks like the following:
+## 그래프 정의
+
+간단한 그래프를 호출하고 사용자에게 응답을 반환하는 앱이 있다고 가정해 보겠습니다. 앱 파일 디렉토리는 다음과 같습니다:
 
 ```
 my-app/
 |-- requirements.txt
 |-- .env
-|-- openai_agent.py     # code for your graph
+|-- openai_agent.py     # 그래프 코드
 ```
 
-where the graph is defined in `openai_agent.py`. 
+그래프는 `openai_agent.py`에 정의되어 있습니다.
 
-### No rebuild
+### 재구성 없음
 
-In the standard LangGraph API configuration, the server uses the compiled graph instance that's defined at the top level of `openai_agent.py`, which looks like the following:
+표준 LangGraph API 구성에서는 서버가 `openai_agent.py`의 최상위에 정의된 컴파일된 그래프 인스턴스를 사용합니다. 이는 다음과 같습니다:
 
 ```python
 from langchain_openai import ChatOpenAI
@@ -41,7 +43,7 @@ graph_workflow.add_edge(START, "agent")
 agent = graph_workflow.compile()
 ```
 
-To make the server aware of your graph, you need to specify a path to the variable that contains the `CompiledStateGraph` instance in your LangGraph API configuration (`langgraph.json`), e.g.:
+서버가 그래프를 인식하도록 하려면 LangGraph API 구성(`langgraph.json`)에 `CompiledStateGraph` 인스턴스가 포함된 변수의 경로를 지정해야 합니다. 예를 들어:
 
 ```
 {
@@ -53,9 +55,9 @@ To make the server aware of your graph, you need to specify a path to the variab
 }
 ```
 
-### Rebuild
+### 재구성
 
-To make your graph rebuild on each new run with custom configuration, you need to rewrite `openai_agent.py` to instead provide a _function_ that takes a config and returns a graph (or compiled graph) instance. Let's say we want to return our existing graph for user ID '1', and a tool-calling agent for other users. We can modify `openai_agent.py` as follows:
+사용자 정의 구성으로 각 새로운 실행 때 그래프를 재구성하도록 하려면 `openai_agent.py`를 수정하여 구성(config)을 받아 그래프(또는 컴파일된 그래프) 인스턴스를 반환하는 _함수_를 제공해야 합니다. 사용자 ID '1'에 대한 기존 그래프를 반환하고 다른 사용자에 대해서는 도구 호출 에이전트를 반환한다고 가정해 보겠습니다. 우리는 `openai_agent.py`를 다음과 같이 수정할 수 있습니다:
 
 ```python
 from typing import Annotated
@@ -77,7 +79,7 @@ class State(TypedDict):
 model = ChatOpenAI(temperature=0)
 
 def make_default_graph():
-    """Make a simple LLM agent"""
+    """간단한 LLM 에이전트 만들기"""
     graph_workflow = StateGraph(State)
     def call_model(state):
         return {"messages": [model.invoke(state["messages"])]}
@@ -91,11 +93,11 @@ def make_default_graph():
 
 
 def make_alternative_graph():
-    """Make a tool-calling agent"""
+    """도구 호출 에이전트 만들기"""
 
     @tool
     def add(a: float, b: float):
-        """Adds two numbers."""
+        """두 숫자를 더합니다."""
         return a + b
 
     tool_node = ToolNode([add])
@@ -121,18 +123,17 @@ def make_alternative_graph():
     return agent
 
 
-# this is the graph making function that will decide which graph to
-# build based on the provided config
+# 제공된 구성에 따라 어떤 그래프를 생성할지 결정하는 그래프 생성 함수입니다.
 def make_graph(config: RunnableConfig):
     user_id = config.get("configurable", {}).get("user_id")
-    # route to different graph state / structure based on the user ID
+    # 사용자 ID에 따라 서로 다른 그래프 상태/구조로 라우팅합니다.
     if user_id == "1":
         return make_default_graph()
     else:
         return make_alternative_graph()
 ```
 
-Finally, you need to specify the path to your graph-making function (`make_graph`) in `langgraph.json`:
+마지막으로, `make_graph` 함수의 경로를 `langgraph.json`에 지정해야 합니다:
 
 ```
 {
@@ -144,4 +145,4 @@ Finally, you need to specify the path to your graph-making function (`make_graph
 }
 ```
 
-See more info on LangGraph API configuration file [here](../reference/cli.md#configuration-file)
+LangGraph API 구성 파일에 대한 자세한 정보는 [여기](../reference/cli.md#configuration-file)를 참조하십시오.
