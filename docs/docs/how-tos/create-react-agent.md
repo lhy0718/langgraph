@@ -1,51 +1,51 @@
-# How to use the pre-built ReAct agent
+_한국어로 기계번역됨_
+
+# 미리 구축된 ReAct 에이전트 사용 방법
 
 <div class="admonition tip">
-    <p class="admonition-title">Prerequisites</p>
+    <p class="admonition-title">전제 조건</p>
     <p>
-        This guide assumes familiarity with the following:
+        이 가이드는 다음에 대한 친숙함을 가정합니다:
         <ul>
             <li>
                 <a href="https://langchain-ai.github.io/langgraph/concepts/agentic_concepts/">
-                    Agent Architectures
+                    에이전트 아키텍처
                 </a>                   
             </li>
             <li>
                 <a href="https://python.langchain.com/docs/concepts/chat_models/">
-                    Chat Models
+                    채팅 모델
                 </a>
             </li>
             <li>
                 <a href="https://python.langchain.com/docs/concepts/tools/">
-                    Tools
+                    도구
                 </a>
             </li>
         </ul>
     </p>
-</div> 
+</div>
 
-In this how-to we'll create a simple [ReAct](https://arxiv.org/abs/2210.03629) agent app that can check the weather. The app consists of an agent (LLM) and tools. As we interact with the app, we will first call the agent (LLM) to decide if we should use tools. Then we will run a loop:  
+이 방법에서는 간단한 [ReAct](https://arxiv.org/abs/2210.03629) 에이전트 앱을 만들어 날씨를 확인할 수 있습니다. 이 앱은 에이전트 (LLM)와 도구로 구성되어 있습니다. 앱과 상호작용하면서 먼저 에이전트 (LLM)를 호출하여 도구를 사용할지 결정합니다. 그런 다음 반복 작업을 수행합니다:
 
-1. If the agent said to take an action (i.e. call tool), we'll run the tools and pass the results back to the agent
-2. If the agent did not ask to run tools, we will finish (respond to the user)
+1. 에이전트가 행동을 취하라고 말하면 (즉, 도구를 호출하라고 하면), 도구를 실행하고 결과를 에이전트에게 전달합니다.
+2. 에이전트가 도구를 실행하라고 요청하지 않으면, 사용자에게 응답하여 종료합니다.
 
 <div class="admonition warning">
-    <p class="admonition-title">Prebuilt Agent</p>
+    <p class="admonition-title">사전 구축된 에이전트</p>
     <p>
-Please note that here will we use <a href="https://langchain-ai.github.io/langgraph/reference/prebuilt/#langgraph.prebuilt.chat_agent_executor.create_react_agent">a prebuilt agent</a>. One of the big benefits of LangGraph is that you can easily create your own agent architectures. So while it's fine to start here to build an agent quickly, we would strongly recommend learning how to build your own agent so that you can take full advantage of LangGraph.
+        여기서는 <a href="https://langchain-ai.github.io/langgraph/reference/prebuilt/#langgraph.prebuilt.chat_agent_executor.create_react_agent">사전 구축된 에이전트</a>를 사용할 것입니다. LangGraph의 큰 장점 중 하나는 쉽게 자신의 에이전트 아키텍처를 만들 수 있다는 것입니다. 따라서 여기서 빠르게 에이전트를 구축하는 것은 괜찮지만, LangGraph의 모든 이점을 활용할 수 있도록 자신의 에이전트를 구축하는 방법을 배우는 것을 강력히 추천합니다.
     </p>
-</div>   
+</div>
 
-## Setup
+## 설정
 
-First let's install the required packages and set our API keys
-
+먼저 필요한 패키지를 설치하고 API 키를 설정합시다.
 
 ```python
 %%capture --no-stderr
 %pip install -U langgraph langchain-openai
 ```
-
 
 ```python
 import getpass
@@ -61,23 +61,23 @@ _set_env("OPENAI_API_KEY")
 ```
 
 <div class="admonition tip">
-    <p class="admonition-title">Set up <a href="https://smith.langchain.com">LangSmith</a> for LangGraph development</p>
+    <p class="admonition-title"><a href="https://smith.langchain.com">LangSmith</a>를 LangGraph 개발을 위해 설정하기</p>
     <p style="padding-top: 5px;">
-        Sign up for LangSmith to quickly spot issues and improve the performance of your LangGraph projects. LangSmith lets you use trace data to debug, test, and monitor your LLM apps built with LangGraph — read more about how to get started <a href="https://docs.smith.langchain.com">here</a>. 
+        LangSmith에 가입하여 LangGraph 프로젝트의 문제를 신속하게 발견하고 성능을 개선하세요. LangSmith는 추적 데이터를 사용하여 LangGraph로 구축된 LLM 앱을 디버깅하고 테스트하며 모니터링할 수 있게 해줍니다 — 시작하는 방법에 대한 자세한 내용은 <a href="https://docs.smith.langchain.com">여기</a>에서 읽어보세요.
     </p>
 </div>
 
-## Code
+## 코드
 
 
 ```python exec="on" source="above" session="1"
-# First we initialize the model we want to use.
+# 먼저 사용하고자 하는 모델을 초기화합니다.
 from langchain_openai import ChatOpenAI
 
 model = ChatOpenAI(model="gpt-4o", temperature=0)
 
 
-# For this tutorial we will use custom tool that returns pre-defined values for weather in two cities (NYC & SF)
+# 이 튜토리얼에서는 두 도시(NYC 및 SF)의 날씨에 대한 미리 정의된 값을 반환하는 사용자 지정 도구를 사용합니다.
 
 from typing import Literal
 
@@ -86,28 +86,28 @@ from langchain_core.tools import tool
 
 @tool
 def get_weather(city: Literal["nyc", "sf"]):
-    """Use this to get weather information."""
+    """이것을 사용하여 날씨 정보를 가져옵니다."""
     if city == "nyc":
-        return "It might be cloudy in nyc"
+        return "뉴욕은 흐릴 수 있습니다"
     elif city == "sf":
-        return "It's always sunny in sf"
+        return "샌프란시스코는 항상 화창합니다"
     else:
-        raise AssertionError("Unknown city")
+        raise AssertionError("알 수 없는 도시")
 
 
 tools = [get_weather]
 
 
-# Define the graph
+# 그래프 정의
 
 from langgraph.prebuilt import create_react_agent
 
 graph = create_react_agent(model, tools=tools)
 ```
 
-## Usage
+## 사용법
 
-First, let's visualize the graph we just created
+먼저 방금 생성한 그래프를 시각화해 보겠습니다.
 
 
 ```python exec="on" source="above" session="1"
@@ -129,18 +129,18 @@ def print_stream(stream):
             message.pretty_print()
 ```
 
-Let's run the app with an input that needs a tool call
+도구 호출이 필요한 입력으로 앱을 실행해 보겠습니다.
 
 
 ```python exec="on" source="above" session="1" result="ansi"
-inputs = {"messages": [("user", "what is the weather in sf")]}
+inputs = {"messages": [("user", "샌프란시스코의 날씨는 어때?")]}
 print_stream(graph.stream(inputs, stream_mode="values"))
 ```
 
-Now let's try a question that doesn't need tools
+이제 도구가 필요 없는 질문을 시도해 보겠습니다.
 
 
 ```python exec="on" source="above" session="1" result="ansi"
-inputs = {"messages": [("user", "who built you?")]}
+inputs = {"messages": [("user", "너를 만든 사람은 누구야?")]}
 print_stream(graph.stream(inputs, stream_mode="values"))
 ```

@@ -1,30 +1,32 @@
-# How to interact with the deployment using RemoteGraph
+_한국어로 기계번역됨_
 
-!!! info "Prerequisites"
-    - [LangGraph Platform](../concepts/langgraph_platform.md)
-    - [LangGraph Server](../concepts/langgraph_server.md)
+# RemoteGraph를 사용하여 배포와 상호작용하는 방법
 
-`RemoteGraph` is an interface that allows you to interact with your LangGraph Platform deployment as if it were a regular, locally-defined LangGraph graph (e.g. a `CompiledGraph`). This guide shows you how you can initialize a `RemoteGraph` and interact with it.
+!!! 정보 "전제 조건"
+    - [LangGraph 플랫폼](../concepts/langgraph_platform.md)
+    - [LangGraph 서버](../concepts/langgraph_server.md)
 
-## Initializing the graph
+`RemoteGraph`는 LangGraph 플랫폼 배포와 상호작용할 수 있는 인터페이스로, 마치 일반적으로 정의된 로컬 LangGraph 그래프(예: `CompiledGraph`)처럼 사용할 수 있습니다. 이 가이드는 `RemoteGraph`를 초기화하고 상호작용하는 방법을 보여줍니다.
 
-When initializing a `RemoteGraph`, you must always specify:
+## 그래프 초기화
 
-- `name`: the name of the graph you want to interact with. This is the same graph name you use in `langgraph.json` configuration file for your deployment. 
-- `api_key`: a valid LangSmith API key. Can be set as an environment variable (`LANGSMITH_API_KEY`) or passed directly via the `api_key` argument. The API key could also be provided via the `client` / `sync_client` arguments, if `LangGraphClient` / `SyncLangGraphClient` were initialized with `api_key` argument.
+`RemoteGraph`를 초기화할 때에는 항상 다음을 지정해야 합니다:
 
-Additionally, you have to provide one of the following:
+- `name`: 상호작용할 그래프의 이름. 이는 배포를 위한 `langgraph.json` 구성 파일에서 사용하는 그래프 이름과 동일합니다.
+- `api_key`: 유효한 LangSmith API 키. 환경 변수(`LANGSMITH_API_KEY`)로 설정하거나 `api_key` 인수를 통해 직접 전달할 수 있습니다. API 키는 `LangGraphClient` / `SyncLangGraphClient`가 `api_key` 인수로 초기화된 경우 `client` / `sync_client` 인수를 통해서도 제공될 수 있습니다.
 
-- `url`: URL of the deployment you want to interact with. If you pass `url` argument, both sync and async clients will be created using the provided URL, headers (if provided) and default configuration values (e.g. timeout, etc).
-- `client`: a `LangGraphClient` instance for interacting with the deployment asynchronously (e.g. using `.astream()`, `.ainvoke()`, `.aget_state()`, `.aupdate_state()`, etc.)
-- `sync_client`: a `SyncLangGraphClient` instance for interacting with the deployment synchronously (e.g. using `.stream()`, `.invoke()`, `.get_state()`, `.update_state()`, etc.)
+추가로 다음 중 하나를 제공해야 합니다:
 
-!!! Note
+- `url`: 상호작용할 배포의 URL. `url` 인수를 전달하면 제공된 URL, 헤더(제공된 경우) 및 기본 구성 값(예: 타임아웃 등)을 사용하여 비동기 및 동기 클라이언트가 생성됩니다.
+- `client`: 비동기적으로 배포와 상호작용하기 위한 `LangGraphClient` 인스턴스(예: `.astream()`, `.ainvoke()`, `.aget_state()`, `.aupdate_state()` 등의 메서드를 사용).
+- `sync_client`: 동기적으로 배포와 상호작용하기 위한 `SyncLangGraphClient` 인스턴스(예: `.stream()`, `.invoke()`, `.get_state()`, `.update_state()` 등의 메서드를 사용).
 
-    If you pass both `client` or `sync_client` as well as `url` argument, they will take precedence over the `url` argument. If none of the `client` / `sync_client` / `url` arguments are provided, `RemoteGraph` will raise a `ValueError` at runtime.
+!!! 주의
+
+    `client` 또는 `sync_client`와 `url` 인수를 모두 제공하는 경우, `url` 인수보다 우선합니다. `client` / `sync_client` / `url` 인수가 모두 제공되지 않으면, `RemoteGraph`는 런타임에 `ValueError`를 발생시킵니다.
 
 
-### Using URL
+### URL 사용하기
 
 === "Python"
 
@@ -46,7 +48,7 @@ Additionally, you have to provide one of the following:
     const remoteGraph = new RemoteGraph({ graphId: graphName, url });
     ```
 
-### Using clients
+### 클라이언트 사용하기
 
 === "Python"
 
@@ -72,27 +74,27 @@ Additionally, you have to provide one of the following:
     const remoteGraph = new RemoteGraph({ graphId: graphName, client });
     ```
 
-## Invoking the graph
+## 그래프 호출하기
 
-Since `RemoteGraph` is a `Runnable` that implements the same methods as `CompiledGraph`, you can interact with it the same way you normally would with a compiled graph, i.e. by calling `.invoke()`, `.stream()`, `.get_state()`, `.update_state()`, etc (as well as their async counterparts).
+`RemoteGraph`는 `Runnable`이며 `CompiledGraph`와 동일한 메서드를 구현하므로, 보통의 컴파일된 그래프와 동일한 방식으로 상호작용할 수 있습니다. 즉, `.invoke()`, `.stream()`, `.get_state()`, `.update_state()` 등을 호출하여 상호작용할 수 있습니다(비동기 버전도 마찬가지입니다).
 
-### Asynchronously
+### 비동기적으로
 
-!!! Note
+!!! 주의
 
-    To use the graph asynchronously, you must provide either the `url` or `client` when initializing the `RemoteGraph`.
+    그래프를 비동기적으로 사용하려면 `RemoteGraph`를 초기화할 때 `url` 또는 `client`를 제공해야 합니다.
 
 === "Python"
 
     ```python
-    # invoke the graph
+    # 그래프 호출
     result = await remote_graph.ainvoke({
-        "messages": [{"role": "user", "content": "what's the weather in sf"}]
+        "messages": [{"role": "user", "content": "샌프란시스코의 날씨는 어때?"}]
     })
 
-    # stream outputs from the graph
+    # 그래프로부터 출력 스트리밍
     async for chunk in remote_graph.astream({
-        "messages": [{"role": "user", "content": "what's the weather in la"}]
+        "messages": [{"role": "user", "content": "로스앤젤레스의 날씨는 어때?"}]
     }):
         print(chunk)
     ```
@@ -100,44 +102,44 @@ Since `RemoteGraph` is a `Runnable` that implements the same methods as `Compile
 === "JavaScript"
 
     ```ts
-    // invoke the graph
+    // 그래프 호출
     const result = await remoteGraph.invoke({
-        messages: [{role: "user", content: "what's the weather in sf"}]
+        messages: [{role: "user", content: "샌프란시스코의 날씨는 어때?"}]
     })
 
-    // stream outputs from the graph
+    // 그래프에서 출력 스트리밍
     for await (const chunk of await remoteGraph.stream({
-        messages: [{role: "user", content: "what's the weather in la"}]
+        messages: [{role: "user", content: "로스앤젤레스의 날씨는 어때?"}]
     })):
         console.log(chunk)
     ```
 
-### Synchronously
+### 동기적으로
 
-!!! Note
+!!! 주의
 
-    To use the graph synchronously, you must provide either the `url` or `sync_client` when initializing the `RemoteGraph`.
+    그래프를 동기적으로 사용하려면 `RemoteGraph` 초기화 시 `url` 또는 `sync_client`를 제공해야 합니다.
 
-=== "Python"
+=== "파이썬"
 
     ```python
-    # invoke the graph
+    # 그래프 호출
     result = remote_graph.invoke({
-        "messages": [{"role": "user", "content": "what's the weather in sf"}]
+        "messages": [{"role": "user", "content": "샌프란시스코의 날씨는 어때?"}]
     })
 
-    # stream outputs from the graph
+    # 그래프에서 출력 스트리밍
     for chunk in remote_graph.stream({
-        "messages": [{"role": "user", "content": "what's the weather in la"}]
+        "messages": [{"role": "user", "content": "로스앤젤레스의 날씨는 어때?"}]
     }):
         print(chunk)
     ```
 
-## Thread-level persistence
+## 스레드 수준의 지속성
 
-By default, the graph runs (i.e. `.invoke()` or `.stream()` invocations) are stateless - the checkpoints and the final state of the graph are not persisted. If you would like to persist the outputs of the graph run (for example, to enable human-in-the-loop features), you can create a thread and provide the thread ID via the `config` argument, same as you would with a regular compiled graph:
+기본적으로 그래프 실행 (즉, `.invoke()` 또는 `.stream()` 호출)은 무상태이며 - 체크포인트와 그래프의 최종 상태가 지속되지 않습니다. 그래프 실행의 출력을 지속하고 싶다면 (예: 사람의 개입 기능을 활성화하기 위해), 스레드를 생성하고 `config` 인자를 통해 스레드 ID를 제공해야 합니다. 일반적으로 컴파일된 그래프와 동일합니다:
 
-=== "Python"
+=== "파이썬"
 
     ```python
     from langgraph_sdk import get_sync_client
@@ -146,21 +148,21 @@ By default, the graph runs (i.e. `.invoke()` or `.stream()` invocations) are sta
     sync_client = get_sync_client(url=url)
     remote_graph = RemoteGraph(graph_name, url=url)
 
-    # create a thread (or use an existing thread instead)
+    # 스레드 생성 (또는 기존 스레드 사용)
     thread = sync_client.threads.create()
 
-    # invoke the graph with the thread config
+    # 스레드 구성으로 그래프 호출
     config = {"configurable": {"thread_id": thread["thread_id"]}}
     result = remote_graph.invoke({
-        "messages": [{"role": "user", "content": "what's the weather in sf"}]
+        "messages": [{"role": "user", "content": "샌프란시스코의 날씨는 어때?"}]
     }, config=config)
 
-    # verify that the state was persisted to the thread
+    # 상태가 스레드에 지속되었는지 검증
     thread_state = remote_graph.get_state(config)
     print(thread_state)
     ```
 
-=== "JavaScript"
+=== "자바스크립트"
 
     ```ts
     import { Client } from "@langchain/langgraph-sdk";
@@ -171,56 +173,55 @@ By default, the graph runs (i.e. `.invoke()` or `.stream()` invocations) are sta
     const client = new Client({ apiUrl: url });
     const remoteGraph = new RemoteGraph({ graphId: graphName, url });
 
-    // create a thread (or use an existing thread instead)
+    // 스레드 생성 (또는 기존 스레드 사용)
     const thread = await client.threads.create();
 
-    // invoke the graph with the thread config
+    // 스레드 구성으로 그래프 호출
     const config = { configurable: { thread_id: thread.thread_id }};
     const result = await remoteGraph.invoke({
-      messages: [{ role: "user", content: "what's the weather in sf" }],
+      messages: [{ role: "user", content: "샌프란시스코의 날씨는 어때?" }],
     }, config);
 
-    // verify that the state was persisted to the thread
+    // 상태가 스레드에 지속되었는지 검증
     const threadState = await remoteGraph.getState(config);
     console.log(threadState);
     ```
 
-## Using as a subgraph
+## 서브그래프로 사용하기
 
-!!! Note
+!!! 주의
 
-    If you need to use a `checkpointer` with a graph that has a `RemoteGraph` subgraph node, make sure to use UUIDs as thread IDs.
+    `RemoteGraph` 서브그래프 노드가 있는 그래프에서 `checkpointer`를 사용해야 하는 경우, 스레드 ID로 UUID를 사용해야 합니다.
 
+`RemoteGraph`는 일반 `CompiledGraph`와 같은 방식으로 동작하므로, 다른 그래프의 서브그래프로도 사용할 수 있습니다. 예를 들어:
 
-Since the `RemoteGraph` behaves the same way as a regular `CompiledGraph`, it can be also used as a subgraph in another graph. For example:
-
-=== "Python"
+=== "파이썬"
 
     ```python
     from langgraph_sdk import get_sync_client
     from langgraph.graph import StateGraph, MessagesState, START
     from typing import TypedDict
 
-    url = <DEPLOYMENT_URL>
-    graph_name = "agent"
+    url = <배포_URL>
+    graph_name = "에이전트"
     remote_graph = RemoteGraph(graph_name, url=url)
 
-    # define parent graph
+    # 부모 그래프 정의
     builder = StateGraph(MessagesState)
-    # add remote graph directly as a node
-    builder.add_node("child", remote_graph)
-    builder.add_edge(START, "child")
+    # 원격 그래프를 노드로 직접 추가
+    builder.add_node("자식", remote_graph)
+    builder.add_edge(START, "자식")
     graph = builder.compile()
 
-    # invoke the parent graph
+    # 부모 그래프 호출
     result = graph.invoke({
-        "messages": [{"role": "user", "content": "what's the weather in sf"}]
+        "messages": [{"role": "user", "content": "샌프란시스코의 날씨는 어때?"}]
     })
     print(result)
 
-    # stream outputs from both the parent graph and subgraph
+    # 부모 그래프와 하위 그래프의 출력 스트리밍
     for chunk in graph.stream({
-        "messages": [{"role": "user", "content": "what's the weather in sf"}]
+        "messages": [{"role": "user", "content": "샌프란시스코의 날씨는 어때?"}]
     }, subgraphs=True):
         print(chunk)
     ```
@@ -231,25 +232,25 @@ Since the `RemoteGraph` behaves the same way as a regular `CompiledGraph`, it ca
     import { MessagesAnnotation, StateGraph, START } from "@langchain/langgraph";
     import { RemoteGraph } from "@langchain/langgraph/remote";
 
-    const url = `<DEPLOYMENT_URL>`;
-    const graphName = "agent";
+    const url = `<배포_URL>`;
+    const graphName = "에이전트";
     const remoteGraph = new RemoteGraph({ graphId: graphName, url });
 
-    // define parent graph and add remote graph directly as a node
+    // 부모 그래프 정의 및 원격 그래프를 노드로 직접 추가
     const graph = new StateGraph(MessagesAnnotation)
-      .addNode("child", remoteGraph)
-      .addEdge(START, "child")
+      .addNode("자식", remoteGraph)
+      .addEdge(START, "자식")
       .compile()
 
-    // invoke the parent graph
+    // 부모 그래프 호출
     const result = await graph.invoke({
-      messages: [{ role: "user", content: "what's the weather in sf" }]
+      messages: [{ role: "user", content: "샌프란시스코의 날씨는 어때?" }]
     });
     console.log(result);
 
-    // stream outputs from both the parent graph and subgraph
+    // 부모 그래프와 하위 그래프의 출력 스트리밍
     for await (const chunk of await graph.stream({
-      messages: [{ role: "user", content: "what's the weather in la" }]
+      messages: [{ role: "user", content: "로스앤젤레스의 날씨는 어때?" }]
     }, { subgraphs: true })) {
       console.log(chunk);
     }
