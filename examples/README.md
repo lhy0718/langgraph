@@ -1,3 +1,5 @@
-# LangGraph examples
+_한국어로 기계번역됨_
 
-This directory should NOT be used for documentation. All new documentation must be added to `docs/docs/` directory.
+# LangGraph 예시
+
+이 디렉토리는 문서화에 사용되지 않아야 합니다. 모든 새로운 문서는 `docs/docs/` 디렉토리에 추가되어야 합니다.
