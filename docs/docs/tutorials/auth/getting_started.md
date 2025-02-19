@@ -1,32 +1,34 @@
-# Setting up Custom Authentication (Part 1/3)
+_한국어로 기계번역됨_
 
-!!! note "This is part 1 of our authentication series:"
+# 사용자 정의 인증 설정 (1부/3부)
 
-    1. Basic Authentication (you are here) - Control who can access your bot
-    2. [Resource Authorization](resource_auth.md) - Let users have private conversations
-    3. [Production Auth](add_auth_server.md) - Add real user accounts and validate using OAuth2
+!!! 주의 "인증 시리즈의 1부입니다:"
 
-!!! tip "Prerequisites"
+    1. 기본 인증 (여기에 있음) - 봇에 대한 접근 권한을 제어합니다
+    2. [자원 권한 부여](resource_auth.md) - 사용자들이 비공식적인 대화를 나눌 수 있도록 합니다
+    3. [프로덕션 인증](add_auth_server.md) - 실제 사용자 계정을 추가하고 OAuth2를 사용하여 검증합니다
 
-    This guide assumes basic familiarity with the following concepts:
+!!! 팁 "전제 조건"
 
-      *  [**Authentication & Access Control**](../../concepts/auth.md)
-      *  [**LangGraph Platform**](../../concepts/index.md#langgraph-platform)
+    이 가이드는 다음 개념에 대한 기본적인 이해를 가정합니다:
 
-!!! note "Python only"
+      *  [**인증 및 접근 제어**](../../concepts/auth.md)
+      *  [**LangGraph 플랫폼**](../../concepts/index.md#langgraph-platform)
 
-    We currently only support custom authentication and authorization in Python deployments with `langgraph-api>=0.0.11`. Support for LangGraph.JS will be added soon.
+!!! 주의 "파이썬 전용"
+
+    현재 우리는 `langgraph-api>=0.0.11`와 함께 파이썬 배포의 사용자 정의 인증 및 권한 부여만 지원합니다. LangGraph.JS에 대한 지원도 곧 추가될 예정입니다.
 
 
-???+ note "Support by deployment type"
+???+ 주의 "배포 유형별 지원"
 
-    Custom auth is supported for all deployments in the **managed LangGraph Cloud**, as well as **Enterprise** self-hosted plans. It is not supported for **Lite** self-hosted plans.
+    사용자 정의 인증은 **관리되는 LangGraph 클라우드**의 모든 배포와 **기업** 셀프 호스팅 플랜에서 지원됩니다. **라이트** 셀프 호스팅 플랜에서는 지원되지 않습니다.
 
-In this tutorial, we will build a chatbot that only lets specific users access it. We'll start with the LangGraph template and add token-based security step by step. By the end, you'll have a working chatbot that checks for valid tokens before allowing access.
+이번 튜토리얼에서는 특정 사용자만 액세스할 수 있는 챗봇을 구축할 것입니다. LangGraph 템플릿을 시작으로 토큰 기반 보안을 단계별로 추가할 것입니다. 최종적으로는 유효한 토큰을 확인한 후에만 접근을 허용하는 작동하는 챗봇을 갖게 될 것입니다.
 
-## Setting up our project
+## 프로젝트 설정
 
-First, let's create a new chatbot using the LangGraph starter template:
+먼저 LangGraph 스타터 템플릿을 사용하여 새 챗봇을 생성해 봅시다:
 
 ```bash
 pip install -U "langgraph-cli[inmem]"
@@ -34,76 +36,76 @@ langgraph new --template=new-langgraph-project-python custom-auth
 cd custom-auth
 ```
 
-The template gives us a placeholder LangGraph app. Let's try it out by installing the local dependencies and running the development server.
+이 템플릿은 LangGraph 앱의 자리 표시자를 제공합니다. 로컬 의존성을 설치하고 개발 서버를 실행하여 이를 시험해 봅시다.
 ```shell
 pip install -e .
 langgraph dev
 ```
-If everything works, the server should start and open the studio in your browser.
+모든 것이 잘 작동하면 서버가 시작되고 브라우저에서 스튜디오가 열릴 것입니다.
 
 > - 🚀 API: http://127.0.0.1:2024
-> - 🎨 Studio UI: https://smith.langchain.com/studio/?baseUrl=http://127.0.0.1:2024
-> - 📚 API Docs: http://127.0.0.1:2024/docs
+> - 🎨 스튜디오 UI: https://smith.langchain.com/studio/?baseUrl=http://127.0.0.1:2024
+> - 📚 API 문서: http://127.0.0.1:2024/docs
 > 
-> This in-memory server is designed for development and testing.
-> For production use, please use LangGraph Cloud.
+> 이 인메모리 서버는 개발 및 테스트를 위해 설계되었습니다.
+> 운영 목적으로는 LangGraph 클라우드를 사용하시기 바랍니다.
 
-The graph should run, and if you were to self-host this on the public internet, anyone could access it!
+그래프가 실행되어야 하며, 만약 이를 공개 인터넷에 셀프 호스팅 한다면 누구나 접근할 수 있을 것입니다!
 
 ![No auth](./img/no_auth.png)
 
-Now that we've seen the base LangGraph app, let's add authentication to it! 
+이제 기본 LangGraph 앱을 살펴보았으니 이제 인증을 추가해 봅시다! 
 
-???+ tip "Placeholder token"
+???+ 팁 "자리 표시자 토큰"
     
-    In part 1, we will start with a hard-coded token for illustration purposes.
-    We will get to a "production-ready" authentication scheme in part 3, after mastering the basics.
+    1부에서는 설명을 위해 하드코딩된 토큰부터 시작합니다.
+    기본을 마스터한 후 3부에서 "프로덕션 준비 완료" 인증 체계로 넘어갑니다.
 
 
-## Adding Authentication
+## 인증 추가하기
 
-The [`Auth`](../../cloud/reference/sdk/python_sdk_ref.md#langgraph_sdk.auth.Auth) object lets you register an authentication function that the LangGraph platform will run on every request. This function receives each request and decides whether to accept or reject.
+[`Auth`](../../cloud/reference/sdk/python_sdk_ref.md#langgraph_sdk.auth.Auth) 객체를 사용하면 LangGraph 플랫폼이 모든 요청에서 실행할 인증 함수를 등록할 수 있습니다. 이 함수는 각 요청을 수신하고 수락할지 거부할지를 결정합니다.
 
-Create a new file `src/security/auth.py`. This is where our code will live to check if users are allowed to access our bot:
+`src/security/auth.py`라는 새 파일을 생성합니다. 이곳에서 사용자가 봇에 접근할 수 있는지 확인하는 코드가 작성됩니다:
 
 ```python hl_lines="10 15-16" title="src/security/auth.py"
 from langgraph_sdk import Auth
 
-# This is our toy user database. Do not do this in production
+# 이것은 우리의 장난감 사용자 데이터베이스입니다. 운영 환경에서 이렇게 하지 마십시오.
 VALID_TOKENS = {
     "user1-token": {"id": "user1", "name": "Alice"},
     "user2-token": {"id": "user2", "name": "Bob"},
 }
 
-# The "Auth" object is a container that LangGraph will use to mark our authentication function
+# "Auth" 객체는 LangGraph가 우리의 인증 함수를 표시하는 데 사용할 컨테이너입니다.
 auth = Auth()
 
 
-# The `authenticate` decorator tells LangGraph to call this function as middleware
-# for every request. This will determine whether the request is allowed or not
+# `authenticate` 데코레이터는 LangGraph가 이 함수를 미들웨어로 호출하도록 지시합니다.
+# 이는 요청의 허용 여부를 결정하게 됩니다.
 @auth.authenticate
 async def get_current_user(authorization: str | None) -> Auth.types.MinimalUserDict:
-    """Check if the user's token is valid."""
+    """사용자의 토큰이 유효한지 확인합니다."""
     assert authorization
     scheme, token = authorization.split()
     assert scheme.lower() == "bearer"
-    # Check if token is valid
+    # 토큰이 유효한지 확인합니다.
     if token not in VALID_TOKENS:
-        raise Auth.exceptions.HTTPException(status_code=401, detail="Invalid token")
+        raise Auth.exceptions.HTTPException(status_code=401, detail="유효하지 않은 토큰")
 
-    # Return user info if valid
+    # 유효할 경우 사용자 정보를 반환합니다.
     user_data = VALID_TOKENS[token]
     return {
         "identity": user_data["id"],
     }
 ```
 
-Notice that our [authentication](../../cloud/reference/sdk/python_sdk_ref.md#langgraph_sdk.auth.Auth.authenticate) handler does two important things:
+우리의 [인증](../../cloud/reference/sdk/python_sdk_ref.md#langgraph_sdk.auth.Auth.authenticate) 핸들러가 두 가지 중요한 일을 수행한다는 점에 유의하십시오:
 
-1. Checks if a valid token is provided in the request's [Authorization header](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Authorization)
-2. Returns the user's [identity](../../cloud/reference/sdk/python_sdk_ref.md#langgraph_sdk.auth.types.MinimalUserDict)
+1. 요청의 [Authorization 헤더](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Authorization)에 유효한 토큰이 제공되는지 확인합니다.
+2. 사용자의 [신원](../../cloud/reference/sdk/python_sdk_ref.md#langgraph_sdk.auth.types.MinimalUserDict)을 반환합니다.
 
-Now tell LangGraph to use our authentication by adding the following to the [`langgraph.json`](../../cloud/reference/cli.md#configuration-file) configuration:
+이제 LangGraph에 인증을 사용하도록 하려면 [`langgraph.json`](../../cloud/reference/cli.md#configuration-file) 구성 파일에 다음 내용을 추가하십시오:
 
 ```json hl_lines="7-9" title="langgraph.json"
 {
@@ -118,18 +120,17 @@ Now tell LangGraph to use our authentication by adding the following to the [`la
 }
 ```
 
-## Testing Our "Secure" Bot
+## "보안" 봇 테스트하기
 
-Let's start the server again to test everything out!
+모든 것을 테스트하기 위해 서버를 다시 시작합시다!
 
 ```bash
 langgraph dev --no-browser
 ```
 
-??? note "Custom auth in the studio"
+??? 노트 "스튜디오에서의 사용자 정의 인증"
 
-    If you didn't add the `--no-browser`, the studio UI will open in the browser. You may wonder, how is the studio able to still connect to our server? By default, we also permit access from the LangGraph studio, even when using custom auth. This makes it easier to develop and test your bot in the studio. You can remove this alternative authentication option by
-    setting `disable_studio_auth: "true"` in your auth configuration:
+    만약 `--no-browser`를 추가하지 않았다면, 스튜디오 UI가 브라우저에서 열릴 것입니다. 스튜디오가 여전히 우리의 서버에 연결할 수 있는 이유는 무엇일까요? 기본적으로, 우리는 사용자 정의 인증을 사용할 경우에도 LangGraph 스튜디오의 접근을 허용합니다. 이는 스튜디오에서 봇을 쉽게 개발하고 테스트할 수 있게 합니다. 인증 구성에서 `disable_studio_auth: "true"`로 설정하여 이 대체 인증 옵션을 제거할 수 있습니다:
     ```json
     {
         "auth": {
@@ -139,52 +140,52 @@ langgraph dev --no-browser
     }
     ```
 
-Now let's try to chat with our bot. If we've implemented authentication correctly, we should only be able to access the bot if we provide a valid token in the request header. Users will still, however, be able to access each other's resources until we add [resource authorization handlers](../../concepts/auth.md#resource-authorization) in the next section of our tutorial.
+이제 우리 봇과 대화해 봅시다. 만약 우리가 인증을 올바르게 구현했다면, 요청 헤더에 유효한 토큰을 제공해야만 봇에 접근할 수 있어야 합니다. 그러나 사용자는 [리소스 권한 부여 핸들러](../../concepts/auth.md#resource-authorization)를 다음 섹션에서 추가할 때까지 서로의 리소스에 계속 접근할 수 있습니다.
 
-![Authentication, no authorization handlers](./img/authentication.png)
+![인증, 권한 부여 핸들러 없음](./img/authentication.png)
 
-Run the following code in a file or notebook:
+파일이나 노트북에서 다음 코드를 실행하십시오:
 
 ```python
 from langgraph_sdk import get_client
 
-# Try without a token (should fail)
+# 토큰 없이 시도하기 (실패해야 함)
 client = get_client(url="http://localhost:2024")
 try:
     thread = await client.threads.create()
-    print("❌ Should have failed without token!")
+    print("❌ 토큰 없이 실패했어야 했습니다!")
 except Exception as e:
-    print("✅ Correctly blocked access:", e)
+    print("✅ 접근 차단이 올바르게 이루어졌습니다:", e)
 
-# Try with a valid token
+# 유효한 토큰으로 시도하기
 client = get_client(
     url="http://localhost:2024", headers={"Authorization": "Bearer user1-token"}
 )
 
-# Create a thread and chat
+# 스레드 생성 및 채팅
 thread = await client.threads.create()
-print(f"✅ Created thread as Alice: {thread['thread_id']}")
+print(f"✅ 앨리스로서 스레드를 생성했습니다: {thread['thread_id']}")
 
 response = await client.runs.create(
     thread_id=thread["thread_id"],
     assistant_id="agent",
-    input={"messages": [{"role": "user", "content": "Hello!"}]},
+    input={"messages": [{"role": "user", "content": "안녕하세요!"}]},
 )
-print("✅ Bot responded:")
+print("✅ 봇이 응답했습니다:")
 print(response)
 ```
 
-You should see that:
+다음과 같은 결과를 보아야 합니다:
 
-1. Without a valid token, we can't access the bot
-2. With a valid token, we can create threads and chat
+1. 유효한 토큰 없이 봇에 접근할 수 없습니다.
+2. 유효한 토큰으로 스레드를 만들고 채팅할 수 있습니다.
 
-Congratulations! You've built a chatbot that only lets "authenticated" users access it. While this system doesn't (yet) implement a production-ready security scheme, we've learned the basic mechanics of how to control access to our bot. In the next tutorial, we'll learn how to give each user their own private conversations.
+축하합니다! "인증된" 사용자만 접근할 수 있는 챗봇을 만들었습니다. 이 시스템은 (아직) 운영 준비가 된 보안 체계를 구현하지는 않았지만, 봇에 대한 접근을 제어하는 기본 메커니즘을 배웠습니다. 다음 튜토리얼에서는 각 사용자에게 개인적인 대화를 제공하는 방법에 대해 배울 것입니다.
 
-## What's Next?
+## 다음 단계는 무엇인가요?
 
-Now that you can control who accesses your bot, you might want to:
+이제 봇에 접근할 수 있는 사람을 제어할 수 있게 되었으니, 다음을 원할 수 있습니다:
 
-1. Continue the tutorial by going to [Making Conversations Private (Part 2/3)](resource_auth.md) to learn about resource authorization.
-2. Read more about [authentication concepts](../../concepts/auth.md).
-3. Check out the [API reference](../../cloud/reference/sdk/python_sdk_ref.md) for more authentication details.
+1. [대화를 비공개로 만드는 것 (2/3부)](resource_auth.md) 튜토리얼로 계속 진행하여 리소스 권한 부여에 대해 배우기.
+2. [인증 개념](../../concepts/auth.md)에 대해 더 읽기.
+3. [API 참조](../../cloud/reference/sdk/python_sdk_ref.md)를 확인하여 더 많은 인증 정보를 얻기.

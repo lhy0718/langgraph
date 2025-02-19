@@ -1,18 +1,18 @@
-# Deployment
+_한국어로 기계번역됨_
 
-Get started deploying your LangGraph applications locally or on the cloud with
-[LangGraph Platform](../concepts/langgraph_platform.md).
+# 배포
 
-## Get Started 🚀 {#quick-start}
+[LangGraph Platform](../concepts/langgraph_platform.md)로 로컬 또는 클라우드에서 LangGraph 애플리케이션을 배포하는 방법을 시작하세요.
 
-- [LangGraph Server Quickstart](../tutorials/langgraph-platform/local-server.md): Launch a LangGraph server locally and interact with it using REST API and LangGraph Studio Web UI.
-- [LangGraph Template Quickstart](../concepts/template_applications.md): Start building with LangGraph Platform using a template application.
-- [Deploy with LangGraph Cloud Quickstart](../cloud/quick_start.md): Deploy a LangGraph app using LangGraph Cloud.
+## 시작하기 🚀 {#quick-start}
 
+- [LangGraph 서버 빠른 시작](../tutorials/langgraph-platform/local-server.md): 로컬에서 LangGraph 서버를 시작하고 REST API 및 LangGraph Studio 웹 UI를 사용하여 상호작용합니다.
+- [LangGraph 템플릿 빠른 시작](../concepts/template_applications.md): 템플릿 애플리케이션을 사용하여 LangGraph Platform으로 빌드를 시작합니다.
+- [LangGraph Cloud를 통한 배포 빠른 시작](../cloud/quick_start.md): LangGraph Cloud를 사용하여 LangGraph 앱을 배포합니다.
 
-## Deployment Options
+## 배포 옵션
 
-- [Self-Hosted Lite](../concepts/self_hosted.md): A free (up to 1 million nodes executed per year), limited version of LangGraph Platform that you can run locally or in a self-hosted manner
-- [Cloud SaaS](../concepts/langgraph_cloud.md): Hosted as part of LangSmith.
-- [Bring Your Own Cloud](../concepts/bring_your_own_cloud.md): We manage the infrastructure, so you don't have to, but the infrastructure all runs within your cloud.
-- [Self-Hosted Enterprise](../concepts/self_hosted.md): Completely managed by you.
+- [자체 호스팅 라이트](../concepts/self_hosted.md): 로컬에서 또는 자체 호스팅 방식으로 실행할 수 있는 무료(연간 최대 100만 노드 실행), 제한된 버전의 LangGraph Platform입니다.
+- [클라우드 SaaS](../concepts/langgraph_cloud.md): LangSmith의 일부로 호스팅됩니다.
+- [자체 클라우드 사용](../concepts/bring_your_own_cloud.md): 인프라는 우리가 관리하므로 귀하는 관리할 필요가 없지만, 모든 인프라는 귀하의 클라우드 내에서 실행됩니다.
+- [자체 호스팅 엔터프라이즈](../concepts/self_hosted.md): 완전히 귀하에 의해 관리됩니다.

@@ -1,27 +1,29 @@
-# Workflows and Agents
+_한국어로 기계번역됨_
 
-This guide reviews common patterns for agentic systems. In describing these systems, it can be useful to make a distinction between "workflows" and "agents". One way to think about this difference is nicely explained [here](https://www.anthropic.com/research/building-effective-agents) by Anthropic:
+# 워크플로우와 에이전트
 
-> Workflows are systems where LLMs and tools are orchestrated through predefined code paths.
-> Agents, on the other hand, are systems where LLMs dynamically direct their own processes and tool usage, maintaining control over how they accomplish tasks.
+이 가이드는 에이전틱 시스템에 대한 일반적인 패턴을 검토합니다. 이러한 시스템을 설명할 때 "워크플로우"와 "에이전트"를 구분하는 것이 유용할 수 있습니다. 이 차이를 생각하는 한 가지 방법은 Anthropic의 [여기](https://www.anthropic.com/research/building-effective-agents)에서 잘 설명되어 있습니다:
 
-Here is a simple way to visualize these differences:
+> 워크플로우는 LLM과 도구가 미리 정의된 코드 경로를 통해 조정된 시스템입니다.
+> 반면 에이전트는 LLM이 자신의 프로세스와 도구 사용을 동적으로 조정하여 작업을 수행하는 방식을 제어하는 시스템입니다.
+
+다음은 이러한 차이를 시각화하는 간단한 방법입니다:
 
 ![Agent Workflow](../../concepts/img/agent_workflow.png)
 
-When building agents and workflows, LangGraph [offers a number of benefits](https://langchain-ai.github.io/langgraph/concepts/high_level/) including persistence, streaming, and support for debugging as well as deployment.
+에이전트와 워크플로우를 구축할 때, LangGraph는 [지속성, 스트리밍, 디버깅 및 배포 지원](https://langchain-ai.github.io/langgraph/concepts/high_level/) 등 여러 가지 이점을 제공합니다.
 
-## Set up
+## 설정
 
-You can use [any chat model](https://python.langchain.com/docs/integrations/chat/) that supports structured outputs and tool calling. Below, we show the process of installing the packages, setting API keys, and testing structured outputs / tool calling for Anthropic.
+구조화된 출력 및 도구 호출을 지원하는 [모든 채팅 모델](https://python.langchain.com/docs/integrations/chat/)을 사용할 수 있습니다. 아래에서는 패키지 설치, API 키 설정, Anthropic의 구조화된 출력 / 도구 호출 테스트 과정을 보여줍니다.
 
-??? "Install dependencies"
+??? "종속성 설치"
 
     ```bash
-    pip install langchain_core langchain-anthropic langgraph 
+    pip install langchain_core langchain-anthropic langgraph
     ```
 
-Initialize an LLM
+LLM 초기화
 
 ```python
 import os
@@ -33,63 +35,60 @@ def _set_env(var: str):
     if not os.environ.get(var):
         os.environ[var] = getpass.getpass(f"{var}: ")
 
-
 _set_env("ANTHROPIC_API_KEY")
 
 llm = ChatAnthropic(model="claude-3-5-sonnet-latest")
 ```
 
-## Building Blocks: The Augmented LLM 
+## 빌딩 블록: 증강된 LLM
 
-LLM have [augmentations](https://www.anthropic.com/research/building-effective-agents) that support building workflows and agents. These include [structured outputs](https://python.langchain.com/docs/concepts/structured_outputs/) and [tool calling](https://python.langchain.com/docs/concepts/tool_calling/), as shown in this image from the Anthropic [blog](https://www.anthropic.com/research/building-effective-agents):
+LLM은 [워크플로우와 에이전트 구축을 지원하는 증강](https://www.anthropic.com/research/building-effective-agents) 기능이 있습니다. 여기에는 [구조화된 출력](https://python.langchain.com/docs/concepts/structured_outputs/)과 [도구 호출](https://python.langchain.com/docs/concepts/tool_calling/)이 포함됩니다. 이는 Anthropic의 [블로그](https://www.anthropic.com/research/building-effective-agents)에서 보여지는 이미지입니다:
 
 ![augmented_llm.png](./img/augmented_llm.png)
 
-
 ```python
-# Schema for structured output
+# 구조화 출력 스키마
 from pydantic import BaseModel, Field
 
 class SearchQuery(BaseModel):
-    search_query: str = Field(None, description="Query that is optimized web search.")
+    search_query: str = Field(None, description="최적화된 웹 검색 쿼리.")
     justification: str = Field(
-        None, description="Why this query is relevant to the user's request."
+        None, description="이 쿼리가 사용자의 요청과 관련된 이유."
     )
 
-
-# Augment the LLM with schema for structured output
+# 구조화 출력을 위한 스키마로 LLM 증강
 structured_llm = llm.with_structured_output(SearchQuery)
 
-# Invoke the augmented LLM
-output = structured_llm.invoke("How does Calcium CT score relate to high cholesterol?")
+# 증강된 LLM 호출
+output = structured_llm.invoke("칼슘 CT 점수는 고콜레스테롤과 어떻게 관련이 있습니까?")
 
-# Define a tool
+# 도구 정의
 def multiply(a: int, b: int) -> int:
     return a * b
 
-# Augment the LLM with tools
+# 도구로 LLM 증강
 llm_with_tools = llm.bind_tools([multiply])
 
-# Invoke the LLM with input that triggers the tool call
-msg = llm_with_tools.invoke("What is 2 times 3?")
+# 도구 호출을 트리거하는 입력으로 LLM 호출
+msg = llm_with_tools.invoke("2 곱하기 3은 얼마입니까?")
 
-# Get the tool call
+# 도구 호출 확인
 msg.tool_calls
 ```
 
-## Prompt chaining
+## 프롬프트 체인
 
-In prompt chaining, each LLM call processes the output of the previous one. 
+프롬프트 체인에서는 각 LLM 호출이 이전 호출의 출력을 처리합니다.
 
-As noted in the [Anthropic blog](https://www.anthropic.com/research/building-effective-agents): 
+[Anthropic 블로그](https://www.anthropic.com/research/building-effective-agents)에서 언급한 바와 같이:
 
-> Prompt chaining decomposes a task into a sequence of steps, where each LLM call processes the output of the previous one. You can add programmatic checks (see "gate” in the diagram below) on any intermediate steps to ensure that the process is still on track.
+> 프롬프트 체인은 작업을 일련의 단계로 분해하며, 각 LLM 호출이 이전 호출의 출력을 처리합니다. 프로그래밍 검사를 추가하여(아래 다이어그램에서 "게이트" 참조) 프로세스가 여전히 궤도에 있는지 확인할 수 있습니다.
 
-> When to use this workflow: This workflow is ideal for situations where the task can be easily and cleanly decomposed into fixed subtasks. The main goal is to trade off latency for higher accuracy, by making each LLM call an easier task.
+> 이 워크플로우를 사용하는 적절한 시점: 이 워크플로우는 작업이 고정된 하위 작업으로 쉽게 분해될 수 있는 상황에 이상적입니다. 주요 목표는 각 LLM 호출을 더 쉬운 작업으로 만들어 지연 시간을 높이는 대신 정확성을 향상시키는 것입니다.
 
 ![prompt_chain.png](./img/prompt_chain.png)
 
-=== "Graph API"
+=== "그래프 API"
 
     ```python
     from typing_extensions import TypedDict
@@ -97,7 +96,7 @@ As noted in the [Anthropic blog](https://www.anthropic.com/research/building-eff
     from IPython.display import Image, display
 
 
-    # Graph state
+    # 그래프 상태
     class State(TypedDict):
         topic: str
         joke: str
@@ -105,46 +104,46 @@ As noted in the [Anthropic blog](https://www.anthropic.com/research/building-eff
         final_joke: str
 
 
-    # Nodes
+    # 노드
     def generate_joke(state: State):
-        """First LLM call to generate initial joke"""
+        """초기 농담을 생성하기 위한 첫 번째 LLM 호출"""
 
-        msg = llm.invoke(f"Write a short joke about {state['topic']}")
+        msg = llm.invoke(f"{state['topic']}에 대한 짧은 농담을 작성하세요.")
         return {"joke": msg.content}
 
 
     def check_punchline(state: State):
-        """Gate function to check if the joke has a punchline"""
+        """농담에 펀치라인이 있는지 확인하는 게이트 함수"""
 
-        # Simple check - does the joke contain "?" or "!"
+        # 간단한 검사 - 농담에 "?" 또는 "!"가 포함되어 있는지
         if "?" in state["joke"] or "!" in state["joke"]:
             return "Fail"
         return "Pass"
 
 
     def improve_joke(state: State):
-        """Second LLM call to improve the joke"""
+        """농담을 개선하기 위한 두 번째 LLM 호출"""
 
-        msg = llm.invoke(f"Make this joke funnier by adding wordplay: {state['joke']}")
+        msg = llm.invoke(f"이 농담을 유머있게 만들기 위해 언어유희를 추가하세요: {state['joke']}")
         return {"improved_joke": msg.content}
 
 
     def polish_joke(state: State):
-        """Third LLM call for final polish"""
+        """마무리 다듬기를 위한 세 번째 LLM 호출"""
 
-        msg = llm.invoke(f"Add a surprising twist to this joke: {state['improved_joke']}")
+        msg = llm.invoke(f"이 농담에 놀라운 전환을 추가하세요: {state['improved_joke']}")
         return {"final_joke": msg.content}
 
 
-    # Build workflow
+    # 워크플로우 구축
     workflow = StateGraph(State)
 
-    # Add nodes
+    # 노드 추가
     workflow.add_node("generate_joke", generate_joke)
     workflow.add_node("improve_joke", improve_joke)
     workflow.add_node("polish_joke", polish_joke)
 
-    # Add edges to connect nodes
+    # 노드를 연결하는 엣지 추가
     workflow.add_edge(START, "generate_joke")
     workflow.add_conditional_edges(
         "generate_joke", check_punchline, {"Fail": "improve_joke", "Pass": END}
@@ -152,37 +151,37 @@ As noted in the [Anthropic blog](https://www.anthropic.com/research/building-eff
     workflow.add_edge("improve_joke", "polish_joke")
     workflow.add_edge("polish_joke", END)
 
-    # Compile
+    # 컴파일
     chain = workflow.compile()
 
-    # Show workflow
+    # 워크플로우 표시
     display(Image(chain.get_graph().draw_mermaid_png()))
 
-    # Invoke
-    state = chain.invoke({"topic": "cats"})
-    print("Initial joke:")
+    # 호출
+    state = chain.invoke({"topic": "고양이"})
+    print("초기 농담:")
     print(state["joke"])
     print("\n--- --- ---\n")
     if "improved_joke" in state:
-        print("Improved joke:")
+        print("개선된 농담:")
         print(state["improved_joke"])
         print("\n--- --- ---\n")
 
-        print("Final joke:")
+        print("최종 농담:")
         print(state["final_joke"])
     else:
-        print("Joke failed quality gate - no punchline detected!")
+        print("농담이 품질 게이트를 통과하지 못했습니다 - 펀치라인이 감지되지 않았습니다!")
     ```
 
-    **LangSmith Trace**
+    **LangSmith 추적**
 
     https://smith.langchain.com/public/a0281fca-3a71-46de-beee-791468607b75/r
 
-    **Resources:**
+    **리소스:**
 
-    **LangChain Academy**
+    **LangChain 아카데미**
 
-    See our lesson on Prompt Chaining [here](https://github.com/langchain-ai/langchain-academy/blob/main/module-1/chain.ipynb).
+    프롬프트 체인에 대한 강의는 [여기](https://github.com/langchain-ai/langchain-academy/blob/main/module-1/chain.ipynb)에서 확인하세요.
 
 === "Functional API (beta)"
 
@@ -190,70 +189,70 @@ As noted in the [Anthropic blog](https://www.anthropic.com/research/building-eff
     from langgraph.func import entrypoint, task
 
 
-    # Tasks
+    # 작업
     @task
     def generate_joke(topic: str):
-        """First LLM call to generate initial joke"""
-        msg = llm.invoke(f"Write a short joke about {topic}")
+        """초기 농담을 생성하기 위한 첫 번째 LLM 호출"""
+        msg = llm.invoke(f"{topic}에 대한 짧은 농담을 작성하세요.")
         return msg.content
 
 
     def check_punchline(joke: str):
-        """Gate function to check if the joke has a punchline"""
-        # Simple check - does the joke contain "?" or "!"
+        """농담에 펀치라인이 있는지 확인하는 게이트 함수"""
+        # 간단한 확인 - 농담에 "?" 또는 "!"가 포함되어 있는지
         if "?" in joke or "!" in joke:
-            return "Fail"
+            return "실패"
 
-        return "Pass"
+        return "합격"
 
 
     @task
     def improve_joke(joke: str):
-        """Second LLM call to improve the joke"""
-        msg = llm.invoke(f"Make this joke funnier by adding wordplay: {joke}")
+        """농담을 개선하기 위한 두 번째 LLM 호출"""
+        msg = llm.invoke(f"이 농담을 말장난을 추가하여 더 재미있게 만드세요: {joke}")
         return msg.content
 
 
     @task
     def polish_joke(joke: str):
-        """Third LLM call for final polish"""
-        msg = llm.invoke(f"Add a surprising twist to this joke: {joke}")
+        """최종 수정을 위한 세 번째 LLM 호출"""
+        msg = llm.invoke(f"이 농담에 놀라운 반전을 추가하세요: {joke}")
         return msg.content
 
 
     @entrypoint()
     def parallel_workflow(topic: str):
         original_joke = generate_joke(topic).result()
-        if check_punchline(original_joke) == "Pass":
+        if check_punchline(original_joke) == "합격":
             return original_joke
 
         improved_joke = improve_joke(original_joke).result()
         return polish_joke(improved_joke).result()
 
-    # Invoke
-    for step in parallel_workflow.stream("cats", stream_mode="updates"):
+    # 호출
+    for step in parallel_workflow.stream("고양이", stream_mode="업데이트"):
         print(step)
         print("\n")
     ```
 
-    **LangSmith Trace**
+    **LangSmith 추적**
 
     https://smith.langchain.com/public/332fa4fc-b6ca-416e-baa3-161625e69163/r
 
-## Parallelization 
+## 병렬화
 
-With parallelization, LLMs work simultaneously on a task:
+병렬화를 통해 LLM이 작업을 동시에 수행합니다:
 
->LLMs can sometimes work simultaneously on a task and have their outputs aggregated programmatically. This workflow, parallelization, manifests in two key variations: Sectioning: Breaking a task into independent subtasks run in parallel. Voting: Running the same task multiple times to get diverse outputs.
+> LLM은 때때로 작업을 동시에 수행할 수 있으며, 그 결과물을 프로그래밍 방식으로 집계할 수 있습니다. 이 작업 흐름, 즉 병렬화는 두 가지 주요 변형으로 나타납니다: 섹션화: 작업을 독립적인 하위 작업으로 나누어 병렬로 실행합니다. 투표: 동일한 작업을 여러 번 실행하여 다양한 출력을 얻습니다.
 
-> When to use this workflow: Parallelization is effective when the divided subtasks can be parallelized for speed, or when multiple perspectives or attempts are needed for higher confidence results. For complex tasks with multiple considerations, LLMs generally perform better when each consideration is handled by a separate LLM call, allowing focused attention on each specific aspect.
+> 이 작업 흐름을 사용할 때: 병렬화는 나눠진 하위 작업이 속도를 위해 병렬화될 수 있거나, 더 높은 신뢰성의 결과를 위해 여러 관점이나 시도가 필요할 때 효과적입니다. 여러 고려 사항이 있는 복잡한 작업의 경우, LLM은 일반적으로 각 고려 사항이 별도의 LLM 호출에 의해 처리되면 각 특정 측면에 집중할 수 있어 더 나은 성능을 보입니다.
 
 ![parallelization.png](./img/parallelization.png)
 
-=== "Graph API"
+=== "그래프 API"
 
     ```python
-    # Graph state
+    # 그래프 상태
     class State(TypedDict):
         topic: str
         joke: str
@@ -262,48 +261,48 @@ With parallelization, LLMs work simultaneously on a task:
         combined_output: str
 
 
-    # Nodes
+    # 노드
     def call_llm_1(state: State):
-        """First LLM call to generate initial joke"""
+        """첫 번째 LLM 호출로 초기 농담 생성"""
 
-        msg = llm.invoke(f"Write a joke about {state['topic']}")
+        msg = llm.invoke(f"{state['topic']}에 대한 농담을 작성해 주세요.")
         return {"joke": msg.content}
 
 
     def call_llm_2(state: State):
-        """Second LLM call to generate story"""
+        """두 번째 LLM 호출로 이야기 생성"""
 
-        msg = llm.invoke(f"Write a story about {state['topic']}")
+        msg = llm.invoke(f"{state['topic']}에 대한 이야기를 작성해 주세요.")
         return {"story": msg.content}
 
 
     def call_llm_3(state: State):
-        """Third LLM call to generate poem"""
+        """세 번째 LLM 호출로 시 생성"""
 
-        msg = llm.invoke(f"Write a poem about {state['topic']}")
+        msg = llm.invoke(f"{state['topic']}에 대한 시를 작성해 주세요.")
         return {"poem": msg.content}
 
 
     def aggregator(state: State):
-        """Combine the joke and story into a single output"""
+        """농담과 이야기를 하나의 출력으로 결합"""
 
-        combined = f"Here's a story, joke, and poem about {state['topic']}!\n\n"
-        combined += f"STORY:\n{state['story']}\n\n"
-        combined += f"JOKE:\n{state['joke']}\n\n"
-        combined += f"POEM:\n{state['poem']}"
+        combined = f"{state['topic']}에 대한 이야기, 농담, 시입니다!\n\n"
+        combined += f"이야기:\n{state['story']}\n\n"
+        combined += f"농담:\n{state['joke']}\n\n"
+        combined += f"시:\n{state['poem']}"
         return {"combined_output": combined}
 
 
-    # Build workflow
+    # 워크플로우 구축
     parallel_builder = StateGraph(State)
 
-    # Add nodes
+    # 노드 추가
     parallel_builder.add_node("call_llm_1", call_llm_1)
     parallel_builder.add_node("call_llm_2", call_llm_2)
     parallel_builder.add_node("call_llm_3", call_llm_3)
     parallel_builder.add_node("aggregator", aggregator)
 
-    # Add edges to connect nodes
+    # 노드를 연결하는 엣지 추가
     parallel_builder.add_edge(START, "call_llm_1")
     parallel_builder.add_edge(START, "call_llm_2")
     parallel_builder.add_edge(START, "call_llm_3")
@@ -313,64 +312,64 @@ With parallelization, LLMs work simultaneously on a task:
     parallel_builder.add_edge("aggregator", END)
     parallel_workflow = parallel_builder.compile()
 
-    # Show workflow
+    # 워크플로우 보여주기
     display(Image(parallel_workflow.get_graph().draw_mermaid_png()))
 
-    # Invoke
-    state = parallel_workflow.invoke({"topic": "cats"})
+    # 호출
+    state = parallel_workflow.invoke({"topic": "고양이"})
     print(state["combined_output"])
     ```
 
-    **LangSmith Trace**
+    **LangSmith 추적**
 
     https://smith.langchain.com/public/3be2e53c-ca94-40dd-934f-82ff87fac277/r
 
-    **Resources:**
+    **리소스:**
 
-    **Documentation**
+    **문서**
 
-    See our documentation on parallelization [here](https://langchain-ai.github.io/langgraph/how-tos/branching/).
+    병렬화에 대한 문서는 [여기](https://langchain-ai.github.io/langgraph/how-tos/branching/)에서 확인하세요.
 
-    **LangChain Academy**
+    **LangChain 아카데미**
 
-    See our lesson on parallelization [here](https://github.com/langchain-ai/langchain-academy/blob/main/module-1/simple-graph.ipynb).
+    병렬화에 대한 수업은 [여기](https://github.com/langchain-ai/langchain-academy/blob/main/module-1/simple-graph.ipynb)에서 확인하세요.
 
-=== "Functional API (beta)"
+=== "기능적 API (베타)"
 
     ```python
     @task
     def call_llm_1(topic: str):
-        """First LLM call to generate initial joke"""
-        msg = llm.invoke(f"Write a joke about {topic}")
+        """첫 번째 LLM 호출로 초기 농담 생성"""
+        msg = llm.invoke(f"{topic}에 관한 농담을 써 주세요.")
         return msg.content
 
 
     @task
     def call_llm_2(topic: str):
-        """Second LLM call to generate story"""
-        msg = llm.invoke(f"Write a story about {topic}")
+        """두 번째 LLM 호출로 이야기 생성"""
+        msg = llm.invoke(f"{topic}에 관한 이야기를 써 주세요.")
         return msg.content
 
 
     @task
     def call_llm_3(topic):
-        """Third LLM call to generate poem"""
-        msg = llm.invoke(f"Write a poem about {topic}")
+        """세 번째 LLM 호출로 시 생성"""
+        msg = llm.invoke(f"{topic}에 관한 시를 써 주세요.")
         return msg.content
 
 
     @task
     def aggregator(topic, joke, story, poem):
-        """Combine the joke and story into a single output"""
+        """농담과 이야기를 단일 출력으로 결합"""
 
-        combined = f"Here's a story, joke, and poem about {topic}!\n\n"
-        combined += f"STORY:\n{story}\n\n"
-        combined += f"JOKE:\n{joke}\n\n"
-        combined += f"POEM:\n{poem}"
+        combined = f"{topic}에 관한 이야기, 농담 및 시입니다!\n\n"
+        combined += f"이야기:\n{story}\n\n"
+        combined += f"농담:\n{joke}\n\n"
+        combined += f"시:\n{poem}"
         return combined
 
 
-    # Build workflow
+    # 워크플로우 구축
     @entrypoint()
     def parallel_workflow(topic: str):
         joke_fut = call_llm_1(topic)
@@ -380,151 +379,153 @@ With parallelization, LLMs work simultaneously on a task:
             topic, joke_fut.result(), story_fut.result(), poem_fut.result()
         ).result()
 
-    # Invoke
-    for step in parallel_workflow.stream("cats", stream_mode="updates"):
+    # 호출
+    for step in parallel_workflow.stream("고양이", stream_mode="updates"):
         print(step)
         print("\n")
     ```
 
-    **LangSmith Trace**
+    **LangSmith 추적**
 
     https://smith.langchain.com/public/623d033f-e814-41e9-80b1-75e6abb67801/r
 
-## Routing
+## 라우팅
 
-Routing classifies an input and directs it to a followup task. As noted in the [Anthropic blog](https://www.anthropic.com/research/building-effective-agents): 
+라우팅은 입력을 분류하고 후속 작업으로 안내합니다. [Anthropic 블로그](https://www.anthropic.com/research/building-effective-agents)에서 언급했듯이:
 
-> Routing classifies an input and directs it to a specialized followup task. This workflow allows for separation of concerns, and building more specialized prompts. Without this workflow, optimizing for one kind of input can hurt performance on other inputs.
+> 라우팅은 입력을 분류하고 이를 전문화된 후속 작업으로 안내합니다. 이 워크플로우는 관심사의 분리를 허용하고 더 전문화된 프롬프트를 구축할 수 있습니다. 이 워크플로우가 없을 경우, 하나의 입력 유형에 최적화하면 다른 입력에서 성능이 저하될 수 있습니다.
 
-> When to use this workflow: Routing works well for complex tasks where there are distinct categories that are better handled separately, and where classification can be handled accurately, either by an LLM or a more traditional classification model/algorithm.
+> 이 워크플로우를 사용해야 할 때: 라우팅은 복잡한 작업에 매우 잘 작동하며, 서로 다르게 처리하는 것이 더 나은 구별된 범주가 존재하고, LLM 또는 보다 전통적인 분류 모델/알고리즘에 의해 분류가 정확하게 처리될 수 있는 경우에 적합합니다.
 
 ![routing.png](./img/routing.png)
 
+=== "그래프 API"
 
-=== "Graph API"
+```python
 
-    ```python
-    from typing_extensions import Literal
-    from langchain_core.messages import HumanMessage, SystemMessage
+from typing_extensions import Literal
+from langchain_core.messages import HumanMessage, SystemMessage
 
+# 구조화된 출력을 위한 스키마로 라우팅 로직 사용
 
-    # Schema for structured output to use as routing logic
-    class Route(BaseModel):
-        step: Literal["poem", "story", "joke"] = Field(
-            None, description="The next step in the routing process"
-        )
+class Route(BaseModel):
+step: Literal["poem", "story", "joke"] = Field(
+None, description="라우팅 과정의 다음 단계"
+)
 
+# 구조화된 출력을 위한 스키마로 LLM 보강
 
-    # Augment the LLM with schema for structured output
-    router = llm.with_structured_output(Route)
+router = llm.with_structured_output(Route)
 
+# 상태
 
-    # State
-    class State(TypedDict):
-        input: str
-        decision: str
-        output: str
+class State(TypedDict):
+input: str
+decision: str
+output: str
 
+# 노드
 
-    # Nodes
-    def llm_call_1(state: State):
-        """Write a story"""
+def llm_call_1(state: State):
+"""이야기 쓰기"""
 
-        result = llm.invoke(state["input"])
-        return {"output": result.content}
+    result = llm.invoke(state["input"])
+    return {"output": result.content}
 
+def llm_call_2(state: State):
+"""농담 쓰기"""
 
-    def llm_call_2(state: State):
-        """Write a joke"""
+    result = llm.invoke(state["input"])
+    return {"output": result.content}
 
-        result = llm.invoke(state["input"])
-        return {"output": result.content}
+def llm_call_3(state: State):
+"""시 쓰기"""
 
+    result = llm.invoke(state["input"])
+    return {"output": result.content}
 
-    def llm_call_3(state: State):
-        """Write a poem"""
+def llm_call_router(state: State):
+"""입력을 적절한 노드로 라우팅"""
 
-        result = llm.invoke(state["input"])
-        return {"output": result.content}
-
-
-    def llm_call_router(state: State):
-        """Route the input to the appropriate node"""
-
-        # Run the augmented LLM with structured output to serve as routing logic
-        decision = router.invoke(
-            [
-                SystemMessage(
-                    content="Route the input to story, joke, or poem based on the user's request."
-                ),
-                HumanMessage(content=state["input"]),
-            ]
-        )
-
-        return {"decision": decision.step}
-
-
-    # Conditional edge function to route to the appropriate node
-    def route_decision(state: State):
-        # Return the node name you want to visit next
-        if state["decision"] == "story":
-            return "llm_call_1"
-        elif state["decision"] == "joke":
-            return "llm_call_2"
-        elif state["decision"] == "poem":
-            return "llm_call_3"
-
-
-    # Build workflow
-    router_builder = StateGraph(State)
-
-    # Add nodes
-    router_builder.add_node("llm_call_1", llm_call_1)
-    router_builder.add_node("llm_call_2", llm_call_2)
-    router_builder.add_node("llm_call_3", llm_call_3)
-    router_builder.add_node("llm_call_router", llm_call_router)
-
-    # Add edges to connect nodes
-    router_builder.add_edge(START, "llm_call_router")
-    router_builder.add_conditional_edges(
-        "llm_call_router",
-        route_decision,
-        {  # Name returned by route_decision : Name of next node to visit
-            "llm_call_1": "llm_call_1",
-            "llm_call_2": "llm_call_2",
-            "llm_call_3": "llm_call_3",
-        },
+    # 라우팅 로직으로서 구조화된 출력을 사용하여 보강된 LLM 실행
+    decision = router.invoke(
+        [
+            SystemMessage(
+                content="사용자의 요청에 따라 입력을 이야기, 농담, 또는 시로 라우팅하세요."
+            ),
+            HumanMessage(content=state["input"]),
+        ]
     )
-    router_builder.add_edge("llm_call_1", END)
-    router_builder.add_edge("llm_call_2", END)
-    router_builder.add_edge("llm_call_3", END)
 
-    # Compile workflow
-    router_workflow = router_builder.compile()
+    return {"decision": decision.step}
 
-    # Show the workflow
-    display(Image(router_workflow.get_graph().draw_mermaid_png()))
+# 적절한 노드로 라우팅하기 위한 조건부 엣지 함수
 
-    # Invoke
-    state = router_workflow.invoke({"input": "Write me a joke about cats"})
-    print(state["output"])
-    ```
+def route_decision(state: State): # 방문할 다음 노드 이름 반환
+if state["decision"] == "story":
+return "llm_call_1"
+elif state["decision"] == "joke":
+return "llm_call_2"
+elif state["decision"] == "poem":
+return "llm_call_3"
 
-    **LangSmith Trace**
+# 워크플로우 구축
 
-    https://smith.langchain.com/public/c4580b74-fe91-47e4-96fe-7fac598d509c/r
+router_builder = StateGraph(State)
 
-    **Resources:**
+# 노드 추가
 
-    **LangChain Academy**
+router_builder.add_node("llm_call_1", llm_call_1)
+router_builder.add_node("llm_call_2", llm_call_2)
+router_builder.add_node("llm_call_3", llm_call_3)
+router_builder.add_node("llm_call_router", llm_call_router)
 
-    See our lesson on routing [here](https://github.com/langchain-ai/langchain-academy/blob/main/module-1/router.ipynb).
+# 노드를 연결하기 위한 엣지 추가
 
-    **Examples**
+router_builder.add_edge(START, "llm_call_router")
+router_builder.add_conditional_edges(
+"llm_call_router",
+route_decision,
+{ # route_decision에서 반환된 이름 : 다음 방문할 노드 이름
+"llm_call_1": "llm_call_1",
+"llm_call_2": "llm_call_2",
+"llm_call_3": "llm_call_3",
+},
+)
+router_builder.add_edge("llm_call_1", END)
+router_builder.add_edge("llm_call_2", END)
+router_builder.add_edge("llm_call_3", END)
 
-    [Here](https://langchain-ai.github.io/langgraph/tutorials/rag/langgraph_adaptive_rag_local/) is RAG workflow that routes questions. See our video [here](https://www.youtube.com/watch?v=bq1Plo2RhYI).
+# 워크플로우 컴파일
 
-=== "Functional API (beta)"
+router_workflow = router_builder.compile()
+
+# 워크플로우 표시
+
+display(Image(router_workflow.get_graph().draw_mermaid_png()))
+
+# 호출
+
+state = router_workflow.invoke({"input": "고양이에 대한 농담을 만들어 줘"})
+print(state["output"])
+
+```
+
+**LangSmith 추적**
+
+https://smith.langchain.com/public/c4580b74-fe91-47e4-96fe-7fac598d509c/r
+
+**자원:**
+
+**LangChain 아카데미**
+
+라우팅에 대한 우리의 수업을 [여기](https://github.com/langchain-ai/langchain-academy/blob/main/module-1/router.ipynb)에서 확인하세요.
+
+**예시**
+
+질문을 라우팅하는 RAG 작업 흐름은 [여기](https://langchain-ai.github.io/langgraph/tutorials/rag/langgraph_adaptive_rag_local/)에서 확인할 수 있습니다. 우리의 비디오는 [여기](https://www.youtube.com/watch?v=bq1Plo2RhYI)에서 확인하세요.
+
+=== "기능적 API (베타)"
 
     ```python
     from typing_extensions import Literal
@@ -532,45 +533,45 @@ Routing classifies an input and directs it to a followup task. As noted in the [
     from langchain_core.messages import HumanMessage, SystemMessage
 
 
-    # Schema for structured output to use as routing logic
+    # 라우팅 논리로 사용할 구조화된 출력의 스키마
     class Route(BaseModel):
         step: Literal["poem", "story", "joke"] = Field(
-            None, description="The next step in the routing process"
+            None, description="라우팅 프로세스의 다음 단계"
         )
 
 
-    # Augment the LLM with schema for structured output
+    # 구조화된 출력을 위한 스키마로 LLM를 증강
     router = llm.with_structured_output(Route)
 
 
     @task
     def llm_call_1(input_: str):
-        """Write a story"""
+        """이야기를 작성합니다"""
         result = llm.invoke(input_)
         return result.content
 
 
     @task
     def llm_call_2(input_: str):
-        """Write a joke"""
+        """농담을 작성합니다"""
         result = llm.invoke(input_)
         return result.content
 
 
     @task
     def llm_call_3(input_: str):
-        """Write a poem"""
+        """시를 작성합니다"""
         result = llm.invoke(input_)
         return result.content
 
 
     def llm_call_router(input_: str):
-        """Route the input to the appropriate node"""
-        # Run the augmented LLM with structured output to serve as routing logic
+        """입력을 적절한 노드로 라우팅합니다"""
+        # 라우팅 논리로 사용할 구조화된 출력을 가진 증강된 LLM을 실행
         decision = router.invoke(
             [
                 SystemMessage(
-                    content="Route the input to story, joke, or poem based on the user's request."
+                    content="사용자의 요청에 따라 입력을 이야기, 농담 또는 시로 라우팅합니다."
                 ),
                 HumanMessage(content=input_),
             ]
@@ -578,7 +579,7 @@ Routing classifies an input and directs it to a followup task. As noted in the [
         return decision.step
 
 
-    # Create workflow
+    # 워크플로우 생성
     @entrypoint()
     def router_workflow(input_: str):
         next_step = llm_call_router(input_)
@@ -591,141 +592,145 @@ Routing classifies an input and directs it to a followup task. As noted in the [
 
         return llm_call(input_).result()
 
-    # Invoke
-    for step in router_workflow.stream("Write me a joke about cats", stream_mode="updates"):
+    # 호출
+    for step in router_workflow.stream("고양이에 관한 농담을 만들어주세요", stream_mode="updates"):
         print(step)
         print("\n")
+
+````
+
     ```
 
-    **LangSmith Trace**
+**LangSmith 추적**
 
-    https://smith.langchain.com/public/5e2eb979-82dd-402c-b1a0-a8cceaf2a28a/r
+https://smith.langchain.com/public/5e2eb979-82dd-402c-b1a0-a8cceaf2a28a/r
 
-## Orchestrator-Worker
+## 오케스트레이터-작업자
 
-With orchestrator-worker, an orchestrator breaks down a task and delegates each sub-task to workers. As noted in the [Anthropic blog](https://www.anthropic.com/research/building-effective-agents): 
+오케스트레이터-작업자는 오케스트레이터가 작업을 세분화하고 각 하위 작업을 작업자에게 위임합니다. [Anthropic 블로그](https://www.anthropic.com/research/building-effective-agents)에서 언급한 바와 같이:
 
-> In the orchestrator-workers workflow, a central LLM dynamically breaks down tasks, delegates them to worker LLMs, and synthesizes their results.
+> 오케스트레이터-작업자 워크플로우에서, 중앙 LLM은 작업을 동적으로 세분화하고, 이를 작업자 LLM에 위임하며 결과를 종합합니다.
 
-> When to use this workflow: This workflow is well-suited for complex tasks where you can’t predict the subtasks needed (in coding, for example, the number of files that need to be changed and the nature of the change in each file likely depend on the task). Whereas it’s topographically similar, the key difference from parallelization is its flexibility—subtasks aren't pre-defined, but determined by the orchestrator based on the specific input.
+> 이 워크플로우를 사용할 때: 이 워크플로우는 하위 작업에 대한 예측이 불가능한 복잡한 작업에 적합합니다(예를 들어, 코딩에서는 변경해야 할 파일의 수와 각 파일에서의 변경 내용이 작업에 따라 다를 수 있습니다). 지형적으로 유사하지만, 병렬화와의 주요 차이점은 유연성입니다—하위 작업은 미리 정의된 것이 아니라 특정 입력에 따라 오케스트레이터에 의해 결정됩니다.
 
 ![worker.png](./img/worker.png)
 
+=== "그래프 API"
 
-=== "Graph API"
+```python
+from typing import Annotated, List
+import operator
+
+
+# 계획 수립에 사용할 구조화된 출력의 스키마
+class Section(BaseModel):
+    name: str = Field(
+        description="보고서의 이 섹션에 대한 이름.",
+    )
+    description: str = Field(
+        description="이 섹션에서 다룰 주요 주제와 개념에 대한 간략한 개요.",
+    )
+
+
+class Sections(BaseModel):
+    sections: List[Section] = Field(
+        description="보고서의 섹션.",
+    )
+
+
+# 구조화된 출력을 위한 스키마로 LLM 증강
+planner = llm.with_structured_output(Sections)
+```
+
+**LangGraph에서 작업자 생성하기**
+
+오케스트레이터-작업자 워크플로우는 일반적이기 때문에, LangGraph **는 이를 지원하기 위한 `Send` API를 보유하고 있습니다**. 이를 통해 동적으로 작업자 노드를 생성하고 각 작업자에게 특정 입력을 보낼 수 있습니다. 각 작업자는 고유한 상태를 가지며, 모든 작업자의 출력은 오케스트레이터 그래프에서 접근 가능한 *공유 상태 키*에 기록됩니다. 이를 통해 오케스트레이터는 모든 작업자의 출력에 접근할 수 있으며, 이를 최종 출력으로 종합할 수 있습니다. 아래에서 볼 수 있듯이, 우리는 섹션 목록을 반복하고 `Send`를 통해 각 작업자 노드에 전송합니다. 더 자세한 문서는 [여기](https://langchain-ai.github.io/langgraph/how-tos/map-reduce/)와 [여기](https://langchain-ai.github.io/langgraph/concepts/low_level/#send)에서 확인할 수 있습니다.
+
+```python
+from langgraph.constants import Send
+
+
+# 그래프 상태
+class State(TypedDict):
+    topic: str  # 보고서 주제
+    sections: list[Section]  # 보고서 섹션 목록
+    completed_sections: Annotated[
+        list, operator.add
+    ]  # 모든 작업자가 이 키에 병렬로 기록
+    final_report: str  # 최종 보고서
+
+
+# 작업자 상태
+class WorkerState(TypedDict):
+    section: Section
+    completed_sections: Annotated[list, operator.add]
+
+
+# 노드
+def orchestrator(state: State):
+    """보고서 계획을 생성하는 오케스트레이터"""
+
+    # 쿼리 생성
+    report_sections = planner.invoke(
+        [
+            SystemMessage(content="보고서 계획을 생성하세요."),
+            HumanMessage(content=f"여기 보고서 주제가 있습니다: {state['topic']}"),
+        ]
+    )
+
+    return {"sections": report_sections.sections}
+
+
+def llm_call(state: WorkerState):
+    """작업자가 보고서 섹션을 작성함"""
+
+    # 섹션 생성
+    section = llm.invoke(
+        [
+            SystemMessage(
+                content="제공된 이름과 설명을 따라 보고서 섹션을 작성하세요. 각 섹션에 대한 서문은 포함하지 마세요. 마크다운 형식을 사용하세요."
+            ),
+            HumanMessage(
+                content=f"여기 섹션 이름: {state['section'].name} 및 설명: {state['section'].description}가 있습니다."
+            ),
+        ]
+    )
+
+    # 완료된 섹션에 업데이트된 섹션 기록
+    return {"completed_sections": [section.content]}
+```
 
     ```python
-    from typing import Annotated, List
-    import operator
 
+def synthesizer(state: State):
+"""섹션에서 전체 보고서를 합성합니다."""
 
-    # Schema for structured output to use in planning
-    class Section(BaseModel):
-        name: str = Field(
-            description="Name for this section of the report.",
-        )
-        description: str = Field(
-            description="Brief overview of the main topics and concepts to be covered in this section.",
-        )
-
-
-    class Sections(BaseModel):
-        sections: List[Section] = Field(
-            description="Sections of the report.",
-        )
-
-
-    # Augment the LLM with schema for structured output
-    planner = llm.with_structured_output(Sections)
-    ```
-
-    **Creating Workers in LangGraph**
-
-    Because orchestrator-worker workflows are common, LangGraph **has the `Send` API to support this**. It lets you dynamically create worker nodes and send each one a specific input. Each worker has its own state, and all worker outputs are written to a *shared state key* that is accessible to the orchestrator graph. This gives the orchestrator access to all worker output and allows it to synthesize them into a final output. As you can see below, we iterate over a list of sections and `Send` each to a worker node. See further documentation [here](https://langchain-ai.github.io/langgraph/how-tos/map-reduce/) and [here](https://langchain-ai.github.io/langgraph/concepts/low_level/#send).
-
-    ```python
-    from langgraph.constants import Send
-
-
-    # Graph state
-    class State(TypedDict):
-        topic: str  # Report topic
-        sections: list[Section]  # List of report sections
-        completed_sections: Annotated[
-            list, operator.add
-        ]  # All workers write to this key in parallel
-        final_report: str  # Final report
-
-
-    # Worker state
-    class WorkerState(TypedDict):
-        section: Section
-        completed_sections: Annotated[list, operator.add]
-
-
-    # Nodes
-    def orchestrator(state: State):
-        """Orchestrator that generates a plan for the report"""
-
-        # Generate queries
-        report_sections = planner.invoke(
-            [
-                SystemMessage(content="Generate a plan for the report."),
-                HumanMessage(content=f"Here is the report topic: {state['topic']}"),
-            ]
-        )
-
-        return {"sections": report_sections.sections}
-
-
-    def llm_call(state: WorkerState):
-        """Worker writes a section of the report"""
-
-        # Generate section
-        section = llm.invoke(
-            [
-                SystemMessage(
-                    content="Write a report section following the provided name and description. Include no preamble for each section. Use markdown formatting."
-                ),
-                HumanMessage(
-                    content=f"Here is the section name: {state['section'].name} and description: {state['section'].description}"
-                ),
-            ]
-        )
-
-        # Write the updated section to completed sections
-        return {"completed_sections": [section.content]}
-
-
-    def synthesizer(state: State):
-        """Synthesize full report from sections"""
-
-        # List of completed sections
+        # 완료된 섹션의 목록
         completed_sections = state["completed_sections"]
 
-        # Format completed section to str to use as context for final sections
+        # 완료된 섹션을 문자로 포맷하여 최종 섹션의 맥락으로 사용
         completed_report_sections = "\n\n---\n\n".join(completed_sections)
 
         return {"final_report": completed_report_sections}
 
 
-    # Conditional edge function to create llm_call workers that each write a section of the report
+    # 각 보고서 섹션에 작성자를 할당하는 조건부 엣지 함수
     def assign_workers(state: State):
-        """Assign a worker to each section in the plan"""
+        """계획에서 각 섹션에 작업자를 할당합니다."""
 
-        # Kick off section writing in parallel via Send() API
+        # Send() API를 통해 섹션 작성을 병렬로 시작
         return [Send("llm_call", {"section": s}) for s in state["sections"]]
 
 
-    # Build workflow
+    # 워크플로우 빌드
     orchestrator_worker_builder = StateGraph(State)
 
-    # Add the nodes
+    # 노드 추가
     orchestrator_worker_builder.add_node("orchestrator", orchestrator)
     orchestrator_worker_builder.add_node("llm_call", llm_call)
     orchestrator_worker_builder.add_node("synthesizer", synthesizer)
 
-    # Add edges to connect nodes
+    # 노드를 연결하는 엣지 추가
     orchestrator_worker_builder.add_edge(START, "orchestrator")
     orchestrator_worker_builder.add_conditional_edges(
         "orchestrator", assign_workers, ["llm_call"]
@@ -733,95 +738,94 @@ With orchestrator-worker, an orchestrator breaks down a task and delegates each 
     orchestrator_worker_builder.add_edge("llm_call", "synthesizer")
     orchestrator_worker_builder.add_edge("synthesizer", END)
 
-    # Compile the workflow
+    # 워크플로우 컴파일
     orchestrator_worker = orchestrator_worker_builder.compile()
 
-    # Show the workflow
+    # 워크플로우 보여주기
     display(Image(orchestrator_worker.get_graph().draw_mermaid_png()))
 
-    # Invoke
-    state = orchestrator_worker.invoke({"topic": "Create a report on LLM scaling laws"})
+    # 호출
+    state = orchestrator_worker.invoke({"topic": "LLM 스케일링 법칙에 대한 보고서 작성"})
 
     from IPython.display import Markdown
     Markdown(state["final_report"])
     ```
 
-    **LangSmith Trace**
+    **LangSmith 추적**
 
     https://smith.langchain.com/public/78cbcfc3-38bf-471d-b62a-b299b144237d/r
 
-    **Resources:**
+    **자료:**
 
-    **LangChain Academy**
+    **LangChain 아카데미**
 
-    See our lesson on orchestrator-worker [here](https://github.com/langchain-ai/langchain-academy/blob/main/module-4/map-reduce.ipynb).
+    [여기](https://github.com/langchain-ai/langchain-academy/blob/main/module-4/map-reduce.ipynb)에서 오케스트레이터-작업자에 대한 강의를 확인하세요.
 
-    **Examples**
+    **예시**
 
-    [Here](https://github.com/langchain-ai/report-mAIstro) is a project that uses orchestrator-worker for report planning and writing. See our video [here](https://www.youtube.com/watch?v=wSxZ7yFbbas).
+    [여기](https://github.com/langchain-ai/report-mAIstro)에는 보고서 계획 및 작성을 위한 오케스트레이터-작업자를 사용하는 프로젝트가 있습니다. 우리의 동영상은 [여기](https://www.youtube.com/watch?v=wSxZ7yFbbas)에서 확인하세요.
 
-
-=== "Functional API (beta)"
+=== "기능적 API (베타)"
 
     ```python
     from typing import List
 
 
-    # Schema for structured output to use in planning
+    # 계획에 사용할 구조화된 출력을 위한 스키마
     class Section(BaseModel):
         name: str = Field(
-            description="Name for this section of the report.",
+            description="보고서의 이 섹션에 대한 이름입니다.",
         )
         description: str = Field(
-            description="Brief overview of the main topics and concepts to be covered in this section.",
+            description="이 섹션에서 다룰 주요 주제 및 개념에 대한 간략한 개요입니다.",
         )
 
 
     class Sections(BaseModel):
         sections: List[Section] = Field(
-            description="Sections of the report.",
+            description="보고서의 섹션입니다.",
         )
 
 
-    # Augment the LLM with schema for structured output
+    # 구조화된 출력을 위한 스키마로 LLM을 확장
     planner = llm.with_structured_output(Sections)
 
 
     @task
     def orchestrator(topic: str):
-        """Orchestrator that generates a plan for the report"""
-        # Generate queries
+        """보고서 계획을 생성하는 오케스트레이터"""
+        # 쿼리 생성
         report_sections = planner.invoke(
             [
-                SystemMessage(content="Generate a plan for the report."),
-                HumanMessage(content=f"Here is the report topic: {topic}"),
+                SystemMessage(content="보고서 계획을 생성합니다."),
+                인간 메시지(content=f"여기 보고서 주제가 있습니다: {topic}"),
             ]
         )
 
-        return report_sections.sections
+        보고서 섹션을 반환합니다.
 
 
     @task
     def llm_call(section: Section):
-        """Worker writes a section of the report"""
+        """작업자가 보고서 섹션을 작성합니다."""
 
-        # Generate section
+        # 섹션 생성
         result = llm.invoke(
             [
-                SystemMessage(content="Write a report section."),
+                SystemMessage(content="보고서 섹션을 작성하세요."),
                 HumanMessage(
-                    content=f"Here is the section name: {section.name} and description: {section.description}"
+                    content=f"여기 섹션 이름이 있습니다: {section.name} 및 설명: {section.description}"
                 ),
             ]
         )
 
-        # Write the updated section to completed sections
+        # 완료된 섹션에 업데이트된 섹션을 작성합니다.
         return result.content
 
 
     @task
     def synthesizer(completed_sections: list[str]):
-        """Synthesize full report from sections"""
+        """섹션에서 전체 보고서를 합성합니다."""
         final_report = "\n\n---\n\n".join(completed_sections)
         return final_report
 
@@ -835,30 +839,30 @@ With orchestrator-worker, an orchestrator breaks down a task and delegates each 
         ).result()
         return final_report
 
-    # Invoke
-    report = orchestrator_worker.invoke("Create a report on LLM scaling laws")
+    # 호출
+    report = orchestrator_worker.invoke("LLM 스케일링 법칙에 대한 보고서 작성")
     from IPython.display import Markdown
     Markdown(report)
     ```
 
-    **LangSmith Trace**
+    **LangSmith 추적**
 
     https://smith.langchain.com/public/75a636d0-6179-4a12-9836-e0aa571e87c5/r
 
-## Evaluator-optimizer
+## 평가자-최적화기
 
-In the evaluator-optimizer workflow, one LLM call generates a response while another provides evaluation and feedback in a loop:
+평가자-최적화기 워크플로우에서는 한 LLM 호출이 응답을 생성하고 다른 LLM 호출이 평가 및 피드백을 제공하는 루프가 형성됩니다:
 
-> In the evaluator-optimizer workflow, one LLM call generates a response while another provides evaluation and feedback in a loop.
+> 평가자-최적화기 워크플로우에서는 한 LLM 호출이 응답을 생성하고 다른 호출이 평가 및 피드백을 제공하는 루프가 형성됩니다.
 
-> When to use this workflow: This workflow is particularly effective when we have clear evaluation criteria, and when iterative refinement provides measurable value. The two signs of good fit are, first, that LLM responses can be demonstrably improved when a human articulates their feedback; and second, that the LLM can provide such feedback. This is analogous to the iterative writing process a human writer might go through when producing a polished document.
+> 이 워크플로우를 사용하는 시점: 이 워크플로우는 명확한 평가 기준이 있을 때 특히 효과적이며, 반복적인 개선이 측정 가능한 가치를 제공할 때 유용합니다. 잘 맞는 두 가지 신호는 첫째, LLM의 응답이 인간이 그들의 피드백을 명확히 할 때 입증 가능하게 개선될 수 있다는 점이며, 둘째, LLM이 그러한 피드백을 제공할 수 있어야 합니다. 이는 인간 작가가 세련된 문서를 작성할 때 겪을 수 있는 반복적인 글쓰기 과정과 유사합니다.
 
 ![evaluator_optimizer.png](./img/evaluator_optimizer.png)
 
-=== "Graph API"
+=== "그래프 API"
 
     ```python
-    # Graph state
+    # 그래프 상태
     class State(TypedDict):
         joke: str
         topic: str
@@ -866,331 +870,330 @@ In the evaluator-optimizer workflow, one LLM call generates a response while ano
         funny_or_not: str
 
 
-    # Schema for structured output to use in evaluation
+    # 평가에 사용할 구조화된 출력의 스키마
     class Feedback(BaseModel):
         grade: Literal["funny", "not funny"] = Field(
-            description="Decide if the joke is funny or not.",
+            description="농담이 웃긴지 아닌지 결정합니다.",
         )
         feedback: str = Field(
-            description="If the joke is not funny, provide feedback on how to improve it.",
+            description="농담이 웃기지 않으면, 개선 방법에 대한 피드백을 제공합니다.",
         )
 
 
-    # Augment the LLM with schema for structured output
+    # 구조화된 출력을 위한 스키마로 LLM을 보강합니다.
     evaluator = llm.with_structured_output(Feedback)
 
 
-    # Nodes
+    # 노드
     def llm_call_generator(state: State):
-        """LLM generates a joke"""
+        """LLM이 농담을 생성합니다."""
 
         if state.get("feedback"):
             msg = llm.invoke(
-                f"Write a joke about {state['topic']} but take into account the feedback: {state['feedback']}"
+                f"{state['topic']}에 관한 농담을 작성하되 피드백을 고려하세요: {state['feedback']}"
             )
         else:
-            msg = llm.invoke(f"Write a joke about {state['topic']}")
+            msg = llm.invoke(f"{state['topic']}에 관한 농담을 작성하세요.")
         return {"joke": msg.content}
 
-
     def llm_call_evaluator(state: State):
-        """LLM evaluates the joke"""
+    """LLM이 농담을 평가합니다."""
 
-        grade = evaluator.invoke(f"Grade the joke {state['joke']}")
-        return {"funny_or_not": grade.grade, "feedback": grade.feedback}
+        grade = evaluator.invoke(f"농담을 평가해 주세요: {state['joke']}")
+        return {"재미있음_or_not": grade.grade, "피드백": grade.feedback}
 
 
-    # Conditional edge function to route back to joke generator or end based upon feedback from the evaluator
+    # 평가자의 피드백에 따라 농담 생성기로 되돌리거나 종료하는 조건부 경로 함수
     def route_joke(state: State):
-        """Route back to joke generator or end based upon feedback from the evaluator"""
+        """평가자의 피드백에 따라 농담 생성기로 되돌리거나 종료합니다."""
 
-        if state["funny_or_not"] == "funny":
-            return "Accepted"
-        elif state["funny_or_not"] == "not funny":
-            return "Rejected + Feedback"
+        if state["재미있음_or_not"] == "재미있음":
+            return "승인됨"
+        elif state["재미있음_or_not"] == "재미없음":
+            return "거부됨 + 피드백"
 
 
-    # Build workflow
+    # 워크플로우 구축
     optimizer_builder = StateGraph(State)
 
-    # Add the nodes
+    # 노드를 추가합니다.
     optimizer_builder.add_node("llm_call_generator", llm_call_generator)
     optimizer_builder.add_node("llm_call_evaluator", llm_call_evaluator)
 
-    # Add edges to connect nodes
+    # 노드를 연결하는 엣지를 추가합니다.
     optimizer_builder.add_edge(START, "llm_call_generator")
     optimizer_builder.add_edge("llm_call_generator", "llm_call_evaluator")
     optimizer_builder.add_conditional_edges(
         "llm_call_evaluator",
         route_joke,
-        {  # Name returned by route_joke : Name of next node to visit
-            "Accepted": END,
-            "Rejected + Feedback": "llm_call_generator",
+        {  # route_joke에 의해 반환된 이름 : 다음 방문할 노드의 이름
+            "승인됨": END,
+            "거부됨 + 피드백": "llm_call_generator",
         },
     )
 
-    # Compile the workflow
+    # 워크플로우를 컴파일합니다.
     optimizer_workflow = optimizer_builder.compile()
 
-    # Show the workflow
+    # 워크플로우를 표시합니다.
     display(Image(optimizer_workflow.get_graph().draw_mermaid_png()))
 
-    # Invoke
-    state = optimizer_workflow.invoke({"topic": "Cats"})
-    print(state["joke"])
+    # 호출합니다.
+    state = optimizer_workflow.invoke({"주제": "고양이"})
+    print(state["농담"])
     ```
 
-    **LangSmith Trace**
+    **LangSmith 추적**
 
     https://smith.langchain.com/public/86ab3e60-2000-4bff-b988-9b89a3269789/r
 
-    **Resources:**
+    **자료:**
 
-    **Examples**
+    **예시**
 
-    [Here](https://github.com/langchain-ai/research-rabbit) is an assistant that uses evaluator-optimizer to improve a report. See our video [here](https://www.youtube.com/watch?v=XGuTzHoqlj8).
+    [여기](https://github.com/langchain-ai/research-rabbit)에는 evaluator-optimizer를 사용하여 보고서를 개선하는 도우미가 있습니다. 비디오는 [여기](https://www.youtube.com/watch?v=XGuTzHoqlj8)에서 확인하세요.
 
-    [Here](https://langchain-ai.github.io/langgraph/tutorials/rag/langgraph_adaptive_rag_local/) is a RAG workflow that grades answers for hallucinations or errors. See our video [here](https://www.youtube.com/watch?v=bq1Plo2RhYI).
+    [여기](https://langchain-ai.github.io/langgraph/tutorials/rag/langgraph_adaptive_rag_local/)는 환각이나 오류에 대해 답변을 평가하는 RAG 워크플로우입니다. 비디오는 [여기](https://www.youtube.com/watch?v=bq1Plo2RhYI)에서 확인하세요.
 
-=== "Functional API (beta)"
+=== "기능적 API (베타)"
 
     ```python
-    # Schema for structured output to use in evaluation
+    # 평가에 사용할 구조화된 출력의 스키마
     class Feedback(BaseModel):
-        grade: Literal["funny", "not funny"] = Field(
-            description="Decide if the joke is funny or not.",
+        grade: Literal["재미있음", "재미없음"] = Field(
+            description="농담이 재미있는지 여부를 결정합니다.",
         )
         feedback: str = Field(
-            description="If the joke is not funny, provide feedback on how to improve it.",
+            description="농담이 재미없다면 개선 방법에 대한 피드백을 제공합니다.",
         )
 
 
-    # Augment the LLM with schema for structured output
+    # 구조화된 출력 스키마로 LLM을 보강합니다.
     evaluator = llm.with_structured_output(Feedback)
 
 
-    # Nodes
+    # 노드
     @task
     def llm_call_generator(topic: str, feedback: Feedback):
-        """LLM generates a joke"""
+        """LLM이 농담을 생성합니다."""
         if feedback:
             msg = llm.invoke(
-                f"Write a joke about {topic} but take into account the feedback: {feedback}"
+                f"{topic}에 대한 농담을 작성하되 피드백: {feedback}을 고려하세요."
             )
         else:
-            msg = llm.invoke(f"Write a joke about {topic}")
+            msg = llm.invoke(f"{topic}에 대한 농담을 작성하세요.")
         return msg.content
 
 
     @task
     def llm_call_evaluator(joke: str):
-        """LLM evaluates the joke"""
-        feedback = evaluator.invoke(f"Grade the joke {joke}")
+        """LLM이 농담을 평가합니다."""
+        feedback = evaluator.invoke(f"농담을 평가해 주세요: {joke}")
         return feedback
 
 
     @entrypoint()
     def optimizer_workflow(topic: str):
         feedback = None
-        while True:
-            joke = llm_call_generator(topic, feedback).result()
-            feedback = llm_call_evaluator(joke).result()
-            if feedback.grade == "funny":
-                break
 
-        return joke
 
-    # Invoke
+        #무한 루프:
+
+    while True:
+        joke = llm_call_generator(topic, feedback).result()
+        feedback = llm_call_evaluator(joke).result()
+        if feedback.grade == "funny":
+            break
+
+    return joke
+
+    # 호출
     for step in optimizer_workflow.stream("Cats", stream_mode="updates"):
         print(step)
         print("\n")
-    ```
 
-    **LangSmith Trace**
+````
 
-    https://smith.langchain.com/public/f66830be-4339-4a6b-8a93-389ce5ae27b4/r
+**LangSmith Trace**
 
-## Agent
+https://smith.langchain.com/public/f66830be-4339-4a6b-8a93-389ce5ae27b4/r
 
-Agents are typically implemented as an LLM performing actions (via tool-calling) based on environmental feedback in a loop. As noted in the [Anthropic blog](https://www.anthropic.com/research/building-effective-agents):
+## 에이전트
 
-> Agents can handle sophisticated tasks, but their implementation is often straightforward. They are typically just LLMs using tools based on environmental feedback in a loop. It is therefore crucial to design toolsets and their documentation clearly and thoughtfully.
+에이전트는 일반적으로 환경 피드백에 따라 행동(도구 호출을 통해)을 수행하는 LLM으로 구현됩니다. [Anthropic 블로그](https://www.anthropic.com/research/building-effective-agents)에서 언급했듯이:
 
-> When to use agents: Agents can be used for open-ended problems where it’s difficult or impossible to predict the required number of steps, and where you can’t hardcode a fixed path. The LLM will potentially operate for many turns, and you must have some level of trust in its decision-making. Agents' autonomy makes them ideal for scaling tasks in trusted environments.
+> 에이전트는 정교한 작업을 처리할 수 있지만, 그 구현은 종종 간단합니다. 일반적으로 환경 피드백을 기반으로 도구를 사용하는 LLM입니다. 따라서 도구 세트와 그 문서를 명확하고 신중하게 설계하는 것이 중요합니다.
+
+> 에이전트를 사용할 때: 에이전트는 필요한 단계 수를 예측하기 어렵거나 불가능한 개방형 문제에 사용할 수 있으며, 고정된 경로를 하드코딩할 수 없는 경우에 적합합니다. LLM은 여러 턴 동안 작동할 수 있으며, 의사 결정에 일정 수준의 신뢰가 필요합니다. 에이전트의 자율성은 신뢰할 수 있는 환경에서 작업을 확장하는 데 이상적입니다.
 
 ![agent.png](./img/agent.png)
-
 
 ```python
 from langchain_core.tools import tool
 
-
-# Define tools
+# 도구 정의
 @tool
 def multiply(a: int, b: int) -> int:
-    """Multiply a and b.
+    """a와 b를 곱합니다.
 
-    Args:
-        a: first int
-        b: second int
+    인수:
+        a: 첫 번째 정수
+        b: 두 번째 정수
     """
     return a * b
 
-
 @tool
 def add(a: int, b: int) -> int:
-    """Adds a and b.
+    """a와 b를 더합니다.
 
-    Args:
-        a: first int
-        b: second int
+    인수:
+        a: 첫 번째 정수
+        b: 두 번째 정수
     """
     return a + b
 
-
 @tool
 def divide(a: int, b: int) -> float:
-    """Divide a and b.
+    """a를 b로 나눕니다.
 
-    Args:
-        a: first int
-        b: second int
+    인수:
+        a: 첫 번째 정수
+        b: 두 번째 정수
     """
     return a / b
 
-
-# Augment the LLM with tools
+# 도구로 LLM 확장
 tools = [add, multiply, divide]
 tools_by_name = {tool.name: tool for tool in tools}
 llm_with_tools = llm.bind_tools(tools)
 ```
 
-=== "Graph API"
+=== "그래프 API"
 
-    ```python
-    from langgraph.graph import MessagesState
-    from langchain_core.messages import SystemMessage, HumanMessage, ToolMessage
+```python
+from langgraph.graph import MessagesState
+from langchain_core.messages import SystemMessage, HumanMessage, ToolMessage
 
+# 노드
+def llm_call(state: MessagesState):
+    """LLM이 도구를 호출할지 여부를 결정합니다."""
 
-    # Nodes
-    def llm_call(state: MessagesState):
-        """LLM decides whether to call a tool or not"""
+    return {
+        "messages": [
+            llm_with_tools.invoke(
+                [
+                    SystemMessage(
+                        content="당신은 입력 세트에 대한 산술을 수행하는 유용한 어시스턴트입니다."
+                    )
+                ]
+                + state["messages"]
+            )
+        ]
+    }
 
-        return {
-            "messages": [
-                llm_with_tools.invoke(
-                    [
-                        SystemMessage(
-                            content="You are a helpful assistant tasked with performing arithmetic on a set of inputs."
-                        )
-                    ]
-                    + state["messages"]
-                )
-            ]
-        }
+def tool_node(state: dict):
+```
 
+        """도구 호출을 수행합니다."""
 
-    def tool_node(state: dict):
-        """Performs the tool call"""
-
-        result = []
+        결과 = []
         for tool_call in state["messages"][-1].tool_calls:
-            tool = tools_by_name[tool_call["name"]]
-            observation = tool.invoke(tool_call["args"])
-            result.append(ToolMessage(content=observation, tool_call_id=tool_call["id"]))
-        return {"messages": result}
+            도구 = tools_by_name[tool_call["name"]]
+            관찰 = 도구.invoke(tool_call["args"])
+            결과.append(ToolMessage(content=관찰, tool_call_id=tool_call["id"]))
+        return {"messages": 결과}
 
 
-    # Conditional edge function to route to the tool node or end based upon whether the LLM made a tool call
+    # LLM이 도구 호출을 했는지 여부에 따라 도구 노드 또는 종료로 라우팅하는 조건부 엣지 함수
     def should_continue(state: MessagesState) -> Literal["environment", END]:
-        """Decide if we should continue the loop or stop based upon whether the LLM made a tool call"""
+        """LLM이 도구 호출을 했는지 여부에 따라 루프를 계속할지 중단할지 결정합니다."""
 
-        messages = state["messages"]
-        last_message = messages[-1]
-        # If the LLM makes a tool call, then perform an action
-        if last_message.tool_calls:
+        메시지 = state["messages"]
+        마지막_메시지 = 메시지[-1]
+        # LLM이 도구 호출을 하면 작업을 수행합니다.
+        if 마지막_메시지.tool_calls:
             return "Action"
-        # Otherwise, we stop (reply to the user)
+        # 그렇지 않으면 중단합니다 (사용자에게 응답)
         return END
 
 
-    # Build workflow
+    # 워크플로우 구성
     agent_builder = StateGraph(MessagesState)
 
-    # Add nodes
+    # 노드 추가
     agent_builder.add_node("llm_call", llm_call)
     agent_builder.add_node("environment", tool_node)
 
-    # Add edges to connect nodes
+    # 노드를 연결하는 엣지 추가
     agent_builder.add_edge(START, "llm_call")
     agent_builder.add_conditional_edges(
         "llm_call",
         should_continue,
         {
-            # Name returned by should_continue : Name of next node to visit
+            # should_continue가 반환하는 이름 : 방문할 다음 노드 이름
             "Action": "environment",
             END: END,
         },
     )
     agent_builder.add_edge("environment", "llm_call")
 
-    # Compile the agent
+    # 에이전트 컴파일
     agent = agent_builder.compile()
 
-    # Show the agent
+    # 에이전트 표시
     display(Image(agent.get_graph(xray=True).draw_mermaid_png()))
 
-    # Invoke
-    messages = [HumanMessage(content="Add 3 and 4.")]
-    messages = agent.invoke({"messages": messages})
-    for m in messages["messages"]:
+    # 호출
+    메시지 = [HumanMessage(content="3과 4를 더하세요.")]
+    메시지 = agent.invoke({"messages": 메시지})
+    for m in 메시지["messages"]:
         m.pretty_print()
-    ```
 
-    **LangSmith Trace**
+**LangSmith 추적**
 
-    https://smith.langchain.com/public/051f0391-6761-4f8c-a53b-22231b016690/r
+https://smith.langchain.com/public/051f0391-6761-4f8c-a53b-22231b016690/r
 
-    **Resources:**
+**자원:**
 
-    **LangChain Academy**
+**LangChain 아카데미**
 
-    See our lesson on agents [here](https://github.com/langchain-ai/langchain-academy/blob/main/module-1/agent.ipynb).
+에이전트에 대한 레슨은 [여기](https://github.com/langchain-ai/langchain-academy/blob/main/module-1/agent.ipynb)에서 확인하실 수 있습니다.
 
-    **Examples**
+**예제**
 
-    [Here](https://github.com/langchain-ai/memory-agent) is a project that uses a tool calling agent to create / store long-term memories.
+[여기](https://github.com/langchain-ai/memory-agent)에는 도구 호출 에이전트를 사용하여 장기 기억을 생성/저장하는 프로젝트가 있습니다.
 
-=== "Functional API (beta)"
+=== "기능적 API(베타)"
 
-    ```python
-    from langgraph.graph import add_messages
-    from langchain_core.messages import (
-        SystemMessage,
-        HumanMessage,
-        BaseMessage,
-        ToolCall,
+````python
+from langgraph.graph import add_messages
+from langchain_core.messages import (
+    SystemMessage,
+    HumanMessage,
+    BaseMessage,
+    ToolCall,
+)
+
+
+@task
+def call_llm(messages: list[BaseMessage]):
+    """LLM이 도구를 호출할지 여부를 결정합니다."""
+    return llm_with_tools.invoke(
+        [
+            SystemMessage(
+                content="당신은 입력 세트에서 산술 작업을 수행하는 유용한 비서입니다."
+            )
+        ]
+        + messages
     )
 
 
-    @task
-    def call_llm(messages: list[BaseMessage]):
-        """LLM decides whether to call a tool or not"""
-        return llm_with_tools.invoke(
-            [
-                SystemMessage(
-                    content="You are a helpful assistant tasked with performing arithmetic on a set of inputs."
-                )
-            ]
-            + messages
-        )
-
-
-    @task
-    def call_tool(tool_call: ToolCall):
-        """Performs the tool call"""
-        tool = tools_by_name[tool_call["name"]]
-        return tool.invoke(tool_call)
+@task
+def call_tool(tool_call: ToolCall):
+    """도구 호출을 수행합니다."""
+    도구 = tools_by_name[tool_call["name"]]
+        ```
+tool.invoke(tool_call를 반환합니다)
 
 
     @entrypoint()
@@ -1201,7 +1204,7 @@ llm_with_tools = llm.bind_tools(tools)
             if not llm_response.tool_calls:
                 break
 
-            # Execute tools
+            # 도구 실행
             tool_result_futures = [
                 call_tool(tool_call) for tool_call in llm_response.tool_calls
             ]
@@ -1212,8 +1215,8 @@ llm_with_tools = llm.bind_tools(tools)
         messages = add_messages(messages, llm_response)
         return messages
 
-    # Invoke
-    messages = [HumanMessage(content="Add 3 and 4.")]
+    # 호출
+    messages = [HumanMessage(content="3과 4를 더하세요.")]
     for chunk in agent.stream(messages, stream_mode="updates"):
         print(chunk)
         print("\n")
@@ -1223,51 +1226,53 @@ llm_with_tools = llm.bind_tools(tools)
 
     https://smith.langchain.com/public/42ae8bf9-3935-4504-a081-8ddbcbfc8b2e/r
 
-#### Pre-built
+#### 미리 구축된
 
-LangGraph also provides a **pre-built method** for creating an agent as defined above (using the [`create_react_agent`][langgraph.prebuilt.chat_agent_executor.create_react_agent] function):
+LangGraph는 위에서 정의된 에이전트를 생성하기 위한 **미리 구축된 방법**도 제공합니다 ( [`create_react_agent`][langgraph.prebuilt.chat_agent_executor.create_react_agent] 함수를 사용):
 
 https://langchain-ai.github.io/langgraph/how-tos/create-react-agent/
 
 ```python
 from langgraph.prebuilt import create_react_agent
 
-# Pass in:
-# (1) the augmented LLM with tools
-# (2) the tools list (which is used to create the tool node)
+# 다음을 전달합니다:
+# (1) 도구가 포함된 증강된 LLM
+# (2) 도구 목록 (도구 노드 생성을 위해 사용됨)
 pre_built_agent = create_react_agent(llm, tools=tools)
 
-# Show the agent
+# 에이전트 표시
 display(Image(pre_built_agent.get_graph().draw_mermaid_png()))
 
-# Invoke
-messages = [HumanMessage(content="Add 3 and 4.")]
+# 호출
+messages = [HumanMessage(content="3과 4를 더하세요.")]
 messages = pre_built_agent.invoke({"messages": messages})
 for m in messages["messages"]:
     m.pretty_print()
+````
+
 ```
 
-**LangSmith Trace**
+**LangSmith 추적**
 
 https://smith.langchain.com/public/abab6a44-29f6-4b97-8164-af77413e494d/r
 
-## What LangGraph provides
+## LangGraph가 제공하는 것
 
-By constructing each of the above in LangGraph, we get a few things:
+LangGraph에서 위의 각 요소를 구성함으로써 몇 가지를 얻을 수 있습니다:
 
-### Persistence: Human-in-the-Loop
+### 지속성: 인간 개입
 
-LangGraph persistence layer supports interruption and approval of actions (e.g., Human In The Loop). See [Module 3 of LangChain Academy](https://github.com/langchain-ai/langchain-academy/tree/main/module-3).
+LangGraph의 지속성 계층은 작업의 중단 및 승인을 지원합니다(예: 인간 개입). [LangChain 아카데미의 3모듈](https://github.com/langchain-ai/langchain-academy/tree/main/module-3)을 참조하십시오.
 
-### Persistence: Memory
+### 지속성: 기억
 
-LangGraph persistence layer supports conversational (short-term) memory and long-term memory. See [Modules 2](https://github.com/langchain-ai/langchain-academy/tree/main/module-2) [and 5](https://github.com/langchain-ai/langchain-academy/tree/main/module-5) of LangChain Academy:
+LangGraph의 지속성 계층은 대화형(단기) 기억과 장기 기억을 지원합니다. [LangChain 아카데미의 2모듈](https://github.com/langchain-ai/langchain-academy/tree/main/module-2)과 [5모듈](https://github.com/langchain-ai/langchain-academy/tree/main/module-5)을 참조하십시오:
 
-### Streaming
+### 스트리밍
 
-LangGraph provides several ways to stream workflow / agent outputs or intermediate state. See [Module 3 of LangChain Academy](https://github.com/langchain-ai/langchain-academy/blob/main/module-3/streaming-interruption.ipynb).
+LangGraph는 워크플로우/에이전트 출력 또는 중간 상태를 스트리밍할 수 있는 여러 가지 방법을 제공합니다. [LangChain 아카데미의 3모듈](https://github.com/langchain-ai/langchain-academy/blob/main/module-3/streaming-interruption.ipynb)을 참조하십시오.
 
+### 배포
 
-### Deployment
-
-LangGraph provides an easy on-ramp for deployment, observability, and evaluation. See [module 6](https://github.com/langchain-ai/langchain-academy/tree/main/module-6) of LangChain Academy.
+LangGraph는 배포, 관측 가능성 및 평가를 위한 쉬운 진입점을 제공합니다. [LangChain 아카데미의 6모듈](https://github.com/langchain-ai/langchain-academy/tree/main/module-6)을 참조하십시오.
+```
