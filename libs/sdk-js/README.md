@@ -1,38 +1,39 @@
+_한국어로 기계번역됨_
+
 # LangGraph JS/TS SDK
 
-This repository contains the JS/TS SDK for interacting with the LangGraph REST API.
+이 리포지토리는 LangGraph REST API와 상호 작용하기 위한 JS/TS SDK를 포함하고 있습니다.
 
-## Quick Start
+## 빠른 시작
 
-To get started with the JS/TS SDK, [install the package](https://www.npmjs.com/package/@langchain/langgraph-sdk)
+JS/TS SDK를 시작하려면 [패키지를 설치](https://www.npmjs.com/package/@langchain/langgraph-sdk)하세요.
 
 ```bash
 yarn add @langchain/langgraph-sdk
 ```
 
-You will need a running LangGraph API server. If you're running a server locally using `langgraph-cli`, SDK will automatically point at `http://localhost:8123`, otherwise
-you would need to specify the server URL when creating a client.
+동작 중인 LangGraph API 서버가 필요합니다. `langgraph-cli`를 사용하여 로컬에서 서버를 실행 중이라면, SDK는 자동으로 `http://localhost:8123`를 가리킵니다. 그렇지 않으면 클라이언트를 생성할 때 서버 URL을 지정해야 합니다.
 
 ```js
 import { Client } from "@langchain/langgraph-sdk";
 
 const client = new Client();
 
-// List all assistants
+// 모든 어시스턴트 목록 검색
 const assistants = await client.assistants.search({
   metadata: null,
   offset: 0,
   limit: 10,
 });
 
-// We auto-create an assistant for each graph you register in config.
+// 구성에서 등록된 각 그래프에 대해 어시스턴트를 자동 생성합니다.
 const agent = assistants[0];
 
-// Start a new thread
+// 새로운 스레드 시작
 const thread = await client.threads.create();
 
-// Start a streaming run
-const messages = [{ role: "human", content: "what's the weather in la" }];
+// 스트리밍 실행 시작
+const messages = [{ role: "human", content: "라의 날씨는 어때요?" }];
 
 const streamResponse = client.runs.stream(
   thread["thread_id"],
@@ -47,18 +48,18 @@ for await (const chunk of streamResponse) {
 }
 ```
 
-## Documentation
+## 문서화
 
-To generate documentation, run the following commands:
+문서를 생성하려면 다음 명령어를 실행하세요:
 
-1. Generate docs.
+1. 문서 생성.
 
         yarn typedoc
 
-1. Consolidate doc files into one markdown file.
+2. 문서 파일을 하나의 마크다운 파일로 통합.
 
         npx concat-md --decrease-title-levels --ignore=js_ts_sdk_ref.md --start-title-level-at 2 docs > docs/js_ts_sdk_ref.md
 
-1. Copy `js_ts_sdk_ref.md` to MkDocs directory.
+3. `js_ts_sdk_ref.md`를 MkDocs 디렉토리로 복사.
 
         cp docs/js_ts_sdk_ref.md ../../docs/docs/cloud/reference/sdk/js_ts_sdk_ref.md

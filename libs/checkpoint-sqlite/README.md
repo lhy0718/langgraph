@@ -1,8 +1,10 @@
-# LangGraph SQLite Checkpoint
+_한국어로 기계번역됨_
 
-Implementation of LangGraph CheckpointSaver that uses SQLite DB (both sync and async, via `aiosqlite`)
+# LangGraph SQLite 체크포인트
 
-## Usage
+SQLite DB를 사용하는 LangGraph CheckpointSaver 구현 (동기 및 비동기, `aiosqlite`를 통해)
+
+## 사용법
 
 ```python
 from langgraph.checkpoint.sqlite import SqliteSaver
@@ -37,17 +39,17 @@ with SqliteSaver.from_conn_string(":memory:") as checkpointer:
         "pending_sends": [],
     }
 
-    # store checkpoint
+    # 체크포인트 저장
     checkpointer.put(write_config, checkpoint, {}, {})
 
-    # load checkpoint
+    # 체크포인트 로드
     checkpointer.get(read_config)
 
-    # list checkpoints
+    # 체크포인트 목록 확인
     list(checkpointer.list(read_config))
 ```
 
-### Async
+### 비동기
 
 ```python
 from langgraph.checkpoint.sqlite.aio import AsyncSqliteSaver
@@ -79,12 +81,12 @@ async with AsyncSqliteSaver.from_conn_string(":memory:") as checkpointer:
         "pending_sends": [],
     }
 
-    # store checkpoint
+    # 체크포인트 저장
     await checkpointer.aput(write_config, checkpoint, {}, {})
 
-    # load checkpoint
+    # 체크포인트 로드
     await checkpointer.aget(read_config)
 
-    # list checkpoints
+    # 체크포인트 목록 확인
     [c async for c in checkpointer.alist(read_config)]
 ```
