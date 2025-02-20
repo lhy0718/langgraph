@@ -1,104 +1,102 @@
-_한국어로 기계번역됨_
+# Deployment Options
 
-# 배포 옵션
+!!! info "Prerequisites"
 
-!!! info " prerequisites"
+    - [LangGraph Platform](./langgraph_platform.md)
+    - [LangGraph Server](./langgraph_server.md)
+    - [LangGraph Platform Plans](./plans.md)
 
-    - [LangGraph 플랫폼](./langgraph_platform.md)
-    - [LangGraph 서버](./langgraph_server.md)
-    - [LangGraph 플랫폼 플랜](./plans.md)
+## Overview
 
-## 개요
+There are 4 main options for deploying with the LangGraph Platform:
 
-LangGraph 플랫폼을 사용한 배포에는 4가지 주요 옵션이 있습니다:
+1. **[Self-Hosted Lite](#self-hosted-lite)**: Available for all plans.
 
-1. **[셀프 호스팅 라이트](#self-hosted-lite)**: 모든 플랜에서 사용 가능합니다.
+2. **[Self-Hosted Enterprise](#self-hosted-enterprise)**: Available for the **Enterprise** plan.
 
-2. **[셀프 호스팅 엔터프라이즈](#self-hosted-enterprise)**: **엔터프라이즈** 플랜에서 사용 가능합니다.
+3. **[Cloud SaaS](#cloud-saas)**: Available for **Plus** and **Enterprise** plans.
 
-3. **[클라우드 SaaS](#cloud-saas)**: **플러스** 및 **엔터프라이즈** 플랜에서 사용 가능합니다.
+4. **[Bring Your Own Cloud](#bring-your-own-cloud)**: Available only for **Enterprise** plans and **only on AWS**.
 
-4. **[내 클라우드 사용하기](#bring-your-own-cloud)**: **엔터프라이즈** 플랜에서만 사용 가능하며 **AWS에서만** 가능합니다.
+Please see the [LangGraph Platform Plans](./plans.md) for more information on the different plans.
 
-자세한 정보는 [LangGraph 플랫폼 플랜](./plans.md)을 참조하시기 바랍니다.
+The guide below will explain the differences between the deployment options.
 
-아래 가이드는 배포 옵션 간의 차이를 설명합니다.
+## Self-Hosted Enterprise
 
-## 셀프 호스팅 엔터프라이즈
+!!! important
 
-!!! 중요
+    The Self-Hosted Enterprise version is only available for the **Enterprise** plan.
 
-    셀프 호스팅 엔터프라이즈 버전은 **엔터프라이즈** 플랜에서만 사용할 수 있습니다.
+!!! warning "Note"
 
-!!! 경고 "참고"
+    The LangGraph Platform Deployments view is optionally available for Self-Hosted Enterprise LangGraph deployments. With one click, self-hosted LangGraph deployments can be deployed in the same Kubernetes cluster where a self-hosted LangSmith instance is deployed.
 
-    셀프 호스팅 엔터프라이즈 LangGraph 배포의 경우 LangSmith SaaS 및 셀프 호스팅 LangSmith 내의 LangGraph 플랫폼 배포 보기 사용이 불가능합니다. 셀프 호스팅 LangGraph 배포는 LangSmith 외부에서 관리됩니다(예: 이러한 배포를 관리하기 위한 UI가 없습니다).
+With a Self-Hosted Enterprise deployment, you are responsible for managing the infrastructure, including setting up and maintaining required databases and Redis instances.
 
-셀프 호스팅 엔터프라이즈 배포의 경우, 필요한 데이터베이스와 Redis 인스턴스를 설정하고 유지하는 등 인프라 관리에 대한 책임이 있습니다.
+You’ll build a Docker image using the [LangGraph CLI](./langgraph_cli.md), which can then be deployed on your own infrastructure.
 
-당신은 [LangGraph CLI](./langgraph_cli.md)를 사용하여 Docker 이미지를 구축하고, 이를 자신의 인프라에 배포할 수 있습니다.
+For more information, please see:
 
-자세한 내용은 다음을 참조하십시오:
+- [Self-Hosted conceptual guide](./self_hosted.md)
+- [Self-Hosted Deployment how-to guide](../how-tos/deploy-self-hosted.md)
 
-- [셀프 호스팅 개념 가이드](./self_hosted.md)
-- [셀프 호스팅 배포 방법 가이드](../how-tos/deploy-self-hosted.md)
+## Self-Hosted Lite
 
-## 셀프 호스팅 라이트
+!!! important
 
-!!! 중요
+    The Self-Hosted Lite version is available for all plans.
 
-    셀프 호스팅 라이트 버전은 모든 플랜에서 사용 가능합니다.
+!!! warning "Note"
 
-!!! 경고 "참고"
+    The LangGraph Platform Deployments view is optionally available for Self-Hosted Lite LangGraph deployments. With one click, self-hosted LangGraph deployments can be deployed in the same Kubernetes cluster where a self-hosted LangSmith instance is deployed.
 
-    셀프 호스팅 라이트 LangGraph 배포의 경우 LangSmith SaaS 및 셀프 호스팅 LangSmith 내의 LangGraph 플랫폼 배포 보기 사용이 불가능합니다. 셀프 호스팅 LangGraph 배포는 LangSmith 외부에서 관리됩니다(예: 이러한 배포를 관리하기 위한 UI가 없습니다).
+The Self-Hosted Lite deployment option is a free (up to 1 million nodes executed per year), limited version of LangGraph Platform that you can run locally or in a self-hosted manner.
 
-셀프 호스팅 라이트 배포 옵션은 매년 최대 100만 노드가 실행될 수 있는 무료의 제한된 버전의 LangGraph 플랫폼입니다. 이를 로컬 또는 셀프 호스팅 방식으로 실행할 수 있습니다.
+With a Self-Hosted Lite deployment, you are responsible for managing the infrastructure, including setting up and maintaining required databases and Redis instances.
 
-셀프 호스팅 라이트 배포의 경우, 필요한 데이터베이스와 Redis 인스턴스를 설정하고 유지하는 등 인프라 관리에 대한 책임이 있습니다.
+You’ll build a Docker image using the [LangGraph CLI](./langgraph_cli.md), which can then be deployed on your own infrastructure.
 
-당신은 [LangGraph CLI](./langgraph_cli.md)를 사용하여 Docker 이미지를 구축하고, 이를 자신의 인프라에 배포할 수 있습니다.
+[Cron jobs](../cloud/how-tos/cron_jobs.md) are not available for Self-Hosted Lite deployments.
 
-셀프 호스팅 라이트 배포에서는 [크론 작업](../cloud/how-tos/cron_jobs.md)을 사용할 수 없습니다.
+For more information, please see:
 
-자세한 내용은 다음을 참조하십시오:
+- [Self-Hosted conceptual guide](./self_hosted.md)
+- [Self-Hosted deployment how-to guide](../how-tos/deploy-self-hosted.md)
 
-- [셀프 호스팅 개념 가이드](./self_hosted.md)
-- [셀프 호스팅 배포 방법 가이드](../how-tos/deploy-self-hosted.md)
+## Cloud SaaS
 
-## 클라우드 SaaS
+!!! important
 
-!!! 중요
+    The Cloud SaaS version of LangGraph Platform is only available for **Plus** and **Enterprise** plans.
 
-    LangGraph 플랫폼의 클라우드 SaaS 버전은 **플러스** 및 **엔터프라이즈** 플랜에서만 사용할 수 있습니다.
+The [Cloud SaaS](./langgraph_cloud.md) version of LangGraph Platform is hosted as part of [LangSmith](https://smith.langchain.com/).
 
-LangGraph 플랫폼의 [클라우드 SaaS](./langgraph_cloud.md) 버전은 [LangSmith](https://smith.langchain.com/)의 일부로 호스팅됩니다.
+The Cloud SaaS version of LangGraph Platform provides a simple way to deploy and manage your LangGraph applications.
 
-클라우드 SaaS 버전의 LangGraph 플랫폼은 LangGraph 애플리케이션을 배포하고 관리하는 간단한 방법을 제공합니다.
+This deployment option provides access to the LangGraph Platform UI (within LangSmith) and an integration with GitHub, allowing you to deploy code from any of your repositories on GitHub.
 
-이 배포 옵션은 LangGraph 플랫폼 UI(그룹 내 LangSmith) 및 GitHub와의 통합에 접근할 수 있어, GitHub의 모든 리포지토리에서 코드를 배포할 수 있습니다.
+For more information, please see:
 
-자세한 내용은 다음을 참조하십시오:
+- [Cloud SaaS Conceptual Guide](./langgraph_cloud.md)
+- [How to deploy to Cloud SaaS](../cloud/deployment/cloud.md)
 
-- [클라우드 SaaS 개념 가이드](./langgraph_cloud.md)
-- [클라우드 SaaS에 배포하는 방법](../cloud/deployment/cloud.md)
+## Bring Your Own Cloud
 
-## 내 클라우드 사용하기
+!!! important
 
-!!! 중요
+    The Bring Your Own Cloud version of LangGraph Platform is only available for **Enterprise** plans.
 
-    LangGraph 플랫폼의 내 클라우드 사용하기 버전은 **엔터프라이즈** 플랜에서만 사용 가능합니다.
+This combines the best of both worlds for Cloud and Self-Hosted. Create your deployments through the LangGraph Platform UI (within LangSmith) and we manage the infrastructure so you don't have to. The infrastructure all runs within your cloud. This is currently only available on AWS.
 
-이 옵션은 클라우드와 셀프 호스팅의 두 가지 장점을 결합합니다. LangGraph 플랫폼 UI(그룹 내 LangSmith)를 통해 배포를 생성하고, 인프라는 관리하므로 사용자가 직접 관리할 필요가 없습니다. 모든 인프라는 귀하의 클라우드 내에서 실행됩니다. 현재 AWS에서만 사용 가능합니다.
+For more information please see:
 
-자세한 내용은 다음을 참조하십시오:
+- [Bring Your Own Cloud Conceptual Guide](./bring_your_own_cloud.md)
 
-- [내 클라우드 사용하기 개념 가이드](./bring_your_own_cloud.md)
+## Related
 
-## 관련
+For more information, please see:
 
-자세한 정보는 다음을 참조하십시오:
-
-- [LangGraph 플랫폼 계획](./plans.md)
-- [LangGraph 플랫폼 가격](https://www.langchain.com/langgraph-platform-pricing)
-- [배포 방법 가이드](../how-tos/index.md#deployment)
+- [LangGraph Platform plans](./plans.md)
+- [LangGraph Platform pricing](https://www.langchain.com/langgraph-platform-pricing)
+- [Deployment how-to guides](../how-tos/index.md#deployment)

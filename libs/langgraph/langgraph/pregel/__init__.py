@@ -59,6 +59,7 @@ from langgraph.constants import (
     CONFIG_KEY_NODE_FINISHED,
     CONFIG_KEY_READ,
     CONFIG_KEY_RESUMING,
+    CONFIG_KEY_RUNNER_SUBMIT,
     CONFIG_KEY_SEND,
     CONFIG_KEY_STORE,
     CONFIG_KEY_STREAM,
@@ -249,25 +250,6 @@ class Pregel(PregelProtocol):
 
     Repeat until no chains are planned for execution, or a maximum number of steps
     is reached.
-
-    Example:
-        ```python
-        from langgraph import Channel, Pregel
-
-        grow_value = (
-            Channel.subscribe_to("value")
-            | (lambda x: x + x)
-            | Channel.write_to(value=lambda x: x if len(x) < 10 else None)
-        )
-
-        app = Pregel(
-            chains={"grow_value": grow_value},
-            input="value",
-            output="value",
-        )
-
-        assert app.invoke("a") == "aaaaaaaa"
-        ```
     """
 
     nodes: dict[str, PregelNode]
@@ -1755,7 +1737,7 @@ class Pregel(PregelProtocol):
             ) as loop:
                 # create runner
                 runner = PregelRunner(
-                    submit=loop.submit,
+                    submit=config[CONF].get(CONFIG_KEY_RUNNER_SUBMIT, loop.submit),
                     put_writes=loop.put_writes,
                     schedule_task=loop.accept_push,
                     node_finished=config[CONF].get(CONFIG_KEY_NODE_FINISHED),
@@ -2047,7 +2029,7 @@ class Pregel(PregelProtocol):
             ) as loop:
                 # create runner
                 runner = PregelRunner(
-                    submit=loop.submit,
+                    submit=config[CONF].get(CONFIG_KEY_RUNNER_SUBMIT, loop.submit),
                     put_writes=loop.put_writes,
                     schedule_task=loop.accept_push,
                     use_astream=do_stream is not None,

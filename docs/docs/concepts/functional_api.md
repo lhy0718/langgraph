@@ -1,9 +1,6 @@
 _한국어로 기계번역됨_
 
-# 기능 API
-
-!!! 경고 "베타"
-기능 API는 현재 **베타** 상태이며 변경될 수 있습니다. 문제나 피드백이 있는 경우 [LangGraph 팀에 보고해 주세요](https://github.com/langchain-ai/langgraph/issues).
+## Overview
 
 ## 개요
 
@@ -823,7 +820,8 @@ from langgraph.checkpoint.memory import MemorySaver
 from langgraph.func import entrypoint, task
 from langgraph.types import StreamWriter
 
-# 시도 횟수를 추적하는 전역 변수
+# This variable is just used for demonstration purposes to simulate a network failure.
+# It's not something you will have in your actual code.
 attempts = 0
 
 @task()
