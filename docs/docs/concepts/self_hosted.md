@@ -1,47 +1,49 @@
-# Self-Hosted
+_한국어로 기계번역됨_
 
-!!! note Prerequisites
+# 자체 호스팅
 
-    - [LangGraph Platform](./langgraph_platform.md)
-    - [Deployment Options](./deployment_options.md)
+!!! 주의 사항 전제 조건
 
-## Versions
+    - [LangGraph 플랫폼](./langgraph_platform.md)
+    - [배포 옵션](./deployment_options.md)
 
-There are two versions of the self-hosted deployment: [Self-Hosted Enterprise](./deployment_options.md#self-hosted-enterprise) and [Self-Hosted Lite](./deployment_options.md#self-hosted-lite).
+## 버전
 
-### Self-Hosted Lite
+자체 호스팅 배포에는 [자체 호스팅 기업 버전](./deployment_options.md#self-hosted-enterprise)과 [자체 호스팅 라이트 버전](./deployment_options.md#self-hosted-lite) 두 가지 버전이 있습니다.
 
-The Self-Hosted Lite version is a limited version of LangGraph Platform that you can run locally or in a self-hosted manner (up to 1 million nodes executed per year).
+### 자체 호스팅 라이트 버전
 
-When using the Self-Hosted Lite version, you authenticate with a [LangSmith](https://smith.langchain.com/) API key.
+자체 호스팅 라이트 버전은 로컬이나 자체 호스팅 방식으로 실행할 수 있는 LangGraph 플랫폼의 제한된 버전입니다(연간 100만 노드 실행까지).
 
-### Self-Hosted Enterprise
+자체 호스팅 라이트 버전을 사용할 때는 [LangSmith](https://smith.langchain.com/) API 키로 인증합니다.
 
-The Self-Hosted Enterprise version is the full version of LangGraph Platform.
+### 자체 호스팅 기업 버전
 
-To use the Self-Hosted Enterprise version, you must acquire a license key that you will need to pass in when running the Docker image. To acquire a license key, please email sales@langchain.dev.
+자체 호스팅 기업 버전은 LangGraph 플랫폼의 전체 버전입니다.
 
-## Requirements
+자체 호스팅 기업 버전을 사용하려면 Docker 이미지를 실행할 때 전달해야 하는 라이센스 키를 취득해야 합니다. 라이센스 키를 받으려면 sales@langchain.dev로 이메일을 보내주시기 바랍니다.
 
-- You use `langgraph-cli` and/or [LangGraph Studio](./langgraph_studio.md) app to test graph locally.
-- You use `langgraph build` command to build image.
+## 요구 사항
 
-## How it works
+- `langgraph-cli` 및/또는 [LangGraph 스튜디오](./langgraph_studio.md) 앱을 사용하여 그래프를 로컬로 테스트합니다.
+- `langgraph build` 명령어를 사용하여 이미지를 빌드합니다.
 
-- Deploy Redis and Postgres instances on your own infrastructure.
-- Build the docker image for [LangGraph Server](./langgraph_server.md) using the [LangGraph CLI](./langgraph_cli.md).
-- Deploy a web server that will run the docker image and pass in the necessary environment variables.
+## 작동 방식
 
-!!! warning "Note"
+- 귀하의 인프라에서 Redis 및 Postgres 인스턴스를 배포합니다.
+- [LangGraph CLI](./langgraph_cli.md)를 사용하여 [LangGraph 서버](./langgraph_server.md)용 Docker 이미지를 빌드합니다.
+- Docker 이미지를 실행하고 필요한 환경 변수를 전달하는 웹 서버를 배포합니다.
 
-    The LangGraph Platform Deployments view is optionally available for Self-Hosted LangGraph deployments. With one click, self-hosted LangGraph deployments can be deployed in the same Kubernetes cluster where a self-hosted LangSmith instance is deployed.
+!!! 경고 "참고"
 
-For step-by-step instructions, see [How to set up a self-hosted deployment of LangGraph](../how-tos/deploy-self-hosted.md).
+    LangGraph 플랫폼 배포 보기 기능은 선택적으로 자체 호스팅 LangGraph 배포용으로 제공됩니다. 클릭 한 번으로 자체 호스팅 LangGraph 배포는 자가 호스팅된 LangSmith 인스턴스가 배포된 동일한 Kubernetes 클러스터에 배포될 수 있습니다.
 
-## Helm Chart
+단계별 지침은 [LangGraph의 자체 호스팅 배포 설정 방법](../how-tos/deploy-self-hosted.md)을 참조하시기 바랍니다.
 
-If you would like to deploy LangGraph Cloud on Kubernetes, you can use this [Helm chart](https://github.com/langchain-ai/helm/blob/main/charts/langgraph-cloud/README.md).
+## 헬름 차트
 
-## Related
+Kubernetes에서 LangGraph Cloud를 배포하려면 이 [헬름 차트](https://github.com/langchain-ai/helm/blob/main/charts/langgraph-cloud/README.md)를 사용할 수 있습니다.
 
-- [How to set up a self-hosted deployment of LangGraph](../how-tos/deploy-self-hosted.md).
+## 관련
+
+- [LangGraph의 자체 호스팅 배포 설정 방법](../how-tos/deploy-self-hosted.md)

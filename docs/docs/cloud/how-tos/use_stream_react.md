@@ -1,27 +1,29 @@
-# How to integrate LangGraph into your React application
+_한국어로 기계번역됨_
 
-!!! info "Prerequisites" - [LangGraph Platform](../../concepts/langgraph_platform.md) - [LangGraph Server](../../concepts/langgraph_server.md)
+# LangGraph를 React 애플리케이션에 통합하는 방법
 
-The `useStream()` React hook provides a seamless way to integrate LangGraph into your React applications. It handles all the complexities of streaming, state management, and branching logic, letting you focus on building great chat experiences.
+!!! 정보 "전제 조건" - [LangGraph 플랫폼](../../concepts/langgraph_platform.md) - [LangGraph 서버](../../concepts/langgraph_server.md)
 
-Key features:
+`useStream()` React 훅은 LangGraph를 React 애플리케이션에 통합하는 매끄러운 방법을 제공합니다. 이 훅은 스트리밍, 상태 관리 및 분기 논리에 대한 모든 복잡성을 처리하여 훌륭한 채팅 경험을 구축하는 데 집중할 수 있도록 해줍니다.
 
-- Messages streaming: Handle a stream of message chunks to form a complete message
-- Automatic state management for messages, loading states, and errors
-- Conversation branching: Create alternate conversation paths from any point in the chat history
-- UI-agnostic design - bring your own components and styling
+주요 기능:
 
-Let's explore how to use `useStream()` in your React application.
+- 메시지 스트리밍: 메시지 조각의 스트림을 처리하여 전체 메시지를 형성
+- 메시지, 로딩 상태 및 오류에 대한 자동 상태 관리
+- 대화 분기: 채팅 기록의 어느 지점에서든 대화의 대체 경로 생성
+- UI 비의존적인 디자인 - 자신만의 구성 요소 및 스타일 사용 가능
 
-The `useStream()` provides a solid foundation for creating bespoke chat experiences. For pre-built chat components and interfaces, we recommend checking out [CopilotKit](https://docs.copilotkit.ai/coagents/quickstart/langgraph) and [assistant-ui](https://www.assistant-ui.com/docs/runtimes/langgraph).
+이제 React 애플리케이션에서 `useStream()`을 사용하는 방법을 살펴보겠습니다.
 
-## Installation
+`useStream()`은 맞춤형 채팅 경험을 만들기 위한 튼튼한 기초를 제공합니다. 사전 구축된 채팅 구성 요소 및 인터페이스에 대해서는 [CopilotKit](https://docs.copilotkit.ai/coagents/quickstart/langgraph) 및 [assistant-ui](https://www.assistant-ui.com/docs/runtimes/langgraph)를 확인하는 것이 좋습니다.
+
+## 설치
 
 ```bash
 npm install @langchain/langgraph-sdk @langchain/langchain-core react
 ```
 
-## Example
+## 예제
 
 ```tsx
 "use client"
@@ -59,11 +61,11 @@ export default function App() {
 
         {thread.isLoading ? (
           <button key="stop" type="button" onClick={() => thread.stop()}>
-            Stop
+            중지
           </button>
         ) : (
           <button key="submit" type="submit">
-            Send
+            전송
           </button>
         )}
       </form>
@@ -72,24 +74,24 @@ export default function App() {
 }
 ```
 
-## Customizing Your UI
+## UI 사용자 정의
 
-The `useStream()` hook takes care of all the complex state management behind the scenes, providing you with simple interfaces to build your UI. Here's what you get out of the box:
+`useStream()` 훅은 복잡한 상태 관리를 비하인드에서 처리하며, UI를 구축하기 위한 간단한 인터페이스를 제공합니다. 기본적으로 제공되는 내용은 다음과 같습니다:
 
-- Thread state management
-- Loading and error states
-- Message handling and updates
-- Branching support
+- 스레드 상태 관리
+- 로딩 및 오류 상태
+- 메시지 처리 및 업데이트
+- 분기 지원
 
-Here are some examples on how to use these features effectively:
+이 기능을 효과적으로 사용하는 방법에 대한 몇 가지 예는 다음과 같습니다:
 
-### Loading States
+### 로딩 상태
 
-The `isLoading` property tells you when a stream is active, enabling you to:
+`isLoading` 속성은 스트림이 활성 상태일 때를 알려줍니다. 이를 통해 다음과 같은 작업을 수행할 수 있습니다:
 
-- Show a loading indicator
-- Disable input fields during processing
-- Display a cancel button
+- 로딩 표시기 표시
+- 처리 중 입력 필드 비활성화
+- 취소 버튼 표시
 
 ```tsx
 export default function App() {
@@ -103,7 +105,7 @@ export default function App() {
     <form>
       {isLoading && (
         <button key="stop" type="button" onClick={() => stop()}>
-          Stop
+          중지
         </button>
       )}
     </form>
@@ -111,9 +113,9 @@ export default function App() {
 }
 ```
 
-### Thread Management
+### 스레드 관리
 
-Keep track of conversations with built-in thread management. You can access the current thread ID and get notified when new threads are created:
+내장된 스레드 관리 기능으로 대화를 추적하세요. 현재 스레드 ID에 접근하고 새 스레드가 생성될 때 알림을 받을 수 있습니다:
 
 ```tsx
 const [threadId, setThreadId] = useState<string | null>(null)
@@ -127,13 +129,13 @@ const thread = useStream<{ messages: Message[] }>({
 })
 ```
 
-We recommend storing the `threadId` in your URL's query parameters to let users resume conversations after page refreshes.
+사용자가 페이지 새로 고침 후 대화를 다시 시작할 수 있도록 하려면 `threadId`를 URL의 쿼리 매개변수에 저장하는 것을 권장합니다.
 
-### Messages Handling
+### 메시지 처리
 
-To enable messages handling, you need to pass the `messagesKey` option to the `useStream()` hook.
+메시지 처리를 활성화하려면 `useStream()` 훅에 `messagesKey` 옵션을 전달해야 합니다.
 
-When enabled, the `useStream()` hook will keep track of the message chunks received from the server and concatenate them together to form a complete message. The completed message chunks can be retrieved via the `messages` property.
+활성화된 상태에서 `useStream()` 훅은 서버에서 수신한 메시지 청크를 추적하고 이를 연결하여 전체 메시지를 형성합니다. 완성된 메시지 청크는 `messages` 속성을 통해 검색할 수 있습니다.
 
 ```tsx
 import type { Message } from "@langchain/langgraph-sdk"
@@ -156,14 +158,14 @@ export default function HomePage() {
 }
 ```
 
-### Branching Support
+### 브랜칭 지원
 
-To enable branching, you need to enable messages handling. Pass the `messagesKey` option to the `useStream()` hook. For each message, you can use `getMessagesMetadata()` to get the first checkpoint from which the message has been first seen. You can then create a new run from the checkpoint preceding the first seen checkpoint to create a new branch in a thread.
+브랜칭을 활성화하려면 메시지 처리를 활성화해야 합니다. `useStream()` 훅에 `messagesKey` 옵션을 전달하세요. 각 메시지에 대해 `getMessagesMetadata()`를 사용해 메시지가 처음으로 표시된 첫 번째 체크포인트를 가져올 수 있습니다. 그런 다음 첫 번째로 표시된 체크포인트 이전의 체크포인트에서 새 실행을 생성하여 스레드 내에 새로운 브랜치를 만들 수 있습니다.
 
-A branch can be created in following ways:
+브랜치는 다음과 같은 방법으로 생성할 수 있습니다:
 
-1. Edit a previous user message.
-2. Request a regeneration of a previous assistant message.
+1. 이전 사용자 메시지를 편집합니다.
+2. 이전 어시스턴트 메시지의 재생성을 요청합니다.
 
 ```tsx
 /* eslint-disable @typescript-eslint/no-floating-promises */
@@ -205,7 +207,7 @@ function BranchSwitcher({
           onSelect(prevBranch)
         }}
       >
-        Prev
+        이전
       </button>
       <span>
         {index + 1} / {branchOptions.length}
@@ -218,7 +220,7 @@ function BranchSwitcher({
           onSelect(nextBranch)
         }}
       >
-        Next
+        다음
       </button>
     </div>
   )
@@ -236,7 +238,7 @@ function EditMessage({
   if (!editing) {
     return (
       <button type="button" onClick={() => setEditing(true)}>
-        Edit
+        수정
       </button>
     )
   }
@@ -254,7 +256,7 @@ function EditMessage({
       }}
     >
       <input name="content" defaultValue={message.content as string} />
-      <button type="submit">Save</button>
+      <button type="submit">저장</button>
     </form>
   )
 }
@@ -299,7 +301,7 @@ export default function App() {
                     thread.submit(undefined, { checkpoint: parentCheckpoint })
                   }
                 >
-                  <span>Regenerate</span>
+                  <span>다시 생성</span>
                 </button>
               )}
 
@@ -328,11 +330,11 @@ export default function App() {
 
         {thread.isLoading ? (
           <button key="stop" type="button" onClick={() => thread.stop()}>
-            Stop
+            중지
           </button>
         ) : (
           <button key="submit" type="submit">
-            Send
+            전송
           </button>
         )}
       </form>
@@ -343,14 +345,14 @@ export default function App() {
 
 ### TypeScript
 
-The `useStream()` hook is fully typed to help catch errors early and provide better IDE support. You can specify types for:
+`useStream()` 훅은 오류를 조기에 잡고 더 나은 IDE 지원을 제공하기 위해 완전히 타입이 지정되어 있습니다. 다음과 같은 타입을 지정할 수 있습니다:
 
-- State shape
-- Update format
-- Custom events
+- 상태 형태
+- 업데이트 형식
+- 사용자 정의 이벤트
 
 ```tsx
-// Define your types
+// 타입 정의
 type State = {
   messages: Message[]
   context?: Record<string, unknown>
@@ -366,7 +368,7 @@ type CustomEvent = {
   payload: unknown
 }
 
-// Use them with the hook
+// 훅과 함께 사용
 const thread = useStream<State, Update, CustomEvent>({
   apiUrl: "http://localhost:2024",
   assistantId: "agent",
@@ -374,7 +376,7 @@ const thread = useStream<State, Update, CustomEvent>({
 })
 ```
 
-If you're using LangGraph.js, you can reuse your graph's annotation types:
+LangGraph.js를 사용하는 경우 그래프의 주석 타입을 재사용할 수 있습니다:
 
 ```tsx
 import {
@@ -399,16 +401,16 @@ const thread = useStream<
 })
 ```
 
-## Event Handling
+## 이벤트 처리
 
-The `useStream()` hook provides several callback options to help you respond to different events:
+`useStream()` 훅은 다양한 이벤트에 반응할 수 있도록 여러 콜백 옵션을 제공합니다:
 
-- `onError`: Called when an error occurs.
-- `onFinish`: Called when the stream is finished.
-- `onUpdateEvent`: Called when an update event is received.
-- `onCustomEvent`: Called when a custom event is received. See [Custom events](../../concepts/streaming.md#custom) to learn how to stream custom events.
-- `onMetadataEvent`: Called when a metadata event is received.
+- `onError`: 오류가 발생할 때 호출됩니다.
+- `onFinish`: 스트림이 종료될 때 호출됩니다.
+- `onUpdateEvent`: 업데이트 이벤트를 받을 때 호출됩니다.
+- `onCustomEvent`: 사용자 정의 이벤트를 받을 때 호출됩니다. 사용자 정의 이벤트를 스트리밍하는 방법에 대해서는 [사용자 정의 이벤트](../../concepts/streaming.md#custom)를 참조하세요.
+- `onMetadataEvent`: 메타데이터 이벤트를 받을 때 호출됩니다.
 
-## Learn More
+## 자세히 알아보기
 
-- [JS/TS SDK Reference](../reference/sdk/js_ts_sdk_ref.md)
+- [JS/TS SDK 참고](../reference/sdk/js_ts_sdk_ref.md)

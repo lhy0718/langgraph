@@ -1,307 +1,302 @@
+_한국어로 기계번역됨_
+
 ---
-title: How-to Guides
-description: How to accomplish common tasks in LangGraph
+제목: 사용 방법 가이드
+설명: LangGraph에서 일반 작업을 수행하는 방법
+
 ---
 
-# How-to Guides
+# 사용 방법 가이드
 
-Here you’ll find answers to “How do I...?” types of questions. These guides are **goal-oriented** and concrete; they're meant to help you complete a specific task. For conceptual explanations see the [Conceptual guide](../concepts/index.md). For end-to-end walk-throughs see [Tutorials](../tutorials/index.md). For comprehensive descriptions of every class and function see the [API Reference](../reference/index.md).
+여기서는 "나는 어떻게...?" 유형의 질문에 대한 답을 찾을 수 있습니다. 이 가이드는 **목표 지향적**이고 구체적이며, 특정 작업을 완료하는 데 도움이 되도록 설계되었습니다. 개념적 설명은 [개념 가이드](../concepts/index.md)를 참조하시기 바랍니다. 전체적인 진행 과정을 보시려면 [튜토리얼](../tutorials/index.md)을 확인해 주세요. 모든 클래스와 함수에 대한 포괄적인 설명은 [API 참조](../reference/index.md)를 참조하십시오.
 
 ## LangGraph
 
-### Graph API Basics
+### 그래프 API 기본
 
-- [How to update graph state from nodes](state-reducers.ipynb)
-- [How to create a sequence of steps](sequence.ipynb)
-- [How to create branches for parallel execution](branching.ipynb)
-- [How to create and control loops with recursion limits](recursion-limit.ipynb)
-- [How to visualize your graph](visualization.ipynb)
+- [노드에서 그래프 상태를 업데이트하는 방법](state-reducers.ipynb)
+- [단계의 시퀀스를 생성하는 방법](sequence.ipynb)
+- [병렬 실행을 위한 분기를 만드는 방법](branching.ipynb)
+- [재귀 한계를 설정하여 루프를 생성하고 제어하는 방법](recursion-limit.ipynb)
+- [그래프를 시각화하는 방법](visualization.ipynb)
 
-### Fine-grained Control
+### 세부 제어
 
-These guides demonstrate LangGraph features that grant fine-grained control over the
-execution of your graph.
+이 가이드는 그래프 실행에 대한 세부 제어를 제공하는 LangGraph 기능을 보여줍니다.
 
-- [How to create map-reduce branches for parallel execution](map-reduce.ipynb)
-- [How to update state and jump to nodes in graphs and subgraphs](command.ipynb)
-- [How to add runtime configuration to your graph](configuration.ipynb)
-- [How to add node retries](node-retries.ipynb)
-- [How to return state before hitting recursion limit](return-when-recursion-limit-hits.ipynb)
+- [병렬 실행을 위한 맵-리듀스 분기를 만드는 방법](map-reduce.ipynb)
+- [그래프와 서브그래프에서 상태를 업데이트하고 노드로 점프하는 방법](command.ipynb)
+- [그래프에 런타임 구성을 추가하는 방법](configuration.ipynb)
+- [노드 재시도를 추가하는 방법](node-retries.ipynb)
+- [재귀 한계에 도달하기 전에 상태를 반환하는 방법](return-when-recursion-limit-hits.ipynb)
 
-### Persistence
+### 지속성
 
-[LangGraph Persistence](../concepts/persistence.md) makes it easy to persist state across graph runs (per-thread persistence) and across threads (cross-thread persistence). These how-to guides show how to add persistence to your graph.
+[LangGraph 지속성](../concepts/persistence.md)은 그래프 실행 간 상태를 지속하는 것을 쉽게 만들어 줍니다 (각 스레드 지속성) 그리고 스레드 간 (크로스 스레드 지속성). 이러한 사용 방법 가이드는 그래프에 지속성을 추가하는 방법을 보여줍니다.
 
-- [How to add thread-level persistence to your graph](persistence.ipynb)
-- [How to add thread-level persistence to a subgraph](subgraph-persistence.ipynb)
-- [How to add cross-thread persistence to your graph](cross-thread-persistence.ipynb)
-- [How to use Postgres checkpointer for persistence](persistence_postgres.ipynb)
-- [How to use MongoDB checkpointer for persistence](persistence_mongodb.ipynb)
-- [How to create a custom checkpointer using Redis](persistence_redis.ipynb)
+- [그래프에 스레드 수준의 지속성을 추가하는 방법](persistence.ipynb)
+- [서브그래프에 스레드 수준의 지속성을 추가하는 방법](subgraph-persistence.ipynb)
+- [그래프에 크로스 스레드 지속성을 추가하는 방법](cross-thread-persistence.ipynb)
+- [지속성을 위한 Postgres 체크포인터를 사용하는 방법](persistence_postgres.ipynb)
+- [지속성을 위한 MongoDB 체크포인터를 사용하는 방법](persistence_mongodb.ipynb)
+- [Redis를 사용하여 사용자 정의 체크포인터를 만드는 방법](persistence_redis.ipynb)
 
-See the below guides for how-to add persistence to your workflow using the [Functional API](../concepts/functional_api.md):
+[기능적 API](../concepts/functional_api.md)를 사용하여 워크플로에 지속성을 추가하는 방법에 대한 아래 가이드를 참조하세요:
 
-- [How to add thread-level persistence (functional API)](persistence-functional.ipynb)
-- [How to add cross-thread persistence (functional API)](cross-thread-persistence-functional.ipynb)
+- [스레드 수준의 지속성을 추가하는 방법 (기능적 API)](persistence-functional.ipynb)
+- [크로스 스레드 지속성을 추가하는 방법 (기능적 API)](cross-thread-persistence-functional.ipynb)
 
-### Memory
+### 메모리
 
-LangGraph makes it easy to manage conversation [memory](../concepts/memory.md) in your graph. These how-to guides show how to implement different strategies for that.
+LangGraph는 그래프에서 대화 [메모리](../concepts/memory.md)를 쉽게 관리할 수 있도록 도와줍니다. 이러한 사용 방법 가이드는 다양한 전략을 구현하는 방법을 보여줍니다.
 
-- [How to manage conversation history](memory/manage-conversation-history.ipynb)
-- [How to delete messages](memory/delete-messages.ipynb)
-- [How to add summary conversation memory](memory/add-summary-conversation-history.ipynb)
-- [How to add long-term memory (cross-thread)](cross-thread-persistence.ipynb)
-- [How to use semantic search for long-term memory](memory/semantic-search.ipynb)
+- [대화 기록 관리하는 방법](memory/manage-conversation-history.ipynb)
+- [메시지 삭제하는 방법](memory/delete-messages.ipynb)
+- [요약 대화 메모리 추가하는 방법](memory/add-summary-conversation-history.ipynb)
+- [장기 메모리 추가하기 (크로스 스레드)](cross-thread-persistence.ipynb)
+- [장기 메모리를 위한 의미론적 검색 사용 방법](memory/semantic-search.ipynb)
 
-### Human-in-the-loop
+### 사람 참여
 
-[Human-in-the-loop](../concepts/human_in_the_loop.md) functionality allows
-you to involve humans in the decision-making process of your graph. These how-to guides show how to implement human-in-the-loop workflows in your graph.
+[사람 참여](../concepts/human_in_the_loop.md) 기능은 그래프의 의사 결정 과정에 사람을 포함할 수 있도록 해 줍니다. 이러한 사용 방법 가이드는 그래프에서 사람 참여 워크플로를 구현하는 방법을 보여줍니다.
 
-Key workflows:
+주요 워크플로:
 
-- [How to wait for user input](human_in_the_loop/wait-user-input.ipynb): A basic example that shows how to implement a human-in-the-loop workflow in your graph using the `interrupt` function.
-- [How to review tool calls](human_in_the_loop/review-tool-calls.ipynb): Incorporate human-in-the-loop for reviewing/editing/accepting tool call requests before they executed using the `interrupt` function.
+- [사용자 입력 대기하는 방법](human_in_the_loop/wait-user-input.ipynb): `interrupt` 함수를 사용하여 그래프에서 사람 참여 워크플로를 구현하는 기본 예시입니다.
+- [도구 호출 검토하는 방법](human_in_the_loop/review-tool-calls.ipynb): `interrupt` 함수를 사용하여 실행 전에 도구 호출 요청을 검토/편집/수락하는 사람 참여 기능을 통합합니다.
 
-Other methods:
+기타 방법:
 
-- [How to add static breakpoints](human_in_the_loop/breakpoints.ipynb): Use for debugging purposes. For [**human-in-the-loop**](../concepts/human_in_the_loop.md) workflows, we recommend the [`interrupt` function][langgraph.types.interrupt] instead.
-- [How to edit graph state](human_in_the_loop/edit-graph-state.ipynb): Edit graph state using `graph.update_state` method. Use this if implementing a **human-in-the-loop** workflow via **static breakpoints**.
-- [How to add dynamic breakpoints with `NodeInterrupt`](human_in_the_loop/dynamic_breakpoints.ipynb): **Not recommended**: Use the [`interrupt` function](../concepts/human_in_the_loop.md) instead.
+- [정적 중단점 추가하는 방법](human_in_the_loop/breakpoints.ipynb): 디버깅 목적으로 사용합니다. [**사람 참여**](../concepts/human_in_the_loop.md) 워크플로에는 대신 [`interrupt` 함수][langgraph.types.interrupt]를 권장합니다.
+- [그래프 상태 편집하는 방법](human_in_the_loop/edit-graph-state.ipynb): `graph.update_state` 메소드를 사용하여 그래프 상태를 편집합니다. 정적 중단점을 통한 **사람 참여** 워크플로를 구현하는 경우 이 방법을 사용하십시오.
+- [`NodeInterrupt`로 동적 중단점 추가하는 방법](human_in_the_loop/dynamic_breakpoints.ipynb): **권장하지 않음**: 대신 [`interrupt` 함수](../concepts/human_in_the_loop.md)를 사용하십시오.
 
-See the below guides for how-to implement human-in-the-loop workflows with the
-[Functional API](../concepts/functional_api.md):
+[기능적 API](../concepts/functional_api.md)를 사용하여 사람 참여 워크플로를 구현하는 방법에 대한 아래 가이드를 참조하십시오:
 
-- [How to wait for user input (Functional API)](wait-user-input-functional.ipynb)
-- [How to review tool calls (Functional API)](review-tool-calls-functional.ipynb)
+- [사용자 입력 대기하는 방법 (기능적 API)](wait-user-input-functional.ipynb)
+- [도구 호출 검토하는 방법 (기능적 API)](review-tool-calls-functional.ipynb)
 
-### Time Travel
+### 타임 트래블
 
-[Time travel](../concepts/time-travel.md) allows you to replay past actions in your LangGraph application to explore alternative paths and debug issues. These how-to guides show how to use time travel in your graph.
+[타임 트래블](../concepts/time-travel.md)은 LangGraph 애플리케이션에서 지난 행위를 재생하여 대체 경로를 탐색하고 문제를 디버그할 수 있게 해줍니다. 이 사용 방법 가이드는 그래프에서 타임 트래블을 사용하는 방법을 보여줍니다.
 
-- [How to view and update past graph state](human_in_the_loop/time-travel.ipynb)
+- [이전 그래프 상태를 보고 업데이트하는 방법](human_in_the_loop/time-travel.ipynb)
 
-### Streaming
+### 스트리밍
 
-[Streaming](../concepts/streaming.md) is crucial for enhancing the responsiveness of applications built on LLMs. By displaying output progressively, even before a complete response is ready, streaming significantly improves user experience (UX), particularly when dealing with the latency of LLMs.
+[스트리밍](../concepts/streaming.md)은 LLM(대형 언어 모델) 위에 구축된 애플리케이션의 응답성을 향상시키는 데 중요합니다. 출력이 완전한 응답이 준비되기 전에 점진적으로 표시됨으로써 스트리밍은 사용자 경험(UX)을 크게 향상시킵니다, 특히 LLM의 지연 문제를 처리할 때 더욱 그렇습니다.
 
-- [How to stream](streaming.ipynb)
-- [How to stream LLM tokens](streaming-tokens.ipynb)
-- [How to stream LLM tokens from specific nodes](streaming-specific-nodes.ipynb)
-- [How to stream data from within a tool](streaming-events-from-within-tools.ipynb)
-- [How to stream from subgraphs](streaming-subgraphs.ipynb)
-- [How to disable streaming for models that don't support it](disable-streaming.ipynb)
+- [스트리밍하는 방법](streaming.ipynb)
+- [LLM 토큰을 스트리밍하는 방법](streaming-tokens.ipynb)
+- [특정 노드에서 LLM 토큰을 스트리밍하는 방법](streaming-specific-nodes.ipynb)
+- [도구 내부에서 데이터를 스트리밍하는 방법](streaming-events-from-within-tools.ipynb)
+- [서브그래프에서 스트리밍하는 방법](streaming-subgraphs.ipynb)
+- [지원하지 않는 모델에 대한 스트리밍 비활성화하는 방법](disable-streaming.ipynb)
 
-### Tool calling
+### 도구 호출
 
-[Tool calling](https://python.langchain.com/docs/concepts/tool_calling/) is a type of
-[chat model](https://python.langchain.com/docs/concepts/chat_models/) API that accepts
-tool schemas, along with messages, as input and returns invocations of those tools as
-part of the output message.
+[도구 호출](https://python.langchain.com/docs/concepts/tool_calling/)은 도구 스키마와 메시지를 입력으로 받아들이고, 이러한 도구의 호출을 반환하는 [채팅 모델](https://python.langchain.com/docs/concepts/chat_models/) API의 일종입니다.
+출력 메시지의 일부입니다.
 
-These how-to guides show common patterns for tool calling with LangGraph:
+이러한 사용 설명서는 LangGraph와 함께 도구 호출을 위한 일반적인 패턴을 보여줍니다:
 
-- [How to call tools using ToolNode](tool-calling.ipynb)
-- [How to handle tool calling errors](tool-calling-errors.ipynb)
-- [How to pass runtime values to tools](pass-run-time-values-to-tools.ipynb)
-- [How to pass config to tools](pass-config-to-tools.ipynb)
-- [How to update graph state from tools](update-state-from-tools.ipynb)
-- [How to handle large numbers of tools](many-tools.ipynb)
+- [ToolNode를 사용하여 도구 호출하는 방법](tool-calling.ipynb)
+- [도구 호출 오류 처리하는 방법](tool-calling-errors.ipynb)
+- [도구에 런타임 값 전달하는 방법](pass-run-time-values-to-tools.ipynb)
+- [도구에 구성 전달하는 방법](pass-config-to-tools.ipynb)
+- [도구로부터 그래프 상태를 업데이트하는 방법](update-state-from-tools.ipynb)
+- [많은 수의 도구를 처리하는 방법](many-tools.ipynb)
 
-### Subgraphs
+### 서브그래프
 
-[Subgraphs](../concepts/low_level.md#subgraphs) allow you to reuse an existing graph from another graph. These how-to guides show how to use subgraphs:
+[서브그래프](../concepts/low_level.md#subgraphs)는 다른 그래프에서 기존의 그래프를 재사용할 수 있게 해줍니다. 이러한 사용 설명서는 서브그래프를 사용하는 방법을 보여줍니다:
 
-- [How to use subgraphs](subgraph.ipynb)
-- [How to view and update state in subgraphs](subgraphs-manage-state.ipynb)
-- [How to transform inputs and outputs of a subgraph](subgraph-transform-state.ipynb)
+- [서브그래프 사용 방법](subgraph.ipynb)
+- [서브그래프에서 상태를 보고 업데이트하는 방법](subgraphs-manage-state.ipynb)
+- [서브그래프의 입력 및 출력 변환하는 방법](subgraph-transform-state.ipynb)
 
-### Multi-agent
+### 다중 에이전트
 
-[Multi-agent systems](../concepts/multi_agent.md) are useful to break down complex LLM applications into multiple agents, each responsible for a different part of the application. These how-to guides show how to implement multi-agent systems in LangGraph:
+[다중 에이전트 시스템](../concepts/multi_agent.md)은 복잡한 LLM 애플리케이션을 여러 에이전트로 나누어 각기 다른 부분을 담당하도록 하는 데 유용합니다. 이러한 사용 설명서는 LangGraph에서 다중 에이전트 시스템을 구현하는 방법을 보여줍니다:
 
-- [How to implement handoffs between agents](agent-handoffs.ipynb)
-- [How to build a multi-agent network](multi-agent-network.ipynb)
-- [How to add multi-turn conversation in a multi-agent application](multi-agent-multi-turn-convo.ipynb)
+- [에이전트 간의 중계 구현 방법](agent-handoffs.ipynb)
+- [다중 에이전트 네트워크 구축 방법](multi-agent-network.ipynb)
+- [다중 에이전트 애플리케이션에서 다중 턴 대화 추가하는 방법](multi-agent-multi-turn-convo.ipynb)
 
-See the [multi-agent tutorials](../tutorials/index.md#multi-agent-systems) for implementations of other multi-agent architectures.
+기타 다중 에이전트 아키텍처의 구현은 [다중 에이전트 튜토리얼](../tutorials/index.md#multi-agent-systems)을 참조하세요.
 
-See the below guides for how to implement multi-agent workflows with the [Functional API](../concepts/functional_api.md):
+[Functional API](../concepts/functional_api.md)를 사용하여 다중 에이전트 워크플로우를 구현하는 방법에 대한 가이드는 다음과 같습니다:
 
-- [How to build a multi-agent network (functional API)](multi-agent-network-functional.ipynb)
-- [How to add multi-turn conversation in a multi-agent application (functional API)](multi-agent-multi-turn-convo-functional.ipynb)
+- [다중 에이전트 네트워크 구축 (Functional API)](multi-agent-network-functional.ipynb)
+- [다중 에이전트 애플리케이션에서 다중 턴 대화 추가 (Functional API)](multi-agent-multi-turn-convo-functional.ipynb)
 
-### State Management
+### 상태 관리
 
-- [How to use Pydantic model as graph state](state-model.ipynb)
-- [How to define input/output schema for your graph](input_output_schema.ipynb)
-- [How to pass private state between nodes inside the graph](pass_private_state.ipynb)
+- [Pydantic 모델을 그래프 상태로 사용하는 방법](state-model.ipynb)
+- [그래프의 입력/출력 스키마 정의하는 방법](input_output_schema.ipynb)
+- [그래프 내부 노드 간에 개인 상태 전달하는 방법](pass_private_state.ipynb)
 
-### Other
+### 기타
 
-- [How to run graph asynchronously](async.ipynb)
-- [How to force tool-calling agent to structure output](react-agent-structured-output.ipynb)
-- [How to pass custom LangSmith run ID for graph runs](run-id-langsmith.ipynb)
-- [How to integrate LangGraph with AutoGen, CrewAI, and other frameworks](autogen-integration.ipynb)
+- [그래프를 비동기로 실행하는 방법](async.ipynb)
+- [도구 호출 에이전트가 출력을 구조화하도록 강제하는 방법](react-agent-structured-output.ipynb)
+- [그래프 실행을 위한 사용자 정의 LangSmith 실행 ID 전달하는 방법](run-id-langsmith.ipynb)
+- [LangGraph를 AutoGen, CrewAI 및 기타 프레임워크와 통합하는 방법](autogen-integration.ipynb)
 
-See the below guide for how to integrate with other frameworks using the [Functional API](../concepts/functional_api.md):
+다음 가이드는 [Functional API](../concepts/functional_api.md)를 사용하여 다른 프레임워크와 통합하는 방법을 제공합니다:
 
-- [How to integrate LangGraph (functional API) with AutoGen, CrewAI, and other frameworks](autogen-integration-functional.ipynb)
+- [LangGraph (Functional API)를 AutoGen, CrewAI 및 기타 프레임워크와 통합하는 방법](autogen-integration-functional.ipynb)
 
-### Prebuilt ReAct Agent
+### 미리 구축된 ReAct 에이전트
 
-The LangGraph [prebuilt ReAct agent](../reference/prebuilt.md#langgraph.prebuilt.chat_agent_executor.create_react_agent) is pre-built implementation of a [tool calling agent](../concepts/agentic_concepts.md#tool-calling-agent).
+LangGraph의 [미리 구축된 ReAct 에이전트](../reference/prebuilt.md#langgraph.prebuilt.chat_agent_executor.create_react_agent)는 [도구 호출 에이전트](../concepts/agentic_concepts.md#tool-calling-agent)의 미리 구축된 구현입니다.
 
-One of the big benefits of LangGraph is that you can easily create your own agent architectures. So while it's fine to start here to build an agent quickly, we would strongly recommend learning how to build your own agent so that you can take full advantage of LangGraph.
+LangGraph의 큰 장점 중 하나는 자신만의 에이전트 아키텍처를 쉽게 만들 수 있다는 점입니다. 따라서 여기서 시작하여 에이전트를 빠르게 구축하는 것도 좋지만, LangGraph의 모든 이점을 누리기 위해서는 자신만의 에이전트를 구축하는 방법을 배우는 것을 강력히 권장합니다.
 
-These guides show how to use the prebuilt ReAct agent:
+이 가이드는 미리 구축된 ReAct 에이전트를 사용하는 방법을 보여줍니다:
 
-- [How to use the pre-built ReAct agent](create-react-agent.ipynb)
-- [How to add thread-level memory to a ReAct Agent](create-react-agent-memory.ipynb)
-- [How to add a custom system prompt to a ReAct agent](create-react-agent-system-prompt.ipynb)
-- [How to add human-in-the-loop processes to a ReAct agent](create-react-agent-hitl.ipynb)
-- [How to return structured output from a ReAct agent](create-react-agent-structured-output.ipynb)
-- [How to add semantic search for long-term memory to a ReAct agent](memory/semantic-search.ipynb#using-in-create-react-agent)
+- [미리 구축된 ReAct 에이전트 사용 방법](create-react-agent.ipynb)
+- [ReAct 에이전트에 스레드 수준의 메모리 추가하는 방법](create-react-agent-memory.ipynb)
+- [ReAct 에이전트에 사용자 정의 시스템 프롬프트 추가하는 방법](create-react-agent-system-prompt.ipynb)
+- [ReAct 에이전트에 인간이 개입하는 프로세스 추가하는 방법](create-react-agent-hitl.ipynb)
+- [ReAct 에이전트에서 구조화된 출력을 반환하는 방법](create-react-agent-structured-output.ipynb)
+- [ReAct 에이전트에 장기 메모리를 위한 의미 검색 추가하는 방법](memory/semantic-search.ipynb#using-in-create-react-agent)
 
-Interested in further customizing the ReAct agent? This guide provides an
-overview of its underlying implementation to help you customize for your own needs:
+ReAct 에이전트를 더욱 맞춤화하는 데 관심이 있나요? 이 가이드는 자신만의 필요에 맞게 커스터마이즈하는 데 도움이 되는 기본 구현 개요를 제공합니다:
 
-- [How to create prebuilt ReAct agent from scratch](react-agent-from-scratch.ipynb)
+- [무에서 시작하여 미리 구축된 ReAct 에이전트를 만드는 방법](react-agent-from-scratch.ipynb)
 
-See the below guide for how-to build ReAct agents with the [Functional API](../concepts/functional_api.md):
+다음 가이드는 [Functional API](../concepts/functional_api.md)를 사용하여 ReAct 에이전트를 구축하는 방법을 제공합니다:
 
-- [How to create a ReAct agent from scratch (Functional API)](react-agent-from-scratch-functional.ipynb)
+- [무에서 시작하여 ReAct 에이전트 만들기 (Functional API)](react-agent-from-scratch-functional.ipynb)
 
-## LangGraph Platform
+## LangGraph 플랫폼
 
-This section includes how-to guides for LangGraph Platform.
+이 섹션은 LangGraph 플랫폼에 대한 사용 설명서를 포함합니다.
 
-LangGraph Platform is a commercial solution for deploying agentic applications in production, built on the open-source LangGraph framework.
+LangGraph 플랫폼은 오픈 소스 LangGraph 프레임워크를 기반으로 하는 상용 솔루션으로, 에이전트 애플리케이션을 생산 환경에 배포하는 데 사용됩니다.
 
-The LangGraph Platform offers a few different deployment options described in the [deployment options guide](../concepts/deployment_options.md).
+LangGraph 플랫폼은 [배포 옵션 가이드](../concepts/deployment_options.md)에 설명된 몇 가지 다양한 배포 옵션을 제공합니다.
 
-!!! tip
+!!! 팁
 
-    * LangGraph is an MIT-licensed open-source library, which we are committed to maintaining and growing for the community.
-    * You can always deploy LangGraph applications on your own infrastructure using the open-source LangGraph project without using LangGraph Platform.
+    * LangGraph는 MIT 라이센스가 부여된 오픈 소스 라이브러리로, 커뮤니티를 위해 유지 및 성장시키는 데 전념하고 있습니다.
+    * LangGraph 플랫폼을 사용하지 않고도 오픈 소스 LangGraph 프로젝트를 사용하여 자신의 인프라에 LangGraph 애플리케이션을 배포할 수 있습니다.
 
-### Application Structure
+### 애플리케이션 구조
 
-Learn how to set up your app for deployment to LangGraph Platform:
+LangGraph 플랫폼에 배포할 애플리케이션을 설정하는 방법을 배우세요:
 
-- [How to set up app for deployment (requirements.txt)](../cloud/deployment/setup.md)
-- [How to set up app for deployment (pyproject.toml)](../cloud/deployment/setup_pyproject.md)
-- [How to set up app for deployment (JavaScript)](../cloud/deployment/setup_javascript.md)
-- [How to add semantic search](../cloud/deployment/semantic_search.md)
-- [How to customize Dockerfile](../cloud/deployment/custom_docker.md)
-- [How to test locally](../cloud/deployment/test_locally.md)
-- [How to rebuild graph at runtime](../cloud/deployment/graph_rebuild.md)
-- [How to use LangGraph Platform to deploy CrewAI, AutoGen, and other frameworks](autogen-langgraph-platform.ipynb)
-- [How to integrate LangGraph into your React application](../cloud/how-tos/use_stream_react.md)
+- [배포를 위한 애플리케이션 설정 방법 (requirements.txt)](../cloud/deployment/setup.md)
+- [배포를 위한 애플리케이션 설정 방법 (pyproject.toml)](../cloud/deployment/setup_pyproject.md)
+- [배포를 위한 애플리케이션 설정 방법 (JavaScript)](../cloud/deployment/setup_javascript.md)
+- [의미 검색 추가하는 방법](../cloud/deployment/semantic_search.md)
+- [Dockerfile 사용자 정의하는 방법](../cloud/deployment/custom_docker.md)
+- [로컬에서 테스트하는 방법](../cloud/deployment/test_locally.md)
+- [런타임에 그래프를 재구성하는 방법](../cloud/deployment/graph_rebuild.md)
+- [CrewAI, AutoGen 및 기타 프레임워크를 배포하기 위해 LangGraph 플랫폼 사용 방법](autogen-langgraph-platform.ipynb)
+- [LangGraph를 React 애플리케이션에 통합하는 방법](../cloud/how-tos/use_stream_react.md)
 
-### Deployment
+### 배포
 
-LangGraph applications can be deployed using LangGraph Cloud, which provides a range of services to help you deploy, manage, and scale your applications.
+LangGraph 애플리케이션은 LangGraph Cloud를 사용하여 배포할 수 있으며, 이는 애플리케이션을 배포, 관리 및 확장하는 데 도움을 주는 다양한 서비스를 제공합니다.
 
-- [How to deploy to LangGraph cloud](../cloud/deployment/cloud.md)
-- [How to deploy to a self-hosted environment](./deploy-self-hosted.md)
-- [How to interact with the deployment using RemoteGraph](./use-remote-graph.md)
+- [LangGraph 클라우드에 배포하는 방법](../cloud/deployment/cloud.md)
+- [자체 호스팅 환경에 배포하는 방법](./deploy-self-hosted.md)
+- [RemoteGraph를 사용하여 배포와 상호작용하는 방법](./use-remote-graph.md)
 
-### Authentication & Access Control
+### 인증 및 접근 제어
 
-- [How to add custom authentication](./auth/custom_auth.md)
-- [How to update the security schema of your OpenAPI spec](./auth/openapi_security.md)
+- [사용자 지정 인증 추가하는 방법](./auth/custom_auth.md)
+- [OpenAPI 사양의 보안 스키마 업데이트하는 방법](./auth/openapi_security.md)
 
-### Assistants
+### 어시스턴트
 
-[Assistants](../concepts/assistants.md) is a configured instance of a template.
+[어시스턴트](../concepts/assistants.md)는 템플릿의 구성된 인스턴스입니다.
 
-See [SDK Reference](../cloud/reference/sdk/python_sdk_ref.md#langgraph_sdk.client.AssistantsClient)
-for supported endpoints and other details.
+지원되는 엔드포인트 및 기타 세부정보는 [SDK 참조](../cloud/reference/sdk/python_sdk_ref.md#langgraph_sdk.client.AssistantsClient)에서 확인하십시오.
 
-- [How to configure agents](../cloud/how-tos/configuration_cloud.md)
-- [How to version assistants](../cloud/how-tos/assistant_versioning.md)
+- [에이전트 구성하는 방법](../cloud/how-tos/configuration_cloud.md)
+- [어시스턴트 버전 관리하는 방법](../cloud/how-tos/assistant_versioning.md)
 
-### Threads
+### 스레드
 
-See [SDK Reference](../cloud/reference/sdk/python_sdk_ref.md#langgraph_sdk.client.ThreadsClient)
-for supported endpoints and other details.
+지원되는 엔드포인트 및 기타 세부정보는 [SDK 참조](../cloud/reference/sdk/python_sdk_ref.md#langgraph_sdk.client.ThreadsClient)에서 확인하십시오.
 
-- [How to copy threads](../cloud/how-tos/copy_threads.md)
-- [How to check status of your threads](../cloud/how-tos/check_thread_status.md)
+- [스레드 복사하는 방법](../cloud/how-tos/copy_threads.md)
+- [스레드 상태 확인하는 방법](../cloud/how-tos/check_thread_status.md)
 
-### Runs
+### 실행
 
-LangGraph Platform supports multiple types of runs besides streaming runs.
+LangGraph 플랫폼은 스트리밍 실행 외에도 여러 가지 유형의 실행을 지원합니다.
 
-- [How to run an agent in the background](../cloud/how-tos/background_run.md)
-- [How to run multiple agents in the same thread](../cloud/how-tos/same-thread.md)
-- [How to create cron jobs](../cloud/how-tos/cron_jobs.md)
-- [How to create stateless runs](../cloud/how-tos/stateless_runs.md)
+- [백그라운드에서 에이전트 실행하는 방법](../cloud/how-tos/background_run.md)
+- [같은 스레드에서 여러 에이전트 실행하는 방법](../cloud/how-tos/same-thread.md)
+- [크론 작업 만드는 방법](../cloud/how-tos/cron_jobs.md)
+- [무상태 실행 만드는 방법](../cloud/how-tos/stateless_runs.md)
 
-### Streaming
+### 스트리밍
 
-Streaming the results of your LLM application is vital for ensuring a good user experience, especially when your graph may call multiple models and take a long time to fully complete a run. Read about how to stream values from your graph in these how to guides:
+LLM 애플리케이션의 결과를 스트리밍하는 것은 사용자 경험을 보장하는 데 중요합니다. 특히 그래프가 여러 모델을 호출하고 실행이 완료되기까지 오랜 시간이 걸릴 수 있는 경우 더욱 그렇습니다. 다음 가이드에서 그래프에서 값을 스트리밍하는 방법에 대해 읽어보십시오.
 
-- [How to stream values](../cloud/how-tos/stream_values.md)
-- [How to stream updates](../cloud/how-tos/stream_updates.md)
-- [How to stream messages](../cloud/how-tos/stream_messages.md)
-- [How to stream events](../cloud/how-tos/stream_events.md)
-- [How to stream in debug mode](../cloud/how-tos/stream_debug.md)
-- [How to stream multiple modes](../cloud/how-tos/stream_multiple.md)
+- [값 스트리밍하는 방법](../cloud/how-tos/stream_values.md)
+- [업데이트 스트리밍하는 방법](../cloud/how-tos/stream_updates.md)
+- [메시지 스트리밍하는 방법](../cloud/how-tos/stream_messages.md)
+- [이벤트 스트리밍하는 방법](../cloud/how-tos/stream_events.md)
+- [디버그 모드에서 스트리밍하는 방법](../cloud/how-tos/stream_debug.md)
+- [여러 모드로 스트리밍하는 방법](../cloud/how-tos/stream_multiple.md)
 
-### Human-in-the-loop
+### 인간-인-루프
 
-When designing complex graphs, relying entirely on the LLM for decision-making can be risky, particularly when it involves tools that interact with files, APIs, or databases. These interactions may lead to unintended data access or modifications, depending on the use case. To mitigate these risks, LangGraph allows you to integrate human-in-the-loop behavior, ensuring your LLM applications operate as intended without undesirable outcomes.
+복잡한 그래프를 설계할 때 LLM에 의존하여 의사 결정을 내리는 것은 위험할 수 있습니다. 특히 파일, API 또는 데이터베이스와 상호작용하는 도구가 포함된 경우 더욱 그렇습니다. 이러한 상호작용은 사용 사례에 따라 의도치 않은 데이터 접근 또는 수정을 초래할 수 있습니다. 이러한 위험을 완화하기 위해 LangGraph는 인간-인-루프 행동을 통합할 수 있으며, 이는 LLM 애플리케이션이 의도한 대로 작동하고 바람직하지 않은 결과를 방지하도록 합니다.
 
-- [How to add a breakpoint](../cloud/how-tos/human_in_the_loop_breakpoint.md)
-- [How to wait for user input](../cloud/how-tos/human_in_the_loop_user_input.md)
-- [How to edit graph state](../cloud/how-tos/human_in_the_loop_edit_state.md)
-- [How to replay and branch from prior states](../cloud/how-tos/human_in_the_loop_time_travel.md)
-- [How to review tool calls](../cloud/how-tos/human_in_the_loop_review_tool_calls.md)
+- [중단점 추가하는 방법](../cloud/how-tos/human_in_the_loop_breakpoint.md)
+- [사용자 입력 대기하는 방법](../cloud/how-tos/human_in_the_loop_user_input.md)
+- [그래프 상태 수정하는 방법](../cloud/how-tos/human_in_the_loop_edit_state.md)
+- [이전 상태로부터 재생 및 가지치기하는 방법](../cloud/how-tos/human_in_the_loop_time_travel.md)
+- [도구 호출 검토하는 방법](../cloud/how-tos/human_in_the_loop_review_tool_calls.md)
 
-### Double-texting
+### 더블 텍스트
 
-Graph execution can take a while, and sometimes users may change their mind about the input they wanted to send before their original input has finished running. For example, a user might notice a typo in their original request and will edit the prompt and resend it. Deciding what to do in these cases is important for ensuring a smooth user experience and preventing your graphs from behaving in unexpected ways.
+그래프 실행은 시간이 걸릴 수 있으며, 사용자가 원래 입력이 완료되기 전에 보내고자 했던 입력에 대해 마음을 바꿀 수 있습니다. 예를 들어, 사용자가 원래 요청에서 오타를 발견하고 프롬프트를 수정하여 재전송할 수 있습니다. 이러한 경우에 어떻게 대응하느냐는 원활한 사용자 경험을 보장하고 그래프가 예상치 못한 방식으로 작동하는 것을 방지하는 데 중요합니다.
 
-- [How to use the interrupt option](../cloud/how-tos/interrupt_concurrent.md)
-- [How to use the rollback option](../cloud/how-tos/rollback_concurrent.md)
-- [How to use the reject option](../cloud/how-tos/reject_concurrent.md)
-- [How to use the enqueue option](../cloud/how-tos/enqueue_concurrent.md)
+- [인터럽트 옵션 사용하는 방법](../cloud/how-tos/interrupt_concurrent.md)
+- [롤백 옵션 사용하는 방법](../cloud/how-tos/rollback_concurrent.md)
+- [거부 옵션 사용하는 방법](../cloud/how-tos/reject_concurrent.md)
+- [대기열 옵션 사용하는 방법](../cloud/how-tos/enqueue_concurrent.md)
 
-### Webhooks
+### 웹훅
 
-- [How to integrate webhooks](../cloud/how-tos/webhooks.md)
+- [웹훅 통합하는 방법](../cloud/how-tos/webhooks.md)
 
-### Cron Jobs
+### 크론 작업
 
-- [How to create cron jobs](../cloud/how-tos/cron_jobs.md)
+- [크론 작업 만드는 방법](../cloud/how-tos/cron_jobs.md)
 
 ### LangGraph Studio
 
-LangGraph Studio is a built-in UI for visualizing, testing, and debugging your agents.
+LangGraph Studio는 에이전트를 시각화하고 테스트하며 디버깅하기 위한 내장 UI입니다.
 
-- [How to connect to a LangGraph Cloud deployment](../cloud/how-tos/test_deployment.md)
-- [How to connect to a local dev server](../how-tos/local-studio.md)
-- [How to connect to a local deployment (Docker)](../cloud/how-tos/test_local_deployment.md)
-- [How to test your graph in LangGraph Studio (MacOS only)](../cloud/how-tos/invoke_studio.md)
-- [How to interact with threads in LangGraph Studio](../cloud/how-tos/threads_studio.md)
-- [How to add nodes as dataset examples in LangGraph Studio](../cloud/how-tos/datasets_studio.md)
-- [How to engineer prompts in LangGraph Studio](../cloud/how-tos/iterate_graph_studio.md)
+- [LangGraph Cloud 배포에 연결하는 방법](../cloud/how-tos/test_deployment.md)
+- [로컬 개발 서버에 연결하는 방법](../how-tos/local-studio.md)
+- [로컬 배포(Docker)에 연결하는 방법](../cloud/how-tos/test_local_deployment.md)
+- [LangGraph Studio에서 그래프 테스트하는 방법 (MacOS 전용)](../cloud/how-tos/invoke_studio.md)
+- [LangGraph Studio에서 스레드와 상호작용하는 방법](../cloud/how-tos/threads_studio.md)
+- [LangGraph Studio에서 데이터 예제로 노드 추가하는 방법](../cloud/how-tos/datasets_studio.md)
+- [LangGraph Studio에서 프롬프트를 엔지니어링하는 방법](../cloud/how-tos/iterate_graph_studio.md)
 
-## Troubleshooting
+## 문제 해결
 
-These are the guides for resolving common errors you may find while building with LangGraph. Errors referenced below will have an `lc_error_code` property corresponding to one of the below codes when they are thrown in code.
+다음은 LangGraph를 사용하여 구축하는 동안 발견할 수 있는 일반 오류를 해결하기 위한 가이드입니다. 아래에서 언급된 오류는 코드에서 발생할 때 아래 코드 중 하나에 해당하는 `lc_error_code` 속성을 갖습니다.
 
 - [GRAPH_RECURSION_LIMIT](../troubleshooting/errors/GRAPH_RECURSION_LIMIT.md)
 - [INVALID_CONCURRENT_GRAPH_UPDATE](../troubleshooting/errors/INVALID_CONCURRENT_GRAPH_UPDATE.md)
-- [INVALID_GRAPH_NODE_RETURN_VALUE](../troubleshooting/errors/INVALID_GRAPH_NODE_RETURN_VALUE.md)
-- [MULTIPLE_SUBGRAPHS](../troubleshooting/errors/MULTIPLE_SUBGRAPHS.md)
-- [INVALID_CHAT_HISTORY](../troubleshooting/errors/INVALID_CHAT_HISTORY.md)
+- [잘못된 그래프 노드 반환 값](../troubleshooting/errors/INVALID_GRAPH_NODE_RETURN_VALUE.md)
+- [다중 서브그래프](../troubleshooting/errors/MULTIPLE_SUBGRAPHS.md)
+- [잘못된 채팅 기록](../troubleshooting/errors/INVALID_CHAT_HISTORY.md)
 
-### LangGraph Platform Troubleshooting
+### LangGraph 플랫폼 문제 해결
 
-These guides provide troubleshooting information for errors that are specific to the LangGraph Platform.
+이 가이드는 LangGraph 플랫폼에 특화된 오류에 대한 문제 해결 정보를 제공합니다.
 
-- [INVALID_LICENSE](../troubleshooting/errors/INVALID_LICENSE.md)
+- [잘못된 라이선스](../troubleshooting/errors/INVALID_LICENSE.md)
