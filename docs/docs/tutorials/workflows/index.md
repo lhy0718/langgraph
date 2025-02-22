@@ -597,8 +597,6 @@ https://smith.langchain.com/public/c4580b74-fe91-47e4-96fe-7fac598d509c/r
         print(step)
         print("\n")
 
-````
-
     ```
 
 **LangSmith 추적**
@@ -700,7 +698,7 @@ def llm_call(state: WorkerState):
     return {"completed_sections": [section.content]}
 ```
 
-    ```python
+```python
 
 def synthesizer(state: State):
 """섹션에서 전체 보고서를 합성합니다."""
@@ -749,21 +747,21 @@ def synthesizer(state: State):
 
     from IPython.display import Markdown
     Markdown(state["final_report"])
-    ```
+```
 
-    **LangSmith 추적**
+**LangSmith 추적**
 
-    https://smith.langchain.com/public/78cbcfc3-38bf-471d-b62a-b299b144237d/r
+https://smith.langchain.com/public/78cbcfc3-38bf-471d-b62a-b299b144237d/r
 
-    **자료:**
+**자료:**
 
-    **LangChain 아카데미**
+**LangChain 아카데미**
 
-    [여기](https://github.com/langchain-ai/langchain-academy/blob/main/module-4/map-reduce.ipynb)에서 오케스트레이터-작업자에 대한 강의를 확인하세요.
+[여기](https://github.com/langchain-ai/langchain-academy/blob/main/module-4/map-reduce.ipynb)에서 오케스트레이터-작업자에 대한 강의를 확인하세요.
 
-    **예시**
+**예시**
 
-    [여기](https://github.com/langchain-ai/report-mAIstro)에는 보고서 계획 및 작성을 위한 오케스트레이터-작업자를 사용하는 프로젝트가 있습니다. 우리의 동영상은 [여기](https://www.youtube.com/watch?v=wSxZ7yFbbas)에서 확인하세요.
+[여기](https://github.com/langchain-ai/report-mAIstro)에는 보고서 계획 및 작성을 위한 오케스트레이터-작업자를 사용하는 프로젝트가 있습니다. 우리의 동영상은 [여기](https://www.youtube.com/watch?v=wSxZ7yFbbas)에서 확인하세요.
 
 === "기능적 API (베타)"
 
@@ -957,7 +955,7 @@ def synthesizer(state: State):
 
 === "기능적 API (베타)"
 
-    ```python
+```python
     # 평가에 사용할 구조화된 출력의 스키마
     class Feedback(BaseModel):
         grade: Literal["재미있음", "재미없음"] = Field(
@@ -1012,7 +1010,7 @@ def synthesizer(state: State):
         print(step)
         print("\n")
 
-````
+```
 
 **LangSmith Trace**
 
@@ -1092,7 +1090,6 @@ def llm_call(state: MessagesState):
     }
 
 def tool_node(state: dict):
-```
 
         """도구 호출을 수행합니다."""
 
@@ -1148,6 +1145,7 @@ def tool_node(state: dict):
     메시지 = agent.invoke({"messages": 메시지})
     for m in 메시지["messages"]:
         m.pretty_print()
+```
 
 **LangSmith 추적**
 
@@ -1220,7 +1218,7 @@ tool.invoke(tool_call를 반환합니다)
     for chunk in agent.stream(messages, stream_mode="updates"):
         print(chunk)
         print("\n")
-    ```
+````
 
     **LangSmith Trace**
 
@@ -1233,6 +1231,7 @@ LangGraph는 위에서 정의된 에이전트를 생성하기 위한 **미리 �
 https://langchain-ai.github.io/langgraph/how-tos/create-react-agent/
 
 ```python
+
 from langgraph.prebuilt import create_react_agent
 
 # 다음을 전달합니다:
@@ -1248,7 +1247,6 @@ messages = [HumanMessage(content="3과 4를 더하세요.")]
 messages = pre_built_agent.invoke({"messages": messages})
 for m in messages["messages"]:
     m.pretty_print()
-````
 
 ```
 
@@ -1275,4 +1273,3 @@ LangGraph는 워크플로우/에이전트 출력 또는 중간 상태를 스트�
 ### 배포
 
 LangGraph는 배포, 관측 가능성 및 평가를 위한 쉬운 진입점을 제공합니다. [LangChain 아카데미의 6모듈](https://github.com/langchain-ai/langchain-academy/tree/main/module-6)을 참조하십시오.
-```
