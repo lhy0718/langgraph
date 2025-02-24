@@ -1,8 +1,8 @@
-_한국어로 기계번역됨_
-
 ---
 title: 튜토리얼
 ---
+
+_한국어로 기계번역됨_
 
 # 튜토리얼
 
@@ -30,11 +30,11 @@ LangGraph 또는 LLM 애플리케이션 개발이 처음이신가요? 이 자료
 
 - [Agentic RAG](rag/langgraph_agentic_rag.ipynb): 사용자의 질문에 답하기 위해 가장 관련성 높은 정보를 검색하는 방법을 알아내는 에이전트를 사용합니다.
 - [Adaptive RAG](rag/langgraph_adaptive_rag.ipynb): Adaptive RAG는 (1) 쿼리 분석과 (2) 능동적/자기 수정 RAG를 통합하는 RAG 전략입니다. 구현: https://arxiv.org/abs/2403.14403
-    - 로컬 LLM을 사용하는 버전: [로컬 LLM을 이용한 Adaptive RAG](rag/langgraph_adaptive_rag_local.ipynb)
-- [Corrective RAG](rag/langgraph_crag.ipynb): 주어진 출처에서 검색된 정보의 품질을 평가하기 위해 LLM을 사용하고 품질이 낮으면 다른 출처에서 정보를 검색하려고 시도합니다. 구현: https://arxiv.org/pdf/2401.15884.pdf 
-    - 로컬 LLM을 사용하는 버전: [로컬 LLM을 이용한 Corrective RAG](rag/langgraph_crag_local.ipynb)
+  - 로컬 LLM을 사용하는 버전: [로컬 LLM을 이용한 Adaptive RAG](rag/langgraph_adaptive_rag_local.ipynb)
+- [Corrective RAG](rag/langgraph_crag.ipynb): 주어진 출처에서 검색된 정보의 품질을 평가하기 위해 LLM을 사용하고 품질이 낮으면 다른 출처에서 정보를 검색하려고 시도합니다. 구현: https://arxiv.org/pdf/2401.15884.pdf
+  - 로컬 LLM을 사용하는 버전: [로컬 LLM을 이용한 Corrective RAG](rag/langgraph_crag_local.ipynb)
 - [Self-RAG](rag/langgraph_self_rag.ipynb): Self-RAG는 검색된 문서와 생성물에 대해 자기 반성/자체 평가를 포함하는 RAG 전략입니다. 구현: https://arxiv.org/abs/2310.11511.
-    - 로컬 LLM을 사용하는 버전: [로컬 LLM을 이용한 Self-RAG](rag/langgraph_self_rag_local.ipynb) 
+  - 로컬 LLM을 사용하는 버전: [로컬 LLM을 이용한 Self-RAG](rag/langgraph_self_rag_local.ipynb)
 - [SQL 에이전트](sql-agent.ipynb): SQL 데이터베이스에 대한 질문에 답할 수 있는 SQL 에이전트를 구축합니다.
 
 ### 에이전트 아키텍처
@@ -51,7 +51,7 @@ LangGraph 또는 LLM 애플리케이션 개발이 처음이신가요? 이 자료
 - [관찰 없는 추론](rewoo/rewoo.ipynb): 관찰을 변수로 저장하여 재계획을 줄입니다.
 - [LLM 컴파일러](llm-compiler/LLMCompiler.ipynb): 기획자로부터 작업의 DAG를 스트리밍하고 적극적으로 실행합니다.
 
-#### 반성 및 비판 
+#### 반성 및 비판
 
 - [기본 반성](reflection/reflection.ipynb): 에이전트에게 자신의 출력을 반성하고 수정하도록 요청합니다.
 - [반성](reflexion/reflexion.ipynb): 다음 단계를 안내하기 위해 빠진 세부 사항 및 불필요한 세부 사항을 비판합니다.
